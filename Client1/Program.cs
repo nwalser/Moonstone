@@ -3,7 +3,6 @@ using System.Reactive.Subjects;
 using Microsoft.EntityFrameworkCore;
 using Stream.FileStore;
 using Stream.Mutations;
-using Stream.Mutations.Project.CreateProject;
 
 var localEventsFolder = Directory.CreateTempSubdirectory();
 var localCache = Path.Join(localEventsFolder.FullName, "app.db");
@@ -22,29 +21,32 @@ mutationCache.Database.EnsureCreated();
 
 var fileStoreManager = new FileStoreManager(externalMutation, eventFolder, session, persistMutation);
 var mutationStream = new MutationStream(externalMutation, persistMutation, mutationCached, mutationCache);
+var sw2 = Stopwatch.StartNew();
 
 await fileStoreManager.ActivateAsync();
-
-mutationStream.AddMutation(new CreateProjectMutation()
-{
-    MutationId = Guid.NewGuid(),
-    Occurence = DateTime.UtcNow,
-    ProjectId = Guid.NewGuid(),
-    Name = "Project 1",
-});
+Console.WriteLine(sw2.ElapsedMilliseconds);
 
 var sw = Stopwatch.StartNew();
 
-for (int i = 0; i < 1000000; i++)
-{
-    mutationStream.AddMutation(new CreateProjectMutation()
-    {
-        MutationId = Guid.NewGuid(),
-        Occurence = DateTime.UtcNow,
-        ProjectId = Guid.NewGuid(),
-        Name = "Project 2",
-    });
-}
+//mutationStream.AddMutation(new CreateProjectMutation()
+//{
+//    MutationId = Guid.NewGuid(),
+//    Occurence = DateTime.UtcNow,
+//    ProjectId = Guid.NewGuid(),
+//    Name = "Project 1",
+//});
+//
+//
+//for (int i = 0; i < 1000; i++)
+//{
+//    mutationStream.AddMutation(new CreateProjectMutation()
+//    {
+//        MutationId = Guid.NewGuid(),
+//        Occurence = DateTime.UtcNow,
+//        ProjectId = Guid.NewGuid(),
+//        Name = "Project 2",
+//    });
+//}
 
 Console.WriteLine(sw.ElapsedMilliseconds);
 

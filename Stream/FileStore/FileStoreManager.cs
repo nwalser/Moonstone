@@ -54,6 +54,7 @@ public class FileStoreManager
             };
 
             Directory.CreateDirectory(SessionPath);
+            
             foreach (var file in Directory.EnumerateFiles(SessionPath, string.Empty, SearchOption.AllDirectories))
             {
                 PushExternalMutation(file);
@@ -67,12 +68,12 @@ public class FileStoreManager
 
         var filePath = Path.Join(SessionPath, mutation.MutationId.ToString());
         var json = MutationSerializer.Serialize(mutation);
-        File.WriteAllText(filePath, json);
+        File.WriteAllBytes(filePath, json);
     }
     
     private void PushExternalMutation(string mutationPath)
     {
-        var json = File.ReadAllText(mutationPath);
+        var json = File.ReadAllBytes(mutationPath);
         var mutation = MutationSerializer.Deserialize(json);
         
         _externalMutation.OnNext(mutation);

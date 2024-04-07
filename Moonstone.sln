@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client1", "Client1\Client1.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stream", "Stream\Stream.csproj", "{974B9E61-83E9-4D53-B101-D6B7251CF520}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedSessions", "DistributedSessions\DistributedSessions.csproj", "{3EC496C1-9536-4357-86ED-1739C64AD36F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{974B9E61-83E9-4D53-B101-D6B7251CF520}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{974B9E61-83E9-4D53-B101-D6B7251CF520}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{974B9E61-83E9-4D53-B101-D6B7251CF520}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EC496C1-9536-4357-86ED-1739C64AD36F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EC496C1-9536-4357-86ED-1739C64AD36F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EC496C1-9536-4357-86ED-1739C64AD36F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EC496C1-9536-4357-86ED-1739C64AD36F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -41,5 +47,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{58161281-5F19-43B7-A11D-30372E207036} = {D8705C1B-4A3A-4BA3-A3D5-3B4A181B2E82}
 		{974B9E61-83E9-4D53-B101-D6B7251CF520} = {D8705C1B-4A3A-4BA3-A3D5-3B4A181B2E82}
+		{3EC496C1-9536-4357-86ED-1739C64AD36F} = {D8705C1B-4A3A-4BA3-A3D5-3B4A181B2E82}
 	EndGlobalSection
 EndGlobal

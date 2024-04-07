@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Subjects;
-using Microsoft.EntityFrameworkCore;
 using Stream.Mutations;
 
 namespace Stream.FileStore;
@@ -68,7 +67,7 @@ public class MutationStream
 
     private static Mutation MapFrom(CachedMutation mutation)
     {
-        return MutationSerializer.Deserialize(mutation.MutationJson);
+        return MutationSerializer.Deserialize(mutation.Mutation);
     }
 
     private static CachedMutation MapFrom(Mutation mutation)
@@ -77,7 +76,7 @@ public class MutationStream
         {
             Occurence = mutation.Occurence,
             MutationId = mutation.MutationId,
-            MutationJson = MutationSerializer.Serialize(mutation)
+            Mutation = MutationSerializer.Serialize(mutation)
         };
     }
 }
