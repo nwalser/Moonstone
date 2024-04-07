@@ -1,52 +1,56 @@
 ﻿using System.Reactive.Subjects;
-using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 using Stream.Mutations;
 
-namespace Client1;
+namespace Stream.FileStore;
 
 public class MutationStream
 {
-    private readonly MutationCache _cache;
-    
-    private readonly IObservable<Mutation> _mutationAddedExternally;
+    private readonly MutationStreamStore _store;
+
+    private readonly IObservable<Mutation> _externalMutation;
     private readonly Subject<Mutation> _persistMutation;
     private readonly Subject<Mutation> _mutationCached;
-    
-    
-    public MutationStream(MutationCache cache, IObservable<Mutation> mutationAddedExternally, Subject<Mutation> persistMutation, Subject<Mutation> mutationCached)
+
+
+    public MutationStream(IObservable<Mutation> externalMutation,
+        Subject<Mutation> persistMutation, Subject<Mutation> mutationCached,
+        MutationStreamStore streamStore)
     {
-        _cache = cache;
-        _mutationAddedExternally = mutationAddedExternally;
+        _externalMutation = externalMutation;
         _persistMutation = persistMutation;
         _mutationCached = mutationCached;
+        _store = streamStore;
 
-        _mutationAddedExternally.Subscribe(ExternalUpdate);
+        _externalMutation.Subscribe(ExternalUpdate);
     }
 
-    
+
     public void AddMutation(Mutation mutation)
     {
         CacheMutation(mutation);
         _persistMutation.OnNext(mutation);
         _mutationCached.OnNext(mutation);
     }
-    
+
     public IEnumerable<Mutation> ReplaySince(DateTime after)
     {
-        return _cache.CachedMutations
+        return _store.CachedMutations
             .Where(c => c.Occurence >= after)
             .OrderBy(c => c.Occurence)
             .Select(m => MapFrom(m))
             .AsEnumerable();
     }
-    
-    
+
+
     private void ExternalUpdate(Mutation mutation)
     {
-        var existingMutation = _cache.CachedMutations.Any(m => m.MutationId == mutation.MutationId);
-        if (existingMutation) 
-            return;
-
+        lock (_store)
+        {
+            var mutationExists = _store.CachedMutations.Any(m => m.MutationId == mutation.MutationId);
+            if (mutationExists) return;
+        }
+        
         CacheMutation(mutation);
         _mutationCached.OnNext(mutation);
     }
@@ -54,25 +58,26 @@ public class MutationStream
     private void CacheMutation(Mutation mutation)
     {
         var cachedMutation = MapFrom(mutation);
-        _cache.CachedMutations.Add(cachedMutation);
-        _cache.SaveChanges();
+
+        lock (_store)
+        {
+            _store.CachedMutations.Add(cachedMutation);
+            _store.SaveChanges();
+        }
     }
-    
-    
-    private static readonly JsonSerializerSettings SerializerSettings = new() { TypeNameHandling = TypeNameHandling.All };
 
     private static Mutation MapFrom(CachedMutation mutation)
     {
-        return JsonConvert.DeserializeObject<Mutation>(mutation.MutationJson, SerializerSettings)!;
+        return MutationSerializer.Deserialize(mutation.MutationJson);
     }
 
     private static CachedMutation MapFrom(Mutation mutation)
     {
-        return new CachedMutation()
+        return new CachedMutation
         {
             Occurence = mutation.Occurence,
             MutationId = mutation.MutationId,
-            MutationJson = JsonConvert.SerializeObject(mutation, SerializerSettings)
+            MutationJson = MutationSerializer.Serialize(mutation)
         };
     }
 }

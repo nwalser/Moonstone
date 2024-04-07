@@ -1,61 +1,51 @@
-﻿using System.Reactive.Linq;
-using Newtonsoft.Json;
-using Stream;
+﻿using System.Diagnostics;
+using System.Reactive.Subjects;
+using Microsoft.EntityFrameworkCore;
+using Stream.FileStore;
 using Stream.Mutations;
 using Stream.Mutations.Project.CreateProject;
 
 var localEventsFolder = Directory.CreateTempSubdirectory();
+var localCache = Path.Join(localEventsFolder.FullName, "app.db");
 var eventFolder = @"C:\Users\Nathaniel Walser\OneDrive - esp-engineering gmbh\Moonstone\workspace1";
+var session = "04991280-139f-43a9-999c-ca75acf87f83";
 
-var fileSystemObservable = FileSystemWatcherObservable.Create(eventFolder);
-var initialSyncObservable = InitialSyncObservable.Create(eventFolder);
-var eventPathsObservable = fileSystemObservable.Merge(initialSyncObservable);
-
-
-
-
-var mutationStream = new MutationStream()
-{
-    Mutations = []
-};
-
-eventPathsObservable.Subscribe(path =>
-{
-    var file = File.ReadAllText(path);
-    var obj = JsonConvert.DeserializeObject<Mutation>(file, new JsonSerializerSettings(){ TypeNameHandling = TypeNameHandling.All });
-    if (obj != null) 
-        mutationStream.IngestMutation(obj);
-});
+var externalMutation = new Subject<Mutation>();
+var persistMutation = new Subject<Mutation>();
+var mutationCached = new Subject<Mutation>();
 
 
-var mutation1 = new CreateProjectMutation()
+var optionsBuilder = new DbContextOptionsBuilder<MutationStreamStore>().UseSqlite($"Data Source={localCache}");
+var mutationCache = new MutationStreamStore(optionsBuilder.Options);
+
+mutationCache.Database.EnsureCreated();
+
+var fileStoreManager = new FileStoreManager(externalMutation, eventFolder, session, persistMutation);
+var mutationStream = new MutationStream(externalMutation, persistMutation, mutationCached, mutationCache);
+
+await fileStoreManager.ActivateAsync();
+
+mutationStream.AddMutation(new CreateProjectMutation()
 {
     MutationId = Guid.NewGuid(),
+    Occurence = DateTime.UtcNow,
     ProjectId = Guid.NewGuid(),
     Name = "Project 1",
-};
+});
 
-var mutation2 = new CreateProjectMutation()
+var sw = Stopwatch.StartNew();
+
+for (int i = 0; i < 1000000; i++)
 {
-    MutationId = Guid.NewGuid(),
-    ProjectId = Guid.NewGuid(),
-    Name = "Project 2",
-};
-
-void WriteMutation(Mutation mutation)
-{
-    var text = JsonConvert.SerializeObject(mutation, new JsonSerializerSettings(){ TypeNameHandling = TypeNameHandling.All, Formatting = Formatting.Indented});
-
-    var eventPath = Path.Join(eventFolder, mutation.MutationId.ToString());
-    if (!File.Exists(eventPath))
-        File.WriteAllText(eventPath, text);
+    mutationStream.AddMutation(new CreateProjectMutation()
+    {
+        MutationId = Guid.NewGuid(),
+        Occurence = DateTime.UtcNow,
+        ProjectId = Guid.NewGuid(),
+        Name = "Project 2",
+    });
 }
 
-Console.WriteLine("Listening for events");
-eventPathsObservable.Subscribe(e => Console.WriteLine(e));
-
-
-WriteMutation(mutation1);
-WriteMutation(mutation2);
+Console.WriteLine(sw.ElapsedMilliseconds);
 
 Console.ReadKey();
