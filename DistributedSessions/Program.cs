@@ -1,13 +1,10 @@
 ﻿using System.Diagnostics;
 using DistributedSessions;
 using DistributedSessions.Mutations;
-using MsgPack.Serialization;
 
 var knownIds = @"C:\Users\NathanielWalser\Documents\Repositories\Moonstone\DistributedSessions\Temp\knownIds.bin";
 var session = "nathaniel-desktop";
-var serializer = MessagePackSerializer.Get<List<Guid>>();
 var sw = Stopwatch.StartNew();
-
 
 // workspace2
 // - session1
@@ -26,14 +23,14 @@ var sw = Stopwatch.StartNew();
 // rescan all the ones not already read
 // rescan the newest one per session directory
 
-var workspace = @"C:\Users\NathanielWalser\Desktop\test"; 
+var workspace = @"C:\Users\NathanielWalser\OneDrive - esp-engineering gmbh\Moonstone\workspace2"; 
 var sessionId = Guid.Parse("040461cf-f8cb-4bcb-9352-1edeb67c5d9a");
 
 var writer = new MutationWriter(workspace, sessionId);
 await writer.Initialize();
 
 
-for (var i = 0; i < 10_000; i++)
+for (var i = 0; i < 90_500; i++)
 {
     await writer.StoreMutation(new CreateProjectMutation()
     {

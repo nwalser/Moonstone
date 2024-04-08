@@ -1,19 +1,17 @@
 ﻿using DistributedSessions.Mutations;
-using MsgPack.Serialization;
+using ProtoBuf;
 
 namespace DistributedSessions;
 
 public class MutationWriter
 {
-    private static int MaxMutationsPerFile = 100;
+    private static int MaxMutationsPerFile = 10_000;
     
     private int? _fileCounter;
     private int? _mutations;
     
     private readonly string _workspaceFolder;
     private readonly Guid _sessionId;
-    
-    private static readonly MessagePackSerializer<List<Mutation>> Serializer = MessagePackSerializer.Get<List<Mutation>>();
     
     private string CurrentSessionPath => Path.Join(_workspaceFolder, _sessionId.ToString());
     private string CurrentFilePath => Path.Join(_workspaceFolder, _sessionId.ToString(), _fileCounter.ToString());
@@ -56,11 +54,12 @@ public class MutationWriter
         // mutation maximum reached
         if (_mutations >= MaxMutationsPerFile)
         {
-            _fileCounter += 1;
+            _fileCounter++;
             _mutations = 0;
         }
         
         await WriteMutation(mutation);
+        _mutations++;
     }
 
     private async Task WriteMutation(Mutation mutation)
@@ -70,23 +69,25 @@ public class MutationWriter
 
         if (!File.Exists(CurrentFilePath))
         {
-            var emptyBytes = Serializer.PackSingleObject(new CreateProjectMutation()
-            {
-                Occurence = DateTime.UtcNow,
-                Name = "Test",
-                MutationId = Guid.NewGuid(),
-                ProjectId = Guid.NewGuid(),
-            });
-            await File.WriteAllBytesAsync(CurrentFilePath, emptyBytes);
+            await using var test = File.Create(CurrentFilePath);
         }
+
+        var tempPath = CurrentFilePath + ".tmp";
+        // copy into tempfile
+        File.Copy(CurrentFilePath, tempPath);
         
-        await using var fileStream = File.Open(CurrentFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-        MessagePackExtensions.AppendToFile(fileStream, mutation);
+        await using var fileStream = File.Open(tempPath, FileMode.Append, FileAccess.Write, FileShare.Read);
+        Serializer.SerializeWithLengthPrefix(fileStream, mutation, PrefixStyle.Base128, 0);
+
+        await fileStream.FlushAsync();
+        fileStream.Close();
+        Thread.Sleep(100);
+        File.Replace(tempPath, CurrentFilePath, null);
     }
 
     private async Task<List<Mutation>> ReadMutations()
     {
-        var mutationBytes = await File.ReadAllBytesAsync(CurrentFilePath);
-        return await Serializer.UnpackSingleObjectAsync(mutationBytes);
+        await using var stream = File.OpenRead(CurrentFilePath);
+        return Serializer.DeserializeItems<Mutation>(stream, PrefixStyle.Base128, 0).ToList();
     }
 }

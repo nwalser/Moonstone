@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="MsgPack.Cli" Version="1.0.1" />
+      <PackageReference Include="protobuf-net" Version="3.2.30" />
     </ItemGroup>
 
     <ItemGroup>
