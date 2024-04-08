@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using DistributedSessions;
 using DistributedSessions.Mutations;
+using DistributedSessions.Projection;
 
 var temp = @"C:\Users\Nathaniel Walser\Documents\Repositories\Moonstone\DistributedSessions\Temp";
 var workspace = @"C:\Users\Nathaniel Walser\OneDrive - esp-engineering gmbh\Moonstone\workspace3"; 
@@ -16,15 +17,13 @@ var newMutations = new ConcurrentQueue<Mutation>();
 
 var writer = new MutationWriter(workspace, sessionId, writeMutation);
 var reader = new MutationReader(newMutations, workspace);
+var stream = new MutationStream(new HashSet<Guid>(), new SortedList<DateTime, Mutation>(), new ConcurrentQueue<Mutation>(), []);
 
 var writerTask = writer.ExecuteAsync(cts.Token);
-var fileStoreTask =  reader.ExecuteAsync(cts.Token);
+var readerTask =  reader.ExecuteAsync(cts.Token);
+var streamTask =  stream.ExecuteAsync(cts.Token);
 
-
-
-
-
-for (var i = 0; i < 100; i++)
+for (var i = 0; i < 1; i++)
 {
     writeMutation.Enqueue(new CreateProjectMutation()
     {

@@ -76,6 +76,8 @@ public class MutationReader
                 _updatedPaths.Enqueue(path);
                 Console.WriteLine(ex);
             }
+            
+            // todo implement proper error handling without unlimited retries
         }
     }
 }

@@ -86,6 +86,8 @@ public class MutationWriter
                 _writeMutation.Enqueue(mutation);
                 Console.WriteLine(ex);
             }
+            
+            // todo implement proper error handling without unlimited retries
         }
     }
 }
