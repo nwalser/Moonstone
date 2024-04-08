@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Reactive.Subjects;
 using DistributedSessions;
 using DistributedSessions.Mutations;
 
-var knownIds = @"C:\Users\NathanielWalser\Documents\Repositories\Moonstone\DistributedSessions\Temp\knownIds.bin";
-var session = "nathaniel-desktop";
+var temp = @"C:\Users\Nathaniel Walser\Documents\Repositories\Moonstone\DistributedSessions\Temp";
+var workspace = @"C:\Users\Nathaniel Walser\OneDrive - esp-engineering gmbh\Moonstone\workspace3"; 
+var sessionId = Guid.Parse("040461cf-f8cb-4bcb-9352-1edeb67c5d9a");
+
 var sw = Stopwatch.StartNew();
 
 // workspace2
@@ -23,14 +26,16 @@ var sw = Stopwatch.StartNew();
 // rescan all the ones not already read
 // rescan the newest one per session directory
 
-var workspace = @"C:\Users\NathanielWalser\OneDrive - esp-engineering gmbh\Moonstone\workspace2"; 
-var sessionId = Guid.Parse("040461cf-f8cb-4bcb-9352-1edeb67c5d9a");
+var externalMutationOccured = new Subject<Mutation>();
 
 var writer = new MutationWriter(workspace, sessionId);
-await writer.Initialize();
+var fileStoreManager = new FileStoreManager(externalMutationOccured, workspace);
+
+await writer.InitializeAsync();
+await fileStoreManager.InitializeAsync();
 
 
-for (var i = 0; i < 90_500; i++)
+for (var i = 0; i < 100_000; i++)
 {
     await writer.StoreMutation(new CreateProjectMutation()
     {
@@ -39,66 +44,8 @@ for (var i = 0; i < 90_500; i++)
         ProjectId = Guid.NewGuid(),
         Name = "Project 1",
     });
-}
-
-Console.ReadKey();
-
-/*
-//Directory.Delete(workspace, recursive: true);
-Directory.CreateDirectory(workspace);
-
-// unpack from file
-var ids = Read();
-
-Console.WriteLine("Read Ids From File " + sw.ElapsedMilliseconds);
-sw.Restart();
-
-for (var i = 0; i < 1_000; i++)
-{
-    var id = Guid.NewGuid();
-    File.WriteAllText(Path.Join(workspace, id.ToString()), "Hello world");
-    ids.Add(id);
-}
-
-Console.WriteLine("Writing Files " + sw.ElapsedMilliseconds);
-sw.Restart();
-
-var files = Directory.EnumerateFiles(workspace);
-foreach (var file in files)
-{
-    var fileName = Path.GetFileName(file);
-    var id = Guid.Parse(fileName);
-    var inSet = ids.Contains(id);
-}
-
-Console.WriteLine("Comparing with DB " + sw.ElapsedMilliseconds);
-sw.Restart();
-
-// pack into file
-Write(ids);
-
-Console.WriteLine("Store ids to file " + sw.ElapsedMilliseconds);
-sw.Restart();
-
-Console.ReadKey();
-return;
-
-HashSet<Guid> Read()
-{
-    if (!File.Exists(knownIds))
-        return [];
     
-    using var stream = File.OpenRead(knownIds);
-    var eventIds = serializer.Unpack(stream);
-    return eventIds.ToHashSet();
+    Console.WriteLine(i);
 }
 
-void Write(HashSet<Guid> ids)
-{
-    File.Delete(knownIds);
-    using var stream = File.Create(knownIds);
-    serializer.Pack(stream, ids.ToList());
-    stream.Flush();
-}
-
-*/
+Console.ReadKey();

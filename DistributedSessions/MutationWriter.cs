@@ -1,11 +1,10 @@
-﻿using DistributedSessions.Mutations;
-using ProtoBuf;
+﻿using ProtoBuf;
 
 namespace DistributedSessions;
 
 public class MutationWriter
 {
-    private static int MaxMutationsPerFile = 10_000;
+    private static readonly int MaxMutationsPerFile = 10_000;
     
     private int? _fileCounter;
     private int? _mutations;
@@ -14,7 +13,7 @@ public class MutationWriter
     private readonly Guid _sessionId;
     
     private string CurrentSessionPath => Path.Join(_workspaceFolder, _sessionId.ToString());
-    private string CurrentFilePath => Path.Join(_workspaceFolder, _sessionId.ToString(), _fileCounter.ToString());
+    private string CurrentFilePath => Path.Join(_workspaceFolder, _sessionId.ToString(), $"{_fileCounter}.bin");
 
     
     public MutationWriter(string workspaceFolder, Guid sessionId)
@@ -23,12 +22,12 @@ public class MutationWriter
         _sessionId = sessionId;
     }
 
-    public async Task Initialize()
+    public async Task InitializeAsync()
     {
         Directory.CreateDirectory(CurrentSessionPath);
         
         _fileCounter = Directory
-            .EnumerateFiles(CurrentSessionPath)
+            .EnumerateFiles(CurrentSessionPath, "*.bin")
             .Select(Path.GetFileNameWithoutExtension)
             .Select(p => Convert.ToInt32(p))
             .Max(i => (int?)i);
@@ -42,7 +41,9 @@ public class MutationWriter
         }
 
         // read mutations from latest file
-        var mutations = await ReadMutations();
+        await using var stream = File.OpenRead(CurrentFilePath);
+        var mutations =  Serializer.DeserializeItems<Mutation>(stream, PrefixStyle.Base128, 0).ToList();        
+        
         _mutations = mutations.Count;
     }
     
@@ -58,36 +59,11 @@ public class MutationWriter
             _mutations = 0;
         }
         
-        await WriteMutation(mutation);
-        _mutations++;
-    }
-
-    private async Task WriteMutation(Mutation mutation)
-    {
-        if (_fileCounter is null || _mutations is null)
-            throw new Exception();
-
-        if (!File.Exists(CurrentFilePath))
-        {
-            await using var test = File.Create(CurrentFilePath);
-        }
-
-        var tempPath = CurrentFilePath + ".tmp";
-        // copy into tempfile
-        File.Copy(CurrentFilePath, tempPath);
-        
-        await using var fileStream = File.Open(tempPath, FileMode.Append, FileAccess.Write, FileShare.Read);
+        await using var fileStream = File.Open(CurrentFilePath, FileMode.Append, FileAccess.Write, FileShare.Read);
         Serializer.SerializeWithLengthPrefix(fileStream, mutation, PrefixStyle.Base128, 0);
-
         await fileStream.FlushAsync();
         fileStream.Close();
-        Thread.Sleep(100);
-        File.Replace(tempPath, CurrentFilePath, null);
-    }
-
-    private async Task<List<Mutation>> ReadMutations()
-    {
-        await using var stream = File.OpenRead(CurrentFilePath);
-        return Serializer.DeserializeItems<Mutation>(stream, PrefixStyle.Base128, 0).ToList();
+        
+        _mutations++;
     }
 }
