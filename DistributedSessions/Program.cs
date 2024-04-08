@@ -17,13 +17,13 @@ var newMutations = new ConcurrentQueue<Mutation>();
 
 var writer = new MutationWriter(workspace, sessionId, writeMutation);
 var reader = new MutationReader(newMutations, workspace);
-var stream = new MutationStream(new HashSet<Guid>(), new SortedList<DateTime, Mutation>(), new ConcurrentQueue<Mutation>(), []);
+var stream = new MutationStream([], new SortedList<DateTime, Mutation>(), newMutations, []);
 
 var writerTask = writer.ExecuteAsync(cts.Token);
 var readerTask =  reader.ExecuteAsync(cts.Token);
 var streamTask =  stream.ExecuteAsync(cts.Token);
 
-for (var i = 0; i < 1; i++)
+for (var i = 0; i < 1_000; i++)
 {
     writeMutation.Enqueue(new CreateProjectMutation()
     {

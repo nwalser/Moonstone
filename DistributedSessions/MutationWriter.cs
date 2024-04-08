@@ -32,6 +32,7 @@ public class MutationWriter
     {
         Directory.CreateDirectory(CurrentSessionPath);
         
+        // todo: handle files with different names other than just int (e.g. hello.bin instead of only 14.bin)
         _fileCounter = Directory
             .EnumerateFiles(CurrentSessionPath, "*.bin")
             .Select(Path.GetFileNameWithoutExtension)

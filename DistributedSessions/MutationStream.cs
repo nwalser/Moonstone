@@ -34,14 +34,14 @@ public class MutationStream(
             }
         }, ct);
 
-        await Task.Run(async () =>
-        {
-            while (!ct.IsCancellationRequested)
-            {
-                RebuildSnapshots(ct);
-                await Task.Delay(10, ct);
-            }
-        }, ct);
+        //await Task.Run(async () =>
+        //{
+        //    while (!ct.IsCancellationRequested)
+        //    {
+        //        RebuildSnapshots(ct);
+        //        await Task.Delay(10, ct);
+        //    }
+        //}, ct);
     }
     
     private Task IngestNewMutations(CancellationToken ct)
@@ -54,6 +54,8 @@ public class MutationStream(
             _mutations.Add(mutation.Occurence, mutation);
             _mutationIds.Add(mutation.MutationId);
 
+            Console.WriteLine(mutation.MutationId);
+            
             // remove stale snapshots
             lock (_snapshots)
             {
