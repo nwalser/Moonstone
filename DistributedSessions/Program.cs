@@ -1,8 +1,9 @@
 ﻿using System.Diagnostics;
+using DistributedSessions;
+using DistributedSessions.Mutations;
 using MsgPack.Serialization;
 
-var knownIds = @"C:\Users\Nathaniel Walser\Documents\Respositories\Moonstone\DistributedSessions\Temp\knownIds.bin";
-var workspace = @"C:\Users\Nathaniel Walser\OneDrive - esp-engineering gmbh\Moonstone\workspace2"; 
+var knownIds = @"C:\Users\NathanielWalser\Documents\Repositories\Moonstone\DistributedSessions\Temp\knownIds.bin";
 var session = "nathaniel-desktop";
 var serializer = MessagePackSerializer.Get<List<Guid>>();
 var sw = Stopwatch.StartNew();
@@ -25,7 +26,27 @@ var sw = Stopwatch.StartNew();
 // rescan all the ones not already read
 // rescan the newest one per session directory
 
+var workspace = @"C:\Users\NathanielWalser\Desktop\test"; 
+var sessionId = Guid.Parse("040461cf-f8cb-4bcb-9352-1edeb67c5d9a");
 
+var writer = new MutationWriter(workspace, sessionId);
+await writer.Initialize();
+
+
+for (var i = 0; i < 10_000; i++)
+{
+    await writer.StoreMutation(new CreateProjectMutation()
+    {
+        MutationId = Guid.NewGuid(),
+        Occurence = DateTime.UtcNow,
+        ProjectId = Guid.NewGuid(),
+        Name = "Project 1",
+    });
+}
+
+Console.ReadKey();
+
+/*
 //Directory.Delete(workspace, recursive: true);
 Directory.CreateDirectory(workspace);
 
@@ -82,3 +103,5 @@ void Write(HashSet<Guid> ids)
     serializer.Pack(stream, ids.ToList());
     stream.Flush();
 }
+
+*/
