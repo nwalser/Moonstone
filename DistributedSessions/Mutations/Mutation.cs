@@ -1,7 +1,6 @@
-﻿using DistributedSessions.Mutations;
-using ProtoBuf;
+﻿using ProtoBuf;
 
-namespace DistributedSessions;
+namespace DistributedSessions.Mutations;
 
 [ProtoContract]
 [ProtoInclude(500, typeof(ChangeProjectNameMutation))]

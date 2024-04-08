@@ -1,4 +1,7 @@
-﻿using ProtoBuf;
+﻿using System.Collections.Concurrent;
+using DistributedSessions.Mutations;
+using Microsoft.Extensions.Hosting;
+using ProtoBuf;
 
 namespace DistributedSessions;
 
@@ -12,17 +15,20 @@ public class MutationWriter
     private readonly string _workspaceFolder;
     private readonly Guid _sessionId;
     
+    private ConcurrentQueue<Mutation> _writeMutation;
+    
     private string CurrentSessionPath => Path.Join(_workspaceFolder, _sessionId.ToString());
     private string CurrentFilePath => Path.Join(_workspaceFolder, _sessionId.ToString(), $"{_fileCounter}.bin");
-
     
-    public MutationWriter(string workspaceFolder, Guid sessionId)
+    
+    public MutationWriter(string workspaceFolder, Guid sessionId, ConcurrentQueue<Mutation> writeMutation)
     {
         _workspaceFolder = workspaceFolder;
         _sessionId = sessionId;
+        _writeMutation = writeMutation;
     }
 
-    public async Task InitializeAsync()
+    public async Task ExecuteAsync(CancellationToken ct)
     {
         Directory.CreateDirectory(CurrentSessionPath);
         
@@ -41,29 +47,45 @@ public class MutationWriter
         }
 
         // read mutations from latest file
-        await using var stream = File.OpenRead(CurrentFilePath);
-        var mutations =  Serializer.DeserializeItems<Mutation>(stream, PrefixStyle.Base128, 0).ToList();        
-        
-        _mutations = mutations.Count;
+        await using (var stream = File.OpenRead(CurrentFilePath))
+        {
+            var mutations =  Serializer.DeserializeItems<Mutation>(stream, PrefixStyle.Base128, 0).ToList();        
+            _mutations = mutations.Count;
+        }
+
+        while (!ct.IsCancellationRequested)
+        {
+            await StoreMutations(ct);
+            await Task.Delay(100, ct);
+        }
     }
     
-    public async Task StoreMutation(Mutation mutation)
+    private async Task StoreMutations(CancellationToken ct)
     {
-        if (_fileCounter is null || _mutations is null)
-            throw new Exception("Mutation writer not initialized");
-
-        // mutation maximum reached
-        if (_mutations >= MaxMutationsPerFile)
+        while (_writeMutation.TryDequeue(out var mutation) && !ct.IsCancellationRequested)
         {
-            _fileCounter++;
-            _mutations = 0;
+            // mutation maximum reached
+            if (_mutations >= MaxMutationsPerFile)
+            {
+                _fileCounter++;
+                _mutations = 0;
+            }
+
+            try
+            {
+                await using var fileStream = File.Open(CurrentFilePath, FileMode.Append, FileAccess.Write, FileShare.Read);
+                Serializer.SerializeWithLengthPrefix(fileStream, mutation, PrefixStyle.Base128, 0);
+                await fileStream.FlushAsync(ct);
+                fileStream.Close();
+                
+                _mutations++;
+            }
+            catch (IOException ex)
+            {
+                // retry later
+                _writeMutation.Enqueue(mutation);
+                Console.WriteLine(ex);
+            }
         }
-        
-        await using var fileStream = File.Open(CurrentFilePath, FileMode.Append, FileAccess.Write, FileShare.Read);
-        Serializer.SerializeWithLengthPrefix(fileStream, mutation, PrefixStyle.Base128, 0);
-        await fileStream.FlushAsync();
-        fileStream.Close();
-        
-        _mutations++;
     }
 }
