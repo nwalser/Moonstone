@@ -47,6 +47,9 @@ public class Snapshot
             case CreateProjectMutation createProject:
                 Model.CreatedProjects++;
                 break;
+            case DeleteProjectMutation deleteProject:
+                Model.CreatedProjects++;
+                break;
         }
     }
 }

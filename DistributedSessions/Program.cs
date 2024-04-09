@@ -53,13 +53,13 @@ Task.Run(() =>
 {
     while (true)
     {
-        Console.WriteLine($"Write: {writeMutation.Count} - Read: {newMutations.Count}");
-        Thread.Sleep(1000);
+        //Console.WriteLine($"Write: {writeMutation.Count} - Read: {newMutations.Count}");
+        //Thread.Sleep(1000);
     }
 });
 
 
-for (var i = 0; i < 1_000; i++)
+for (var i = 0; i < 0; i++)
 {
     writeMutation.Enqueue(new CreateProjectMutation()
     {
@@ -76,6 +76,7 @@ for (var i = 0; i < 1_000; i++)
 
 while (true)
 {
+    Console.WriteLine("Ready for Input");
     Console.ReadKey();
     writeMutation.Enqueue(new DeleteProjectMutation()
     {
