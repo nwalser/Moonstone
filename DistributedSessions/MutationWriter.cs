@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using DistributedSessions.Mutations;
-using Microsoft.Extensions.Hosting;
 using ProtoBuf;
 
 namespace DistributedSessions;
@@ -39,17 +38,16 @@ public class MutationWriter
             .Select(p => Convert.ToInt32(p))
             .Max(i => (int?)i);
 
-        // if no file is in session
         if (_fileCounter is null)
         {
+            // if no file is in session
             _fileCounter = 0;
             _mutations = 0;
-            return;
         }
-
-        // read mutations from latest file
-        await using (var stream = File.OpenRead(CurrentFilePath))
+        else
         {
+            // read mutations from latest file
+            await using var stream = File.OpenRead(CurrentFilePath);
             var mutations =  Serializer.DeserializeItems<Mutation>(stream, PrefixStyle.Base128, 0).ToList();        
             _mutations = mutations.Count;
         }
