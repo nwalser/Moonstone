@@ -20,6 +20,7 @@ var writer = new MutationWriter(workspace, sessionId, writeMutation);
 var reader = new MutationReader(workspace, newMutations);
 var stream = new MutationStream(Path.Join(temp, sessionId.ToString()), newMutations, newSnapshots);
 
+// todo: implement background worker
 var writerTask = writer.ExecuteAsync(cts.Token);
 var readerTask =  reader.ExecuteAsync(cts.Token);
 var streamTask =  stream.ExecuteAsync(cts.Token);
