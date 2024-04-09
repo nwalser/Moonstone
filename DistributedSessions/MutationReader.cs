@@ -34,7 +34,8 @@ public class MutationReader
             if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory))
                 return;
 
-            _updatedPaths.Enqueue(e.FullPath);
+            if(!_updatedPaths.Contains(e.FullPath))
+                _updatedPaths.Enqueue(e.FullPath);
         };
         
         _fileSystemWatcher.Changed += (_, e) =>
@@ -42,7 +43,8 @@ public class MutationReader
             if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory))
                 return;
 
-            _updatedPaths.Enqueue(e.FullPath);
+            if(!_updatedPaths.Contains(e.FullPath))
+                _updatedPaths.Enqueue(e.FullPath);
         };
 
         Directory.CreateDirectory(_workspace);

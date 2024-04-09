@@ -18,11 +18,25 @@ var newSnapshots = new ConcurrentQueue<Snapshot>();
 
 var writer = new MutationWriter(workspace, sessionId, writeMutation);
 var reader = new MutationReader(newMutations, workspace);
-var stream = new MutationStream([], new SortedList<Mutation, Mutation>(), newMutations, newSnapshots, []);
+var stream = new MutationStream([], new SortedList<MutationOccurence, Mutation>(), newMutations, newSnapshots, []);
 
 var writerTask = writer.ExecuteAsync(cts.Token);
 var readerTask =  reader.ExecuteAsync(cts.Token);
 var streamTask =  stream.ExecuteAsync(cts.Token);
+
+
+var mut1 = new MutationOccurence()
+{
+    Occurence = new DateTime(2020, 01, 01),
+    RandomId = Guid.NewGuid(),
+};
+
+var mut2 = new MutationOccurence()
+{
+    Occurence = new DateTime(2020, 01, 01),
+    RandomId = Guid.NewGuid(),
+};
+
 
 Task.Run(() =>
 {
@@ -45,19 +59,35 @@ Task.Run(() =>
 });
 
 
-for (var i = 0; i < 100_000; i++)
+for (var i = 0; i < 1_000; i++)
 {
     writeMutation.Enqueue(new CreateProjectMutation()
     {
         MutationId = Guid.NewGuid(),
-        Occurence = DateTime.UtcNow,
+        Occurence = new MutationOccurence()
+        {
+            Occurence = DateTime.UtcNow,
+            RandomId = Guid.NewGuid(),
+        },
         ProjectId = Guid.NewGuid(),
         Name = "Project 1",
     });
-    //Thread.Sleep(1);
+}
+
+while (true)
+{
+    Console.ReadKey();
+    writeMutation.Enqueue(new DeleteProjectMutation()
+    {
+        MutationId = Guid.NewGuid(),
+        Occurence = new MutationOccurence()
+        {
+            Occurence = DateTime.UtcNow,
+            RandomId = Guid.NewGuid(),
+        },
+        Id = Guid.NewGuid(),
+    });
 }
 
 await Task.WhenAll(writerTask, readerTask, streamTask);
-
-Console.ReadKey();
 cts.Cancel();

@@ -6,68 +6,56 @@ namespace DistributedSessions;
 
 public class MutationStream(
     HashSet<Guid> mutationIds,
-    SortedList<Mutation, Mutation> mutations,
+    SortedList<MutationOccurence, Mutation> mutations,
     ConcurrentQueue<Mutation> newMutations,
     ConcurrentQueue<Snapshot> newSnapshot,
     List<Snapshot> snapshotCaches)
 {
     private readonly HashSet<Guid> _mutationIds = mutationIds;
-    private readonly SortedList<Mutation, Mutation> _mutations = mutations;
+    private readonly SortedList<MutationOccurence, Mutation> _mutations = mutations;
     private readonly List<Snapshot> _snapshotCaches = snapshotCaches;
 
     private readonly ConcurrentQueue<Mutation> _newMutations = newMutations;
     private readonly ConcurrentQueue<Snapshot> _newSnapshot = newSnapshot;
 
     private readonly object _streamState = new();
-    private bool _snapshotUpdateNeeded = false;
     
     public async Task ExecuteAsync(CancellationToken ct)
     {
-        var t1 = Task.Run(async () =>
+        while (!ct.IsCancellationRequested)
         {
-            while (!ct.IsCancellationRequested)
-            {
-                await IngestNewMutations(ct);
-                await Task.Delay(10, ct);
-            }
-        }, ct);
+            var eventsIngested = IngestNewMutations(ct);
 
-        var t2 = Task.Run(async () =>
-        {
-            while (!ct.IsCancellationRequested)
-            {
+            if (eventsIngested)
                 RebuildSnapshots(ct);
-                await Task.Delay(10, ct);
-            }
-        }, ct);
-
-        await Task.WhenAll(t1, t2);
+            
+            await Task.Delay(10, ct);
+        }
     }
     
-    private Task IngestNewMutations(CancellationToken ct)
+    private bool IngestNewMutations(CancellationToken ct)
     {
+        var eventsIngested = false;
+        
         try
         {
-            lock (_streamState)
+            while (_newMutations.TryDequeue(out var mutation) && !ct.IsCancellationRequested)
             {
-                while (_newMutations.TryDequeue(out var mutation) && !ct.IsCancellationRequested)
-                {
-                    if (_mutationIds.Contains(mutation.MutationId))
-                        continue;
+                if (_mutationIds.Contains(mutation.MutationId))
+                    continue;
 
-                    _mutations.Add(mutation, mutation);
-                    _mutationIds.Add(mutation.MutationId);
+                _mutations.Add(mutation.Occurence, mutation);
+                _mutationIds.Add(mutation.MutationId);
 
-                    // invalidate caches
-                    var invalidCaches = _snapshotCaches
-                        .Where(s => s.LastMutationTime >= mutation.Occurence)
-                        .ToList();
+                // invalidate caches
+                var invalidCaches = _snapshotCaches
+                    .Where(s => s.LastMutationOccurence >= mutation.Occurence)
+                    .ToList();
 
-                    foreach (var invalidCache in invalidCaches)
-                        _snapshotCaches.Remove(invalidCache);
-                    
-                    _snapshotUpdateNeeded = true;
-                }
+                foreach (var invalidCache in invalidCaches)
+                    _snapshotCaches.Remove(invalidCache);
+                
+                eventsIngested = true;
             }
         }
         catch (Exception ex)
@@ -76,15 +64,11 @@ public class MutationStream(
         }
 
         
-        return Task.CompletedTask;
+        return eventsIngested;
     }
     
     private void RebuildSnapshots(CancellationToken ct)
     {
-        // do not start processing snapshots if any mutations are not ingested
-        if (!_snapshotUpdateNeeded)
-            return;
-
         try
         {
             lock (_streamState)
@@ -103,8 +87,8 @@ public class MutationStream(
                     var targetDate = now - wantedSnapshotAge;
 
                     var bestParent = _snapshotCaches
-                        .Where(s => s.LastMutationTime < targetDate)
-                        .MaxBy(v => v.LastMutationTime);
+                        .Where(s => s.LastMutationOccurence?.Occurence < targetDate)
+                        .MaxBy(v => v.LastMutationOccurence?.Occurence);
 
                     if (bestParent is null)
                         bestParent = Snapshot.Create(wantedSnapshotAge);
@@ -115,7 +99,7 @@ public class MutationStream(
 
                     // apply remaining mutations on top of it
                     var remainingMutations = _mutations
-                        .Where(m => m.Key.Occurence >= bestParent.LastMutationTime)
+                        .Where(m => m.Key > bestParent.LastMutationOccurence)
                         .Where(m => m.Key.Occurence <= targetDate);
 
                     foreach (var (occurence, mutation) in remainingMutations)
@@ -131,24 +115,11 @@ public class MutationStream(
                     if (wantedSnapshotAge == TimeSpan.Zero)
                         _newSnapshot.Enqueue(bestParent);
                 }
-
-                _snapshotUpdateNeeded = false;
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
-    }
-}
-
-public class MutationOccurence : IComparable<MutationOccurence>
-{
-    public required Guid MutationId { get; set; }
-    public required DateTime Occurence { get; set; }
-    
-    public int CompareTo(MutationOccurence? other)
-    {
-        throw new NotImplementedException();
     }
 }
