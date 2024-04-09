@@ -9,8 +9,26 @@
 @code {
     private int currentCount = 0;
 
+    protected override void OnInitialized()
+    {
+        var temp = Path.GetTempPath();
+        var path = Path.Join(temp, "counter.json");
+
+        if (File.Exists(path))
+        {
+            var json = File.ReadAllText(path);
+            currentCount = System.Text.Json.JsonSerializer.Deserialize<int>(json);
+        }
+        
+        base.OnInitialized();
+    }
+
     private void IncrementCount()
     {
         currentCount++;
+
+        var temp = Path.GetTempPath();
+        var json = System.Text.Json.JsonSerializer.Serialize(currentCount);
+        File.WriteAllText(Path.Join(temp, "counter.json"), json);
     }
 }

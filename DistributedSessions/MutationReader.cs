@@ -12,7 +12,7 @@ public class MutationReader
     private readonly ConcurrentQueue<string> _updatedPaths = new();
 
     
-    public MutationReader(ConcurrentQueue<Mutation> mutationRead, string workspace)
+    public MutationReader(string workspace, ConcurrentQueue<Mutation> mutationRead)
     {
         _mutationRead = mutationRead;
         _workspace = workspace;
