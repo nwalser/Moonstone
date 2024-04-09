@@ -4,8 +4,8 @@ using DistributedSessions;
 using DistributedSessions.Mutations;
 using DistributedSessions.Projection;
 
-var temp = @"C:\Users\Nathaniel Walser\Documents\Repositories\Moonstone\DistributedSessions\Temp";
-var workspace = @"C:\Users\Nathaniel Walser\OneDrive - esp-engineering gmbh\Moonstone\workspace3"; 
+var temp = @"C:\Users\NathanielWalser\Documents\Repositories\Moonstone\DistributedSessions\Temp";
+var workspace = @"C:\Users\NathanielWalser\OneDrive - esp-engineering gmbh\Moonstone\workspace3"; 
 var sessionId = Guid.Parse("040461cf-f8cb-4bcb-9352-1edeb67c5d9a");
 
 var sw = Stopwatch.StartNew();
@@ -14,10 +14,12 @@ var cts = new CancellationTokenSource();
 
 var writeMutation = new ConcurrentQueue<Mutation>();
 var newMutations = new ConcurrentQueue<Mutation>();
+var newStreamMutations = new ConcurrentQueue<Mutation>();
+var newSnapshots = new ConcurrentQueue<Snapshot>();
 
 var writer = new MutationWriter(workspace, sessionId, writeMutation);
 var reader = new MutationReader(newMutations, workspace);
-var stream = new MutationStream([], new SortedList<DateTime, Mutation>(), newMutations, []);
+var stream = new MutationStream([], new SortedList<DateTime, Mutation>(), newMutations, newStreamMutations, new Dictionary<TimeSpan, Snapshot>(), newSnapshots);
 
 var writerTask = writer.ExecuteAsync(cts.Token);
 var readerTask =  reader.ExecuteAsync(cts.Token);
@@ -33,8 +35,26 @@ for (var i = 0; i < 1_000; i++)
         Name = "Project 1",
     });
     
-    Console.WriteLine(i);
+    //Console.WriteLine(i);
 }
+
+Task.Run(() =>
+{
+    while (true)
+    {
+        if (newSnapshots.TryDequeue(out var snapshot))
+        {
+            Console.WriteLine(snapshot.Model.CreatedProjects);
+        }
+    }
+});
+
+
+Console.WriteLine("Enqueuing: " + sw.ElapsedMilliseconds);
+sw.Restart();
+
+while(newMutations.Count > 0){}
+
 
 Console.ReadKey();
 cts.Cancel();

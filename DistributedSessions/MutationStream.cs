@@ -8,24 +8,23 @@ public class MutationStream(
     HashSet<Guid> mutationIds,
     SortedList<DateTime, Mutation> mutations,
     ConcurrentQueue<Mutation> newMutations,
-    Dictionary<TimeSpan, Snapshot> snapshots1)
+    ConcurrentQueue<Mutation> newMutations2,
+    Dictionary<TimeSpan, Snapshot> snapshots1,
+    ConcurrentQueue<Snapshot> newSnapshot)
 {
     private readonly HashSet<Guid> _mutationIds = mutationIds;
     private readonly SortedList<DateTime, Mutation> _mutations = mutations;
     private readonly Dictionary<TimeSpan, Snapshot> _snapshots = snapshots1;
 
     private readonly ConcurrentQueue<Mutation> _newMutations = newMutations;
+    private readonly ConcurrentQueue<Mutation> _newMutations2 = newMutations2;
+    private readonly ConcurrentQueue<Snapshot> _newSnapshot = newSnapshot;
 
-    private static readonly List<TimeSpan> SnapshotAges =
-    [
-        TimeSpan.FromMinutes(10),
-        TimeSpan.FromMinutes(1),
-        TimeSpan.FromSeconds(10)
-    ];
+    private Snapshot _snapshot = Snapshot.Create();
     
     public async Task ExecuteAsync(CancellationToken ct)
     {
-        await Task.Run(async () =>
+        var t1 = Task.Run(async () =>
         {
             while (!ct.IsCancellationRequested)
             {
@@ -34,14 +33,16 @@ public class MutationStream(
             }
         }, ct);
 
-        //await Task.Run(async () =>
-        //{
-        //    while (!ct.IsCancellationRequested)
-        //    {
-        //        RebuildSnapshots(ct);
-        //        await Task.Delay(10, ct);
-        //    }
-        //}, ct);
+        var t2 = Task.Run(async () =>
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                RebuildSnapshots(ct);
+                await Task.Delay(10, ct);
+            }
+        }, ct);
+
+        await Task.WhenAll(t1, t2);
     }
     
     private Task IngestNewMutations(CancellationToken ct)
@@ -53,17 +54,8 @@ public class MutationStream(
             
             _mutations.Add(mutation.Occurence, mutation);
             _mutationIds.Add(mutation.MutationId);
-
-            Console.WriteLine(mutation.MutationId);
             
-            // remove stale snapshots
-            lock (_snapshots)
-            {
-                foreach(var toRemove in _snapshots.Where(s => s.Value.SnapshotTime > mutation.Occurence).ToList())
-                {
-                    _snapshots.Remove(toRemove.Key);
-                }
-            }
+            _newMutations2.Enqueue(mutation);
         }
 
         return Task.CompletedTask;
@@ -71,21 +63,24 @@ public class MutationStream(
     
     private void RebuildSnapshots(CancellationToken ct)
     {
-        // move forward to target age
-        foreach (var snapshotAge in SnapshotAges.OrderByDescending(a => a))
+        while (_newMutations2.TryDequeue(out var mutation))
         {
-            var newSnapshot = GetSnapshot();
-            lock (_snapshots)
+            Console.WriteLine(_newMutations2.Count);
+            if (mutation.Occurence > _snapshot.SnapshotTime)
             {
-                _snapshots.Remove(snapshotAge);
-                _snapshots.Add(snapshotAge, newSnapshot);
+                _snapshot.AppendMutation(mutation);
             }
+            else
+            {
+                _snapshot = GetSnapshot();
+            }
+            _newSnapshot.Enqueue(_snapshot);
         }
     }
 
     private Snapshot GetSnapshot()
     {
-        var snapshot = Snapshot.Create(TimeSpan.Zero);
+        var snapshot = Snapshot.Create();
 
         foreach (var (occurence, mutation) in _mutations)
         {

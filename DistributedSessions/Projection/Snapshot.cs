@@ -4,16 +4,14 @@ namespace DistributedSessions.Projection;
 
 public class Snapshot
 {
-    public required TimeSpan TargetAge { get; set; }
     public required DateTime SnapshotTime { get; set; }
     public required ProjectionModel Model { get; set; }
 
 
-    public static Snapshot Create(TimeSpan targetAge)
+    public static Snapshot Create()
     {
         return new Snapshot()
         {
-            TargetAge = targetAge,
             SnapshotTime = DateTime.MinValue,
             Model = ProjectionModel.Empty(),
         };
