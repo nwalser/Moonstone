@@ -1,0 +1,81 @@
+﻿using Microsoft.Extensions.Logging;
+
+namespace DistributedSessions;
+
+public abstract class BackgroundWorker<TWorker> : IDisposable
+{
+    public State State { get; private set; } = State.Initializing;
+    
+    private readonly Task _backgroundTask;
+    private readonly ILogger<TWorker> _logger;
+    
+    public BackgroundWorker(CancellationToken ct, ILogger<TWorker> logger)
+    {
+        _logger = logger;
+        _backgroundTask = RunBackgroundWorker(ct);
+    }
+
+    private Task RunBackgroundWorker(CancellationToken ct)
+    {
+        return Task.Run(async () =>
+        {
+            _logger.LogInformation("Initializing");
+
+            try
+            {
+                await Initialize(ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occured during initialization");
+                throw;
+            }
+            
+            _logger.LogInformation("Initialized");
+
+            while (!ct.IsCancellationRequested)
+            {
+                try
+                {
+                    State = State.Running;
+                    await ProcessWork(ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occured during processing of work");
+                }
+                finally
+                {
+                    State = State.Idle;
+                }
+
+                await Task.Delay(200, ct);
+            }
+
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(2000);
+            
+            await Stop(cts.Token);
+        }, ct);
+    }
+    
+    protected abstract Task Initialize(CancellationToken ct);
+    protected abstract Task ProcessWork(CancellationToken ct);
+
+    protected virtual Task Stop(CancellationToken ct)
+    {
+        return Task.CompletedTask;
+    }
+    
+    public void Dispose()
+    {
+        _backgroundTask.Dispose();
+    }
+}
+
+public enum State
+{
+    Initializing,
+    Running,
+    Idle,
+}

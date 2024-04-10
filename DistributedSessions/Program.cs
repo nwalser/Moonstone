@@ -3,9 +3,18 @@ using System.Diagnostics;
 using DistributedSessions;
 using DistributedSessions.Mutations;
 using DistributedSessions.Projection;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Extensions.Logging;
 
-var temp = @"C:\Users\Nathaniel Walser\Documents\Respositories\Moonstone\DistributedSessions\Temp";
-var workspace = @"C:\Users\Nathaniel Walser\OneDrive - esp-engineering gmbh\Moonstone\workspace3"; 
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+var loggerFactory = new SerilogLoggerFactory(logger);
+
+
+var temp = @"C:\Users\NathanielWalser\Desktop\temp";
+var workspace = @"C:\Users\NathanielWalser\OneDrive - esp-engineering gmbh\Moonstone\workspace3";
 var sessionId = Guid.Parse("040461cf-f8cb-4bcb-9352-1edeb67c5d9a");
 
 var sw = Stopwatch.StartNew();
@@ -16,12 +25,11 @@ var writeMutation = new ConcurrentQueue<Mutation>();
 var newMutations = new ConcurrentQueue<Mutation>();
 var newSnapshots = new ConcurrentQueue<Snapshot>();
 
-var writer = new MutationWriter(workspace, sessionId, writeMutation);
+var writer = new MutationWriter(workspace, sessionId, writeMutation, cts.Token, loggerFactory.CreateLogger<MutationWriter>());
 var reader = new MutationReader(workspace, newMutations);
 var stream = new MutationStream(Path.Join(temp, sessionId.ToString()), newMutations, newSnapshots);
 
 // todo: implement background worker
-var writerTask = writer.ExecuteAsync(cts.Token);
 var readerTask =  reader.ExecuteAsync(cts.Token);
 var streamTask =  stream.ExecuteAsync(cts.Token);
 
@@ -77,5 +85,4 @@ while (true)
     });
 } 
 
-await Task.WhenAll(writerTask, readerTask, streamTask);
 cts.Cancel();

@@ -1,44 +1,42 @@
 ﻿using System.Collections.Concurrent;
 using DistributedSessions.Mutations;
+using Microsoft.Extensions.Logging;
 using ProtoBuf;
 
 namespace DistributedSessions;
 
-public class MutationWriter
+public class MutationWriter : BackgroundWorker<MutationWriter>
 {
     private static readonly int MaxMutationsPerFile = 10_000;
     
-    private int? _fileCounter;
-    private int? _mutations;
+    private readonly ConcurrentQueue<Mutation> _writeMutation;
     
-    private readonly string _workspaceFolder;
+    private readonly string _workspace;
     private readonly Guid _sessionId;
     
-    private ConcurrentQueue<Mutation> _writeMutation;
-    
-    private string CurrentSessionPath => Path.Join(_workspaceFolder, _sessionId.ToString());
-    private string CurrentFilePath => Path.Join(_workspaceFolder, _sessionId.ToString(), $"{_fileCounter}.bin");
+    private int _fileCounter;
+    private int _mutations;
     
     
-    public MutationWriter(string workspaceFolder, Guid sessionId, ConcurrentQueue<Mutation> writeMutation)
+    public MutationWriter(string workspace, Guid sessionId, ConcurrentQueue<Mutation> writeMutation, CancellationToken ct, ILogger<MutationWriter> logger) : base(ct, logger)
     {
-        _workspaceFolder = workspaceFolder;
+        _workspace = workspace;
         _sessionId = sessionId;
         _writeMutation = writeMutation;
     }
 
-    public async Task ExecuteAsync(CancellationToken ct)
+    protected override async Task Initialize(CancellationToken ct)
     {
-        Directory.CreateDirectory(CurrentSessionPath);
+        // create session if it does not exist
+        Directory.CreateDirectory(PathFactory.GetSessionMutationsFolder(_workspace, _sessionId));
         
-        // todo: handle files with different names other than just int (e.g. hello.bin instead of only 14.bin)
-        _fileCounter = Directory
-            .EnumerateFiles(CurrentSessionPath, "*.bin")
+        var fileCounter = Directory
+            .EnumerateFiles(PathFactory.GetSessionMutationsFolder(_workspace, _sessionId), "*.nljson")
             .Select(Path.GetFileNameWithoutExtension)
-            .Select(p => Convert.ToInt32(p))
-            .Max(i => (int?)i);
+            .Select(p => int.TryParse(p, out var value) ? value : default(int?))
+            .Max(i => i);
 
-        if (_fileCounter is null)
+        if (fileCounter is null)
         {
             // if no file is in session
             _fileCounter = 0;
@@ -47,46 +45,37 @@ public class MutationWriter
         else
         {
             // read mutations from latest file
-            await using var stream = File.OpenRead(CurrentFilePath);
-            var mutations =  Serializer.DeserializeItems<Mutation>(stream, PrefixStyle.Base128, 0).ToList();        
+            await using var stream = File.OpenRead(PathFactory.GetSessionMutationsFile(_workspace, _sessionId, fileCounter.Value));
+            var mutations =  Serializer.DeserializeItems<Mutation>(stream, PrefixStyle.Base128, 0).ToList();
+            
+            
+            _fileCounter = fileCounter.Value;
             _mutations = mutations.Count;
-        }
-
-        while (!ct.IsCancellationRequested)
-        {
-            await StoreMutations(ct);
-            await Task.Delay(100, ct);
         }
     }
     
-    private async Task StoreMutations(CancellationToken ct)
+    protected override async Task Stop(CancellationToken ct)
     {
-        while (_writeMutation.TryDequeue(out var mutation) && !ct.IsCancellationRequested)
+        await ProcessWork(ct);
+    }
+    
+    protected override async Task ProcessWork(CancellationToken ct)
+    {
+        while (_writeMutation.TryPeek(out var mutation) && !ct.IsCancellationRequested)
         {
-            // mutation maximum reached
+            // mutation maximum per file reached
             if (_mutations >= MaxMutationsPerFile)
             {
                 _fileCounter++;
                 _mutations = 0;
             }
 
-            try
-            {
-                await using var fileStream = File.Open(CurrentFilePath, FileMode.Append, FileAccess.Write, FileShare.Read);
-                Serializer.SerializeWithLengthPrefix(fileStream, mutation, PrefixStyle.Base128, 0);
-                await fileStream.FlushAsync(ct);
-                fileStream.Close();
-                
-                _mutations++;
-            }
-            catch (IOException ex)
-            {
-                // retry later
-                _writeMutation.Enqueue(mutation);
-                Console.WriteLine(ex);
-            }
-            
-            // todo implement proper error handling without unlimited retries
+            var mutationsFile = PathFactory.GetSessionMutationsFile(_workspace, _sessionId, _fileCounter);
+            await NlJson.Append(mutation, mutationsFile);
+            _mutations++;
+
+            // dequeue if processed successfully
+            _writeMutation.TryDequeue(out _);
         }
     }
 }
