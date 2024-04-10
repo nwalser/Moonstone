@@ -1,6 +1,4 @@
-﻿using ProtoBuf;
-
-namespace DistributedSessions.Mutations;
+﻿namespace DistributedSessions.Mutations;
 
 public class ChangeProjectNameMutation : Mutation
 {

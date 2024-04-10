@@ -36,7 +36,7 @@ var t1 = Task.Run(() =>
     {
         if (newSnapshots.TryDequeue(out var snapshot))
         {
-            logger.Information("Write: {Counter}", snapshot.Model.CreatedProjects);
+            logger.Information("Projects: {Counter}", snapshot.Model.CreatedProjects);
         }
     }
 });
@@ -51,15 +51,15 @@ var t2 = Task.Run(() =>
 });
 
 
-for (var i = 0; i < 100; i++)
+for (var i = 0; i < 1; i++)
 {
     writeMutation.Enqueue(new CreateProjectMutation()
     {
-        Id = Guid.NewGuid(),
-        Occurence = DateTime.UtcNow,
         ProjectId = Guid.NewGuid(),
         Name = "Project 1",
     });
+    
+    Thread.Sleep(TimeSpan.FromMilliseconds(0.1));
 }
 
 while (true)
@@ -69,8 +69,6 @@ while (true)
     
     writeMutation.Enqueue(new DeleteProjectMutation()
     {
-        Id = Guid.NewGuid(),
-        Occurence = DateTime.UtcNow,
         ProjectId = Guid.NewGuid(),
     });
 } 

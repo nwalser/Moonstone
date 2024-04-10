@@ -5,7 +5,7 @@ namespace DistributedSessions.Projection;
 
 public class Snapshot
 {
-    public required Mutation LastMutation { get; set; }
+    public required DateTime LastMutationOccurence { get; set; }
     public required ProjectionModel Model { get; set; }
     
     
@@ -14,23 +14,16 @@ public class Snapshot
         return new Snapshot()
         {
             Model = ProjectionModel.Empty(),
-            LastMutation = new StartStreamMutation()
-            {
-                Id = Guid.Empty,
-                Occurence = DateTime.MinValue,
-            }
+            LastMutationOccurence = DateTime.MinValue,
         };
     }
     
     public void AppendMutation(Mutation mutation)
     {
-        if (LastMutation?.Occurence > mutation.Occurence)
+        if (LastMutationOccurence > mutation.Occurence)
             throw new InvalidOperationException("Mutation is not applied in order");
 
-        if (LastMutation?.Occurence == mutation.Occurence && LastMutation.Id > mutation.Id)
-            throw new InvalidOperationException("Mutation is not applied in order");
-
-        LastMutation = mutation;
+        LastMutationOccurence = mutation.Occurence;
 
         switch (mutation)
         {

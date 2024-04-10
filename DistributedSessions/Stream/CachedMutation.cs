@@ -7,11 +7,9 @@ namespace DistributedSessions.Stream;
 
 public class CachedMutation
 {
-    [Key]
-    public required Guid MutationId { get; set; }
-    public required DateTime Occurence { get; set; }
-    public required byte[] Mutation { get; set; }
-    
+    public required Guid MutationId { get; init; }
+    public required DateTime Occurence { get; init; }
+    public required byte[] Mutation { get; init; }
     
     
     private static readonly JsonSerializerSettings Settings = new()
@@ -27,8 +25,8 @@ public class CachedMutation
         return new CachedMutation()
         {
             MutationId = mutation.Id,
-            Occurence = mutation.Occurence,
             Mutation = bytes,
+            Occurence = mutation.Occurence,
         };
     }
     

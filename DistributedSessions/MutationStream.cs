@@ -83,19 +83,15 @@ public class MutationStream : BackgroundWorker<MutationStream>
             
             eventsIngested = true;
             
-            if (oldestMutation?.Occurence > mutation.Occurence ||
-                oldestMutation?.Occurence == mutation.Occurence && oldestMutation.Id > mutation.Id)
-            {
+            if (mutation.Occurence < oldestMutation?.Occurence)
                 oldestMutation = mutation;
-            }
         }
 
         // invalidate caches
         if (oldestMutation is not null)
         {
             var invalidCaches = _store.CachedSnapshots
-                .Where(s => s.LastMutationOccurence > oldestMutation.Occurence)
-                .Where(s => s.LastMutationOccurence == oldestMutation.Occurence && s.LastMutationId >= oldestMutation.Id)
+                .Where(s => oldestMutation.Occurence < s.LastMutationOccurence)
                 .ToList();
             
             foreach (var invalidCache in invalidCaches)
@@ -103,7 +99,6 @@ public class MutationStream : BackgroundWorker<MutationStream>
         }
 
         await _store.SaveChangesAsync(ct);
-
         
         return eventsIngested;
     }
@@ -115,21 +110,19 @@ public class MutationStream : BackgroundWorker<MutationStream>
         foreach (var wantedSnapshotAge in WantedSnapshotAges.OrderDescending())
         {
             var targetDate = now - wantedSnapshotAge;
-
-            var bestParent = _store.CachedSnapshots
+            
+            var bestParent = await _store.CachedSnapshots
                 .Where(s => s.LastMutationOccurence < targetDate)
-                .AsEnumerable()
-                .MaxBy(v => v.LastMutationOccurence);
+                .OrderByDescending(s => s.LastMutationOccurence)
+                .FirstOrDefaultAsync(cancellationToken: ct);
 
             var snapshot = bestParent != null ? CachedSnapshot.FromCached(bestParent) : Snapshot.Create();
             
             // apply remaining mutations on top of it
             var remainingMutations = _store.CachedMutations
-                .Where(m => m.Occurence > snapshot.LastMutation.Occurence ||
-                            (m.Occurence == snapshot.LastMutation.Occurence &&
-                             m.MutationId > snapshot.LastMutation.Id))
+                .Where(m => m.Occurence > snapshot.LastMutationOccurence)
+                .Where(m => m.Occurence <= targetDate)
                 .OrderBy(m => m.Occurence)
-                .ThenBy(m => m.MutationId)
                 .AsAsyncEnumerable();
             
             await foreach (var cachedMutation in remainingMutations)
