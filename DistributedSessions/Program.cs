@@ -1,11 +1,12 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using DistributedSessions;
 using DistributedSessions.Mutations;
 using DistributedSessions.Projection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Extensions.Logging;
+
+var cts = new CancellationTokenSource();
 
 var logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -15,27 +16,21 @@ var loggerFactory = new SerilogLoggerFactory(logger);
 var paths = new PathProvider()
 {
     Temporary = @"C:\Users\NathanielWalser\Desktop\temp",
-    Session = Guid.Parse("040461cf-f8cb-4bcb-9352-1edeb67c5d9a"),
+    Session = "040461cf-f8cb-4bcb-9352-1edeb67c5d9a",
     Workspace = @"C:\Users\NathanielWalser\OneDrive - esp-engineering gmbh\Moonstone\workspace3",
 };
-
-var sw = Stopwatch.StartNew();
-
-var cts = new CancellationTokenSource();
 
 var writeMutation = new ConcurrentQueue<Mutation>();
 var newMutations = new ConcurrentQueue<Mutation>();
 var newSnapshots = new ConcurrentQueue<Snapshot>();
     
-var writer = new MutationWriter(writeMutation, cts.Token, loggerFactory.CreateLogger<MutationWriter>(), paths);
-var reader = new MutationReader(newMutations, cts.Token, loggerFactory.CreateLogger<MutationReader>(), paths);
-var stream = new MutationStream(Path.Join(temp, sessionId.ToString()), newMutations, newSnapshots);
+var writer = new MutationWriter(writeMutation, paths, cts.Token, loggerFactory.CreateLogger<MutationWriter>());
+var reader = new MutationReader(newMutations, paths, cts.Token, loggerFactory.CreateLogger<MutationReader>());
+var stream = new MutationStream(newMutations, newSnapshots, paths, cts.Token, loggerFactory.CreateLogger<MutationStream>());
 
 
-
-var streamTask =  stream.ExecuteAsync(cts.Token);
-
-Task.Run(() =>
+// tests ----------
+var t1 = Task.Run(() =>
 {
     while (true)
     {
@@ -46,7 +41,7 @@ Task.Run(() =>
     }
 });
 
-Task.Run(() =>
+var t2 = Task.Run(() =>
 {
     while (true)
     {
@@ -60,12 +55,8 @@ for (var i = 0; i < 100_000; i++)
 {
     writeMutation.Enqueue(new CreateProjectMutation()
     {
-        MutationId = Guid.NewGuid(),
-        Occurence = new MutationOccurence()
-        {
-            Occurence = DateTime.UtcNow,
-            RandomId = Guid.NewGuid(),
-        },
+        Id = Guid.NewGuid(),
+        Occurence = DateTime.UtcNow,
         ProjectId = Guid.NewGuid(),
         Name = "Project 1",
     });
@@ -77,13 +68,9 @@ while (true)
     Console.ReadKey();
     writeMutation.Enqueue(new DeleteProjectMutation()
     {
-        MutationId = Guid.NewGuid(),
-        Occurence = new MutationOccurence()
-        {
-            Occurence = DateTime.UtcNow,
-            RandomId = Guid.NewGuid(),
-        },
         Id = Guid.NewGuid(),
+        Occurence = DateTime.UtcNow,
+        ProjectId = Guid.NewGuid(),
     });
 } 
 

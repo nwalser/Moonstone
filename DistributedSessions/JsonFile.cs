@@ -11,7 +11,7 @@ public class JsonFile
         Formatting = Formatting.None
     };
     
-    public static void Serialize(object value, Stream s)
+    public static void Serialize(object value, System.IO.Stream s)
     {
         using var writer = new StreamWriter(s);
         using var jsonWriter = new JsonTextWriter(writer);
@@ -20,7 +20,7 @@ public class JsonFile
         jsonWriter.Flush();
     }
 
-    public static T Deserialize<T>(Stream s)
+    public static T Deserialize<T>(System.IO.Stream s)
     {
         using var reader = new StreamReader(s);
         using var jsonReader = new JsonTextReader(reader);

@@ -4,6 +4,5 @@ namespace DistributedSessions.Mutations;
 
 public class DeleteProjectMutation : Mutation
 {
-    [ProtoMember(3)]
-    public required Guid Id { get; set; }
+    public required Guid ProjectId { get; set; }
 }

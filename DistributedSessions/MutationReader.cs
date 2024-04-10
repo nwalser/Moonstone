@@ -12,7 +12,7 @@ public class MutationReader : BackgroundWorker<MutationReader>
     
     private readonly ConcurrentQueue<string> _updatedPaths = new();
     
-    public MutationReader(ConcurrentQueue<Mutation> mutationRead, CancellationToken ct, ILogger<MutationReader> logger, PathProvider paths) : base(ct, logger)
+    public MutationReader(ConcurrentQueue<Mutation> mutationRead, PathProvider paths, CancellationToken ct, ILogger<MutationReader> logger) : base(ct, logger)
     {
         _mutationRead = mutationRead;
         _paths = paths;

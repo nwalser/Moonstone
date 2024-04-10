@@ -5,9 +5,7 @@ namespace DistributedSessions.Projection;
 
 public class Snapshot
 {
-    public required TimeSpan TargetAge { get; set; }
-    public required MutationOccurence LastMutationOccurence { get; set; }
-
+    public Mutation? LastMutation { get; set; }
     public required ProjectionModel Model { get; set; }
     
     
@@ -16,31 +14,18 @@ public class Snapshot
         return new Snapshot()
         {
             Model = ProjectionModel.Empty(),
-            TargetAge = targetAge,
-            LastMutationOccurence = new MutationOccurence()
-            {
-                Occurence = DateTime.MinValue,
-                RandomId = Guid.Empty,
-            }
         };
     }
     
-    
-    public static Snapshot Clone(TimeSpan targetAge, Snapshot snapshot)
+    public void ApplyMutation(Mutation mutation)
     {
-        var json = JsonConvert.SerializeObject(snapshot);
-        var newSnapshot = JsonConvert.DeserializeObject<Snapshot>(json)!;
-        newSnapshot.TargetAge = targetAge;
-        return newSnapshot;
-    }
-    
-    
-    public void AppendMutation(Mutation mutation)
-    {
-        if (LastMutationOccurence is not null && LastMutationOccurence >= mutation.Occurence)
+        if (LastMutation?.Occurence > mutation.Occurence)
             throw new InvalidOperationException("Mutation is not applied in order");
 
-        LastMutationOccurence = mutation.Occurence;
+        if (LastMutation?.Occurence == mutation.Occurence && LastMutation.Id > mutation.Id)
+            throw new InvalidOperationException("Mutation is not applied in order");
+
+        LastMutation = mutation;
 
         switch (mutation)
         {

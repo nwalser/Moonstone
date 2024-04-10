@@ -1,6 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using System.Net.Mime;
+using System.Text;
 using DistributedSessions.Mutations;
 using DistributedSessions.Projection;
+using DistributedSessions.Stream;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -9,14 +13,25 @@ namespace DistributedSessions;
 public class MutationStream : BackgroundWorker<MutationStream>
 {
     private readonly HashSet<Guid> _mutationIds;
-    private readonly SortedList<MutationOccurence, Mutation> _mutations;
-    private List<Snapshot> _snapshotCaches;
     
     private readonly ConcurrentQueue<Mutation> _newMutations;
     private readonly ConcurrentQueue<Snapshot> _newSnapshot;
 
     private readonly PathProvider _paths;
+    private readonly StreamStore _store;
     
+    private static readonly List<TimeSpan> WantedSnapshotAges =
+    [
+        TimeSpan.Zero,
+        TimeSpan.FromSeconds(10),
+        TimeSpan.FromMinutes(10),
+        TimeSpan.FromDays(7)
+    ];
+    
+    private static readonly JsonSerializerSettings Settings = new()
+    {
+        TypeNameHandling = TypeNameHandling.All,
+    };
     
     public MutationStream(ConcurrentQueue<Mutation> newMutations, ConcurrentQueue<Snapshot> newSnapshot, PathProvider paths, CancellationToken ct, ILogger<MutationStream> logger) : base(ct, logger)
     {
@@ -24,146 +39,113 @@ public class MutationStream : BackgroundWorker<MutationStream>
         _newSnapshot = newSnapshot;
         _paths = paths;
 
-        _mutations = new SortedList<MutationOccurence, Mutation>();
         _mutationIds = new HashSet<Guid>();
-        _snapshotCaches = new List<Snapshot>();
+        
+        var optionsBuilder = new DbContextOptionsBuilder<StreamStore>()
+            .UseSqlite($"Data Source={_paths.GetStreamStoreDbFile()}");
+        
+        _store = new StreamStore(optionsBuilder.Options);
     }
 
     
     protected override async Task Initialize(CancellationToken ct)
     {
-        // load from file system
-        var tempFilePath = Path.Join(_storagePath, "temp.json");
-        if (File.Exists(tempFilePath))
-        {
-            try
-            {
-                await using var stream = File.OpenRead(tempFilePath);
-                var data = Deserialize<MutationStreamData>(stream);
+        await _store.Database.EnsureCreatedAsync(ct);
+        await _store.Database.MigrateAsync(cancellationToken: ct);
+        
+        // load existing mutation ids into memory
+        var mutationIds = await _store.CachedMutations
+            .Select(m => m.MutationId)
+            .ToListAsync(cancellationToken: ct);
 
-                _snapshotCaches = data.SnapshotCaches;
-                
-                foreach (var mutation in data.Mutations)
-                {
-                    _mutations.Add(mutation.Occurence, mutation);
-                    _mutationIds.Add(mutation.MutationId);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
+        foreach (var mutationId in mutationIds)
+            mutationIds.Add(mutationId);
     }
     
     protected override async Task ProcessWork(CancellationToken ct)
     {
-        var eventsIngested = IngestNewMutations(ct);
+        var eventsIngested = await IngestNewMutations(ct);
 
         if(!eventsIngested)
-            continue;
+            return;
             
-        RebuildSnapshots(ct);
-
-        Directory.CreateDirectory(_storagePath);
-        await using (var stream = File.OpenWrite(tempFilePath))
-        {
-            var data = new MutationStreamData()
-            {
-                Mutations = _mutations.Select(m => m.Value).ToList(),
-                SnapshotCaches = _snapshotCaches,
-            };
-                
-            Serialize(data, stream);
-        }
-            
-        await Task.Delay(10, ct);
+        await RebuildSnapshots(ct);
     }
+
+
     
-    private bool IngestNewMutations(CancellationToken ct)
+    private async Task<bool> IngestNewMutations(CancellationToken ct)
     {
         var eventsIngested = false;
         
-        try
+        while (_newMutations.TryDequeue(out var mutation) && !ct.IsCancellationRequested)
         {
-            while (_newMutations.TryDequeue(out var mutation) && !ct.IsCancellationRequested)
+            if (!_mutationIds.Add(mutation.Id))
+                continue;
+
+            var json = JsonConvert.SerializeObject(mutation, Settings);
+            var bytes = Encoding.UTF8.GetBytes(json);
+            
+            _store.CachedMutations.Add(new CachedMutation()
             {
-                if (_mutationIds.Contains(mutation.MutationId))
-                    continue;
+                MutationId = mutation.Id,
+                Occurence = mutation.Occurence,
+                Mutation = bytes,
+            });
 
-                _mutations.Add(mutation.Occurence, mutation);
-                _mutationIds.Add(mutation.MutationId);
+            // invalidate caches
+            var invalidCaches = _store.CachedSnapshots
+                .Where(s => s.LastMutationOccurence > mutation.Occurence)
+                .Where(s => s.LastMutationOccurence == mutation.Occurence && s.LastMutationId >= mutation.Id)
+                .ToList();
 
-                // invalidate caches
-                var invalidCaches = _snapshotCaches
-                    .Where(s => s.LastMutationOccurence >= mutation.Occurence)
-                    .ToList();
+            foreach (var invalidCache in invalidCaches)
+                _store.Remove(invalidCache);
 
-                foreach (var invalidCache in invalidCaches)
-                    _snapshotCaches.Remove(invalidCache);
-                
-                eventsIngested = true;
-            }
+            await _store.SaveChangesAsync(ct);
+            
+            eventsIngested = true;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-
         
         return eventsIngested;
     }
     
-    private void RebuildSnapshots(CancellationToken ct)
+    private Task RebuildSnapshots(CancellationToken ct)
     {
-        try
+        var now = DateTime.UtcNow;
+
+        foreach (var wantedSnapshotAge in WantedSnapshotAges.OrderDescending())
         {
-            var wantedSnapshotAges = new List<TimeSpan>()
-            {
-                TimeSpan.Zero,
-                TimeSpan.FromSeconds(10),
-                TimeSpan.FromMinutes(10),
-            };
+            var targetDate = now - wantedSnapshotAge;
 
-            var now = DateTime.UtcNow;
+            var bestParent = _store.CachedSnapshots
+                .Where(s => s.LastMutationOccurence < targetDate)
+                .MaxBy(v => v.LastMutationOccurence?.Occurence);
 
-            foreach (var wantedSnapshotAge in wantedSnapshotAges.OrderDescending())
-            {
-                var targetDate = now - wantedSnapshotAge;
+            if (bestParent is null)
+                bestParent = Snapshot.Create(wantedSnapshotAge);
 
-                var bestParent = _snapshotCaches
-                    .Where(s => s.LastMutationOccurence?.Occurence < targetDate)
-                    .MaxBy(v => v.LastMutationOccurence?.Occurence);
+            // if parent snapshot is not old self create a copy
+            if (bestParent.TargetAge != wantedSnapshotAge)
+                bestParent = Snapshot.Clone(wantedSnapshotAge, bestParent);
 
-                if (bestParent is null)
-                    bestParent = Snapshot.Create(wantedSnapshotAge);
+            // apply remaining mutations on top of it
+            var remainingMutations = _mutations
+                .Where(m => m.Key > bestParent.LastMutationOccurence)
+                .Where(m => m.Key.Occurence <= targetDate);
 
-                // if parent snapshot is not old self create a copy
-                if (bestParent.TargetAge != wantedSnapshotAge)
-                    bestParent = Snapshot.Clone(wantedSnapshotAge, bestParent);
-
-                // apply remaining mutations on top of it
-                var remainingMutations = _mutations
-                    .Where(m => m.Key > bestParent.LastMutationOccurence)
-                    .Where(m => m.Key.Occurence <= targetDate);
-
-                foreach (var (occurence, mutation) in remainingMutations)
-                    bestParent.AppendMutation(mutation);
+            foreach (var (occurence, mutation) in remainingMutations)
+                bestParent.AppendMutation(mutation);
 
 
-                var snapshotToReplace = _snapshotCaches.SingleOrDefault(s => s.TargetAge == wantedSnapshotAge);
-                if (snapshotToReplace is not null)
-                    _snapshotCaches.Remove(snapshotToReplace);
+            var snapshotToReplace = _snapshotCaches.SingleOrDefault(s => s.TargetAge == wantedSnapshotAge);
+            if (snapshotToReplace is not null)
+                _snapshotCaches.Remove(snapshotToReplace);
 
-                _snapshotCaches.Add(bestParent);
+            _snapshotCaches.Add(bestParent);
 
-                if (wantedSnapshotAge == TimeSpan.Zero)
-                    _newSnapshot.Enqueue(bestParent);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
+            if (wantedSnapshotAge == TimeSpan.Zero)
+                _newSnapshot.Enqueue(bestParent);
         }
     }
 }

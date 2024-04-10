@@ -17,7 +17,7 @@ public class MutationWriter : BackgroundWorker<MutationWriter>
     private int _mutations;
     
     
-    public MutationWriter(ConcurrentQueue<Mutation> writeMutation, CancellationToken ct, ILogger<MutationWriter> logger, PathProvider paths) : base(ct, logger)
+    public MutationWriter(ConcurrentQueue<Mutation> writeMutation, PathProvider paths, CancellationToken ct, ILogger<MutationWriter> logger) : base(ct, logger)
     {
         _writeMutation = writeMutation;
         _paths = paths;
