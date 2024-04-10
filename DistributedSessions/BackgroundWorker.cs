@@ -6,18 +6,17 @@ public abstract class BackgroundWorker<TWorker> : IDisposable
 {
     public State State { get; private set; } = State.Initializing;
     
-    private readonly Task _backgroundTask;
+    private Task? _backgroundTask;
     private readonly ILogger<TWorker> _logger;
-    
-    public BackgroundWorker(CancellationToken ct, ILogger<TWorker> logger)
+
+    protected BackgroundWorker(CancellationToken ct, ILogger<TWorker> logger)
     {
         _logger = logger;
-        _backgroundTask = RunBackgroundWorker(ct);
     }
 
-    private Task RunBackgroundWorker(CancellationToken ct)
+    public void StartBackgroundWorker(CancellationToken ct)
     {
-        return Task.Run(async () =>
+        _backgroundTask = Task.Run(async () =>
         {
             _logger.LogInformation("Initializing");
 

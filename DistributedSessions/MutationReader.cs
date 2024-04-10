@@ -23,6 +23,8 @@ public class MutationReader : BackgroundWorker<MutationReader>
             EnableRaisingEvents = false,
             NotifyFilter = NotifyFilters.LastWrite
         };
+        
+        StartBackgroundWorker(ct);
     }
 
     protected override Task Initialize(CancellationToken ct)

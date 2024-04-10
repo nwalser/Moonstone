@@ -25,8 +25,6 @@ public class MutationStream : BackgroundWorker<MutationStream>
         TimeSpan.FromDays(7)
     ];
     
-
-    
     public MutationStream(ConcurrentQueue<Mutation> newMutations, ConcurrentQueue<Snapshot> newSnapshot, PathProvider paths, CancellationToken ct, ILogger<MutationStream> logger) : base(ct, logger)
     {
         _newMutations = newMutations;
@@ -34,11 +32,15 @@ public class MutationStream : BackgroundWorker<MutationStream>
         _paths = paths;
 
         _mutationIds = new HashSet<Guid>();
+
+        Directory.CreateDirectory(_paths.GetStreamStoreFolder());
         
         var optionsBuilder = new DbContextOptionsBuilder<StreamStore>()
             .UseSqlite($"Data Source={_paths.GetStreamStoreDbFile()}");
         
         _store = new StreamStore(optionsBuilder.Options);
+        
+        StartBackgroundWorker(ct);
     }
 
     
@@ -53,7 +55,7 @@ public class MutationStream : BackgroundWorker<MutationStream>
             .ToListAsync(cancellationToken: ct);
 
         foreach (var mutationId in mutationIds)
-            mutationIds.Add(mutationId);
+            _mutationIds.Add(mutationId);
     }
     
     protected override async Task ProcessWork(CancellationToken ct)
@@ -65,12 +67,10 @@ public class MutationStream : BackgroundWorker<MutationStream>
             
         await RebuildSnapshots(ct);
     }
-
-
     
     private async Task<bool> IngestNewMutations(CancellationToken ct)
     {
-        var eventsIngested = false;
+        Mutation? oldestMutation = default;
         
         while (_newMutations.TryDequeue(out var mutation) && !ct.IsCancellationRequested)
         {
@@ -79,19 +79,29 @@ public class MutationStream : BackgroundWorker<MutationStream>
             
             _store.CachedMutations.Add(CachedMutation.FromMutation(mutation));
 
-            // invalidate caches
-            var invalidCaches = _store.CachedSnapshots
-                .Where(s => s.LastMutationOccurence > mutation.Occurence)
-                .Where(s => s.LastMutationOccurence == mutation.Occurence && s.LastMutationId >= mutation.Id)
-                .ToList();
 
+            if (oldestMutation?.Occurence > mutation.Occurence ||
+                oldestMutation?.Occurence == mutation.Occurence && oldestMutation.Id > mutation.Id)
+            {
+                oldestMutation = mutation;
+            }
+        }
+
+        // invalidate caches
+        if (oldestMutation is not null)
+        {
+            var invalidCaches = _store.CachedSnapshots
+                .Where(s => s.LastMutationOccurence > oldestMutation.Occurence)
+                .Where(s => s.LastMutationOccurence == oldestMutation.Occurence && s.LastMutationId >= oldestMutation.Id)
+                .ToList();
+            
             foreach (var invalidCache in invalidCaches)
                 _store.Remove(invalidCache);
-
-            await _store.SaveChangesAsync(ct);
-            
-            eventsIngested = true;
         }
+
+        await _store.SaveChangesAsync(ct);
+
+        var eventsIngested = oldestMutation is not null;
         
         return eventsIngested;
     }
@@ -106,6 +116,7 @@ public class MutationStream : BackgroundWorker<MutationStream>
 
             var bestParent = _store.CachedSnapshots
                 .Where(s => s.LastMutationOccurence < targetDate)
+                .AsEnumerable()
                 .MaxBy(v => v.LastMutationOccurence);
 
             var snapshot = bestParent != null ? CachedSnapshot.FromCached(bestParent) : Snapshot.Create();

@@ -19,11 +19,14 @@ public static class JsonNewlineFile
 
         var json = JsonConvert.SerializeObject(obj, Settings);
         await sw.WriteLineAsync(json);
+
+        await sw.FlushAsync();
+        sw.Close();
     }
 
     public static async Task<List<TItem>> Read<TItem>(string file)
     {
-        await using var stream = File.OpenRead(file);
+        await using var stream = File.Open(file, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Write);
         using var sr = new StreamReader(stream);
 
         var items = new List<TItem>();
@@ -43,6 +46,8 @@ public static class JsonNewlineFile
             items.Add(json);
         }
 
+        stream.Close();
+        
         return items;
     }
 }

@@ -15,9 +15,9 @@ var loggerFactory = new SerilogLoggerFactory(logger);
 
 var paths = new PathProvider()
 {
-    Temporary = @"C:\Users\NathanielWalser\Desktop\temp",
+    Temporary = @"C:\Users\Nathaniel Walser\Desktop\temp",
     Session = "040461cf-f8cb-4bcb-9352-1edeb67c5d9a",
-    Workspace = @"C:\Users\NathanielWalser\OneDrive - esp-engineering gmbh\Moonstone\workspace3",
+    Workspace = @"C:\Users\Nathaniel Walser\OneDrive - esp-engineering gmbh\Moonstone\workspace3",
 };
 
 var writeMutation = new ConcurrentQueue<Mutation>();
@@ -45,7 +45,7 @@ var t2 = Task.Run(() =>
 {
     while (true)
     {
-        Console.WriteLine($"Write: {writeMutation.Count} - Read: {newMutations.Count}");
+        logger.Information("Write: {WriteMutationCount} - Read: {NewMutationCount}", writeMutation.Count, newMutations.Count);
         Thread.Sleep(1000);
     }
 });
@@ -64,8 +64,9 @@ for (var i = 0; i < 100_000; i++)
 
 while (true)
 {
-    Console.WriteLine("Ready for Input");
+    logger.Information("Ready for input");
     Console.ReadKey();
+    
     writeMutation.Enqueue(new DeleteProjectMutation()
     {
         Id = Guid.NewGuid(),

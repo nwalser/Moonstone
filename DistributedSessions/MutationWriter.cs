@@ -21,15 +21,17 @@ public class MutationWriter : BackgroundWorker<MutationWriter>
     {
         _writeMutation = writeMutation;
         _paths = paths;
+
+        StartBackgroundWorker(ct);
     }
 
     protected override async Task Initialize(CancellationToken ct)
     {
         // create session if it does not exist
-        Directory.CreateDirectory(_paths.GetSessionPath());
+        Directory.CreateDirectory(_paths.GetSessionMutationsFolder());
         
         var fileCounter = Directory
-            .EnumerateFiles(_paths.GetSessionPath(), "*.nljson")
+            .EnumerateFiles(_paths.GetSessionMutationsFolder(), "*.nljson")
             .Select(Path.GetFileNameWithoutExtension)
             .Select(p => int.TryParse(p, out var value) ? value : default(int?))
             .Max(i => i);
