@@ -1,12 +1,9 @@
 ﻿using System.Collections.Concurrent;
-using System.Net.Mime;
-using System.Text;
 using DistributedSessions.Mutations;
 using DistributedSessions.Projection;
 using DistributedSessions.Stream;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace DistributedSessions;
 
@@ -28,10 +25,7 @@ public class MutationStream : BackgroundWorker<MutationStream>
         TimeSpan.FromDays(7)
     ];
     
-    private static readonly JsonSerializerSettings Settings = new()
-    {
-        TypeNameHandling = TypeNameHandling.All,
-    };
+
     
     public MutationStream(ConcurrentQueue<Mutation> newMutations, ConcurrentQueue<Snapshot> newSnapshot, PathProvider paths, CancellationToken ct, ILogger<MutationStream> logger) : base(ct, logger)
     {
@@ -82,16 +76,8 @@ public class MutationStream : BackgroundWorker<MutationStream>
         {
             if (!_mutationIds.Add(mutation.Id))
                 continue;
-
-            var json = JsonConvert.SerializeObject(mutation, Settings);
-            var bytes = Encoding.UTF8.GetBytes(json);
             
-            _store.CachedMutations.Add(new CachedMutation()
-            {
-                MutationId = mutation.Id,
-                Occurence = mutation.Occurence,
-                Mutation = bytes,
-            });
+            _store.CachedMutations.Add(CachedMutation.FromMutation(mutation));
 
             // invalidate caches
             var invalidCaches = _store.CachedSnapshots
@@ -110,7 +96,7 @@ public class MutationStream : BackgroundWorker<MutationStream>
         return eventsIngested;
     }
     
-    private Task RebuildSnapshots(CancellationToken ct)
+    private async Task RebuildSnapshots(CancellationToken ct)
     {
         var now = DateTime.UtcNow;
 
@@ -120,32 +106,30 @@ public class MutationStream : BackgroundWorker<MutationStream>
 
             var bestParent = _store.CachedSnapshots
                 .Where(s => s.LastMutationOccurence < targetDate)
-                .MaxBy(v => v.LastMutationOccurence?.Occurence);
+                .MaxBy(v => v.LastMutationOccurence);
 
-            if (bestParent is null)
-                bestParent = Snapshot.Create(wantedSnapshotAge);
-
-            // if parent snapshot is not old self create a copy
-            if (bestParent.TargetAge != wantedSnapshotAge)
-                bestParent = Snapshot.Clone(wantedSnapshotAge, bestParent);
-
+            var snapshot = bestParent != null ? CachedSnapshot.FromCached(bestParent) : Snapshot.Create();
+            
             // apply remaining mutations on top of it
-            var remainingMutations = _mutations
-                .Where(m => m.Key > bestParent.LastMutationOccurence)
-                .Where(m => m.Key.Occurence <= targetDate);
-
-            foreach (var (occurence, mutation) in remainingMutations)
-                bestParent.AppendMutation(mutation);
-
-
-            var snapshotToReplace = _snapshotCaches.SingleOrDefault(s => s.TargetAge == wantedSnapshotAge);
+            var remainingMutations = _store.CachedMutations
+                .Where(m => m.Occurence > snapshot.LastMutation.Occurence ||
+                            (m.Occurence == snapshot.LastMutation.Occurence &&
+                             m.MutationId > snapshot.LastMutation.Id))
+                .AsAsyncEnumerable();
+            
+            await foreach (var cachedMutation in remainingMutations)
+                snapshot.AppendMutation(CachedMutation.ToMutation(cachedMutation));
+            
+            var snapshotToReplace = _store.CachedSnapshots
+                .SingleOrDefault(s => s.TargetAge == wantedSnapshotAge);
+            
             if (snapshotToReplace is not null)
-                _snapshotCaches.Remove(snapshotToReplace);
+                _store.CachedSnapshots.Remove(snapshotToReplace);
 
-            _snapshotCaches.Add(bestParent);
+            _store.CachedSnapshots.Add(CachedSnapshot.ToCached(Guid.NewGuid(), wantedSnapshotAge, snapshot));
 
             if (wantedSnapshotAge == TimeSpan.Zero)
-                _newSnapshot.Enqueue(bestParent);
+                _newSnapshot.Enqueue(snapshot);
         }
     }
 }
