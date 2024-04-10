@@ -1,23 +1,23 @@
 ﻿using System.Collections.Concurrent;
 using DistributedSessions.Mutations;
-using ProtoBuf;
+using Microsoft.Extensions.Logging;
 
 namespace DistributedSessions;
 
-public class MutationReader
+public class MutationReader : BackgroundWorker<MutationReader>
 {
-    private readonly string _workspace;
     private readonly ConcurrentQueue<Mutation> _mutationRead;
     private readonly FileSystemWatcher _fileSystemWatcher;
-    private readonly ConcurrentQueue<string> _updatedPaths = new();
-
+    private readonly PathProvider _paths;
     
-    public MutationReader(string workspace, ConcurrentQueue<Mutation> mutationRead)
+    private readonly ConcurrentQueue<string> _updatedPaths = new();
+    
+    public MutationReader(ConcurrentQueue<Mutation> mutationRead, CancellationToken ct, ILogger<MutationReader> logger, PathProvider paths) : base(ct, logger)
     {
         _mutationRead = mutationRead;
-        _workspace = workspace;
+        _paths = paths;
 
-        _fileSystemWatcher = new FileSystemWatcher(_workspace)
+        _fileSystemWatcher = new FileSystemWatcher(paths.Workspace)
         {
             IncludeSubdirectories = true,
             EnableRaisingEvents = false,
@@ -25,15 +25,18 @@ public class MutationReader
         };
     }
 
-    public async Task ExecuteAsync(CancellationToken ct)
+    protected override Task Initialize(CancellationToken ct)
     {
+        Directory.CreateDirectory(_paths.Workspace);
+        
         // subscribe to file events
         _fileSystemWatcher.EnableRaisingEvents = true;
         _fileSystemWatcher.Created += (_, e) =>
         {
             if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory))
                 return;
-
+            
+            // todo implement filtering of own session path
             if(!_updatedPaths.Contains(e.FullPath))
                 _updatedPaths.Enqueue(e.FullPath);
         };
@@ -42,44 +45,28 @@ public class MutationReader
         {
             if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory))
                 return;
-
+            
+            // todo implement filtering of own session path
             if(!_updatedPaths.Contains(e.FullPath))
                 _updatedPaths.Enqueue(e.FullPath);
         };
-
-        Directory.CreateDirectory(_workspace);
         
-        foreach (var file in Directory.EnumerateFiles(_workspace, string.Empty, SearchOption.AllDirectories))
+        foreach (var file in Directory.EnumerateFiles(_paths.Workspace, string.Empty, SearchOption.AllDirectories))
             _updatedPaths.Enqueue(file);
-
-        while (!ct.IsCancellationRequested)
-        {
-            await UpdatePaths(ct);
-            await Task.Delay(10, ct);
-        }
+        
+        return Task.CompletedTask;
     }
 
-
-    private async Task UpdatePaths(CancellationToken ct)
+    protected override async Task ProcessWork(CancellationToken ct)
     {
-        while (_updatedPaths.TryDequeue(out var path) && !ct.IsCancellationRequested)
+        while (_updatedPaths.TryPeek(out var path) && !ct.IsCancellationRequested)
         {
-            try
-            {
-                await using var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Write);
-                var mutations = Serializer.DeserializeItems<Mutation>(stream, PrefixStyle.Base128, 0).ToList();
-
-                foreach (var mutation in mutations)
-                    _mutationRead.Enqueue(mutation);
-            }
-            catch (IOException ex)
-            {
-                // retry later
-                _updatedPaths.Enqueue(path);
-                Console.WriteLine(ex);
-            }
+            var mutations  = await JsonNewlineFile.Read<Mutation>(path);
             
-            // todo implement proper error handling without unlimited retries
+            foreach (var mutation in mutations)
+                _mutationRead.Enqueue(mutation);
+
+            _updatedPaths.TryDequeue(out _);
         }
     }
 }

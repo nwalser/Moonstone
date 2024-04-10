@@ -12,10 +12,12 @@ var logger = new LoggerConfiguration()
     .CreateLogger();
 var loggerFactory = new SerilogLoggerFactory(logger);
 
-
-var temp = @"C:\Users\NathanielWalser\Desktop\temp";
-var workspace = @"C:\Users\NathanielWalser\OneDrive - esp-engineering gmbh\Moonstone\workspace3";
-var sessionId = Guid.Parse("040461cf-f8cb-4bcb-9352-1edeb67c5d9a");
+var paths = new PathProvider()
+{
+    Temporary = @"C:\Users\NathanielWalser\Desktop\temp",
+    Session = Guid.Parse("040461cf-f8cb-4bcb-9352-1edeb67c5d9a"),
+    Workspace = @"C:\Users\NathanielWalser\OneDrive - esp-engineering gmbh\Moonstone\workspace3",
+};
 
 var sw = Stopwatch.StartNew();
 
@@ -24,13 +26,13 @@ var cts = new CancellationTokenSource();
 var writeMutation = new ConcurrentQueue<Mutation>();
 var newMutations = new ConcurrentQueue<Mutation>();
 var newSnapshots = new ConcurrentQueue<Snapshot>();
-
-var writer = new MutationWriter(workspace, sessionId, writeMutation, cts.Token, loggerFactory.CreateLogger<MutationWriter>());
-var reader = new MutationReader(workspace, newMutations);
+    
+var writer = new MutationWriter(writeMutation, cts.Token, loggerFactory.CreateLogger<MutationWriter>(), paths);
+var reader = new MutationReader(newMutations, cts.Token, loggerFactory.CreateLogger<MutationReader>(), paths);
 var stream = new MutationStream(Path.Join(temp, sessionId.ToString()), newMutations, newSnapshots);
 
-// todo: implement background worker
-var readerTask =  reader.ExecuteAsync(cts.Token);
+
+
 var streamTask =  stream.ExecuteAsync(cts.Token);
 
 Task.Run(() =>

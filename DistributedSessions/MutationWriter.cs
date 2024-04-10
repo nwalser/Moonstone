@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using DistributedSessions.Mutations;
 using Microsoft.Extensions.Logging;
-using ProtoBuf;
 
 namespace DistributedSessions;
 
@@ -11,27 +10,26 @@ public class MutationWriter : BackgroundWorker<MutationWriter>
     
     private readonly ConcurrentQueue<Mutation> _writeMutation;
     
-    private readonly string _workspace;
-    private readonly Guid _sessionId;
+    private readonly PathProvider _paths;
+
     
     private int _fileCounter;
     private int _mutations;
     
     
-    public MutationWriter(string workspace, Guid sessionId, ConcurrentQueue<Mutation> writeMutation, CancellationToken ct, ILogger<MutationWriter> logger) : base(ct, logger)
+    public MutationWriter(ConcurrentQueue<Mutation> writeMutation, CancellationToken ct, ILogger<MutationWriter> logger, PathProvider paths) : base(ct, logger)
     {
-        _workspace = workspace;
-        _sessionId = sessionId;
         _writeMutation = writeMutation;
+        _paths = paths;
     }
 
     protected override async Task Initialize(CancellationToken ct)
     {
         // create session if it does not exist
-        Directory.CreateDirectory(PathFactory.GetSessionMutationsFolder(_workspace, _sessionId));
+        Directory.CreateDirectory(_paths.GetSessionPath());
         
         var fileCounter = Directory
-            .EnumerateFiles(PathFactory.GetSessionMutationsFolder(_workspace, _sessionId), "*.nljson")
+            .EnumerateFiles(_paths.GetSessionPath(), "*.nljson")
             .Select(Path.GetFileNameWithoutExtension)
             .Select(p => int.TryParse(p, out var value) ? value : default(int?))
             .Max(i => i);
@@ -45,9 +43,7 @@ public class MutationWriter : BackgroundWorker<MutationWriter>
         else
         {
             // read mutations from latest file
-            await using var stream = File.OpenRead(PathFactory.GetSessionMutationsFile(_workspace, _sessionId, fileCounter.Value));
-            var mutations =  Serializer.DeserializeItems<Mutation>(stream, PrefixStyle.Base128, 0).ToList();
-            
+            var mutations = await JsonNewlineFile.Read<Mutation>(_paths.GetSessionMutationsFile(fileCounter.Value));
             
             _fileCounter = fileCounter.Value;
             _mutations = mutations.Count;
@@ -70,8 +66,8 @@ public class MutationWriter : BackgroundWorker<MutationWriter>
                 _mutations = 0;
             }
 
-            var mutationsFile = PathFactory.GetSessionMutationsFile(_workspace, _sessionId, _fileCounter);
-            await NlJson.Append(mutation, mutationsFile);
+            var mutationsFile = _paths.GetSessionMutationsFile(_fileCounter);
+            await JsonNewlineFile.Append(mutation, mutationsFile);
             _mutations++;
 
             // dequeue if processed successfully

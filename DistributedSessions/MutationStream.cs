@@ -1,11 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using DistributedSessions.Mutations;
 using DistributedSessions.Projection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace DistributedSessions;
 
-public class MutationStream
+public class MutationStream : BackgroundWorker<MutationStream>
 {
     private readonly HashSet<Guid> _mutationIds;
     private readonly SortedList<MutationOccurence, Mutation> _mutations;
@@ -14,22 +15,22 @@ public class MutationStream
     private readonly ConcurrentQueue<Mutation> _newMutations;
     private readonly ConcurrentQueue<Snapshot> _newSnapshot;
 
-    private readonly string _storagePath;
+    private readonly PathProvider _paths;
     
     
-    public MutationStream(string storagePath, ConcurrentQueue<Mutation> newMutations,
-        ConcurrentQueue<Snapshot> newSnapshot)
+    public MutationStream(ConcurrentQueue<Mutation> newMutations, ConcurrentQueue<Snapshot> newSnapshot, PathProvider paths, CancellationToken ct, ILogger<MutationStream> logger) : base(ct, logger)
     {
-        _storagePath = storagePath;
         _newMutations = newMutations;
         _newSnapshot = newSnapshot;
+        _paths = paths;
 
         _mutations = new SortedList<MutationOccurence, Mutation>();
         _mutationIds = new HashSet<Guid>();
         _snapshotCaches = new List<Snapshot>();
     }
 
-    public async Task ExecuteAsync(CancellationToken ct)
+    
+    protected override async Task Initialize(CancellationToken ct)
     {
         // load from file system
         var tempFilePath = Path.Join(_storagePath, "temp.json");
@@ -53,60 +54,30 @@ public class MutationStream
                 Console.WriteLine(ex.Message);
             }
         }
-        
-        var firstRun = true;
-        while (!ct.IsCancellationRequested)
-        {
-            var eventsIngested = IngestNewMutations(ct);
-
-            if(!eventsIngested & !firstRun)
-                continue;
-            
-            RebuildSnapshots(ct);
-
-            Directory.CreateDirectory(_storagePath);
-            await using (var stream = File.OpenWrite(tempFilePath))
-            {
-                var data = new MutationStreamData()
-                {
-                    Mutations = _mutations.Select(m => m.Value).ToList(),
-                    SnapshotCaches = _snapshotCaches,
-                };
-                
-                Serialize(data, stream);
-            }
-            
-            firstRun = false;
-            
-            await Task.Delay(10, ct);
-        }
     }
     
-    public static void Serialize(object value, Stream s)
+    protected override async Task ProcessWork(CancellationToken ct)
     {
-        using (StreamWriter writer = new StreamWriter(s))
-        using (JsonTextWriter jsonWriter = new JsonTextWriter(writer))
-        {
-            JsonSerializer ser = new JsonSerializer()
-            {
-                TypeNameHandling = TypeNameHandling.All,
-            };
-            ser.Serialize(jsonWriter, value);
-            jsonWriter.Flush();
-        }
-    }
+        var eventsIngested = IngestNewMutations(ct);
 
-    public static T Deserialize<T>(Stream s)
-    {
-        using (StreamReader reader = new StreamReader(s))
-        using (JsonTextReader jsonReader = new JsonTextReader(reader))
+        if(!eventsIngested)
+            continue;
+            
+        RebuildSnapshots(ct);
+
+        Directory.CreateDirectory(_storagePath);
+        await using (var stream = File.OpenWrite(tempFilePath))
         {
-            JsonSerializer ser = new JsonSerializer()
+            var data = new MutationStreamData()
             {
-                TypeNameHandling = TypeNameHandling.All
+                Mutations = _mutations.Select(m => m.Value).ToList(),
+                SnapshotCaches = _snapshotCaches,
             };
-            return ser.Deserialize<T>(jsonReader);
+                
+            Serialize(data, stream);
         }
+            
+        await Task.Delay(10, ct);
     }
     
     private bool IngestNewMutations(CancellationToken ct)

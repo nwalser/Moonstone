@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace DistributedSessions;
 
-public static class NlJson
+public static class JsonNewlineFile
 {
     private static readonly JsonSerializerSettings Settings = new()
     {
