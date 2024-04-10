@@ -36,7 +36,7 @@ var t1 = Task.Run(() =>
     {
         if (newSnapshots.TryDequeue(out var snapshot))
         {
-            Console.WriteLine(snapshot.Model.CreatedProjects);
+            logger.Information("Write: {Counter}", snapshot.Model.CreatedProjects);
         }
     }
 });
@@ -51,7 +51,7 @@ var t2 = Task.Run(() =>
 });
 
 
-for (var i = 0; i < 100_000; i++)
+for (var i = 0; i < 100; i++)
 {
     writeMutation.Enqueue(new CreateProjectMutation()
     {

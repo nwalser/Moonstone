@@ -70,6 +70,8 @@ public class MutationStream : BackgroundWorker<MutationStream>
     
     private async Task<bool> IngestNewMutations(CancellationToken ct)
     {
+        var eventsIngested = false;
+
         Mutation? oldestMutation = default;
         
         while (_newMutations.TryDequeue(out var mutation) && !ct.IsCancellationRequested)
@@ -78,8 +80,9 @@ public class MutationStream : BackgroundWorker<MutationStream>
                 continue;
             
             _store.CachedMutations.Add(CachedMutation.FromMutation(mutation));
-
-
+            
+            eventsIngested = true;
+            
             if (oldestMutation?.Occurence > mutation.Occurence ||
                 oldestMutation?.Occurence == mutation.Occurence && oldestMutation.Id > mutation.Id)
             {
@@ -101,7 +104,6 @@ public class MutationStream : BackgroundWorker<MutationStream>
 
         await _store.SaveChangesAsync(ct);
 
-        var eventsIngested = oldestMutation is not null;
         
         return eventsIngested;
     }
@@ -126,6 +128,8 @@ public class MutationStream : BackgroundWorker<MutationStream>
                 .Where(m => m.Occurence > snapshot.LastMutation.Occurence ||
                             (m.Occurence == snapshot.LastMutation.Occurence &&
                              m.MutationId > snapshot.LastMutation.Id))
+                .OrderBy(m => m.Occurence)
+                .ThenBy(m => m.MutationId)
                 .AsAsyncEnumerable();
             
             await foreach (var cachedMutation in remainingMutations)
