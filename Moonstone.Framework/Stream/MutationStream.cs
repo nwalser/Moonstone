@@ -10,7 +10,7 @@ public class MutationStream<TModel> : BackgroundWorker<MutationStream<TModel>> w
     
     private readonly ConcurrentQueue<Mutation> _newMutations;
     private readonly ConcurrentQueue<Snapshot<TModel>> _newSnapshot;
-    
+    private readonly MutationHandler<TModel> _handler;
     
     private readonly PathProvider _paths;
     private readonly StreamStore _store;
@@ -23,11 +23,12 @@ public class MutationStream<TModel> : BackgroundWorker<MutationStream<TModel>> w
         TimeSpan.FromDays(7)
     ];
     
-    public MutationStream(ConcurrentQueue<Mutation> newMutations, ConcurrentQueue<Snapshot<TModel>> newSnapshot, PathProvider paths, CancellationToken ct, ILogger<MutationStream<TModel>> logger) : base(ct, logger)
+    public MutationStream(ConcurrentQueue<Mutation> newMutations, ConcurrentQueue<Snapshot<TModel>> newSnapshot, PathProvider paths, CancellationToken ct, ILogger<MutationStream<TModel>> logger, MutationHandler<TModel> handler) : base(ct, logger)
     {
         _newMutations = newMutations;
         _newSnapshot = newSnapshot;
         _paths = paths;
+        _handler = handler;
 
         _mutationIds = new HashSet<Guid>();
 
@@ -124,7 +125,7 @@ public class MutationStream<TModel> : BackgroundWorker<MutationStream<TModel>> w
                 .AsAsyncEnumerable();
             
             await foreach (var cachedMutation in remainingMutations)
-                snapshot.AppendMutation(CachedMutation.ToMutation(cachedMutation));
+                snapshot.AppendMutation(CachedMutation.ToMutation(cachedMutation), _handler);
             
             var snapshotToReplace = _store.CachedSnapshots
                 .SingleOrDefault(s => s.TargetAge == wantedSnapshotAge);

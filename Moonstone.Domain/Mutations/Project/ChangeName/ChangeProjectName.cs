@@ -1,9 +1,9 @@
 ﻿using Moonstone.Framework.Stream;
 
-namespace Moonstone.Domain.Mutations.Project.Create;
+namespace Moonstone.Domain.Mutations.Project.ChangeName;
 
-public class CreateProjectMutation : Mutation
-{    
+public class ChangeProjectName : Mutation
+{
     public required Guid ProjectId { get; set; }
     public required string Name { get; set; }
 }

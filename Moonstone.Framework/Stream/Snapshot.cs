@@ -16,23 +16,14 @@ public class Snapshot<TModel> where TModel : new()
         };
     }
     
-    public void AppendMutation(Mutation mutation)
+    public void AppendMutation(Mutation mutation, MutationHandler<TModel> handler)
     {
+        // todo implement collision of timestamps
         if (LastMutationOccurence > mutation.Occurence)
             throw new InvalidOperationException("Mutation is not applied in order");
 
         LastMutationOccurence = mutation.Occurence;
 
-        // todo: implement command handling
-        
-        //switch (mutation)
-        //{
-        //    case CreateProjectMutation createProject:
-        //        Model.CreatedProjects++;
-        //        break;
-        //    case DeleteProjectMutation deleteProject:
-        //        Model.CreatedProjects++;
-        //        break;
-        //}
+        handler.Handle(Model, mutation);
     }
 }

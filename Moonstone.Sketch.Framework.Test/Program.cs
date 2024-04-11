@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using Moonstone.Domain.Mutations.Project.ChangeName;
 using Moonstone.Domain.Mutations.Project.Create;
 using Moonstone.Domain.Mutations.Project.Delete;
 using Moonstone.Framework;
@@ -24,18 +25,29 @@ var paths = new PathProvider()
 var writeMutation = new ConcurrentQueue<Mutation>();
 var newMutations = new ConcurrentQueue<Mutation>();
 var newSnapshots = new ConcurrentQueue<Snapshot<ProjectionModel>>();
+
+var handler = new MutationHandler<ProjectionModel>()
+{
+    MutationHandlers = new Dictionary<Type, object>()
+    {
+        {typeof(ChangeProjectName), new ChangeProjectNameHandler()},
+        {typeof(CreateProject), new CreateProjectHandler()},
+        {typeof(DeleteProject), new DeleteProjectHandler()},
+    }
+};
+    
     
 var writer = new MutationWriter(writeMutation, paths, cts.Token, loggerFactory.CreateLogger<MutationWriter>());
 var reader = new MutationReader(newMutations, paths, cts.Token, loggerFactory.CreateLogger<MutationReader>());
-var stream = new MutationStream<ProjectionModel>(newMutations, newSnapshots, paths, cts.Token, loggerFactory.CreateLogger<MutationStream<ProjectionModel>>());
+var stream = new MutationStream<ProjectionModel>(newMutations, newSnapshots, paths, cts.Token, loggerFactory.CreateLogger<MutationStream<ProjectionModel>>(), handler);
 
 
-// tests ----------
+// tests
 var t1 = Task.Run(() =>
 {
     while (true)
     {
-        if (newSnapshots.TryDequeue(out var snapshot))
+        while (newSnapshots.TryDequeue(out var snapshot))
         {
             logger.Information("Projects: {Counter}", snapshot.Model.CreatedProjects);
         }
@@ -48,7 +60,7 @@ var t2 = Task.Run(() =>
 {
     while (true)
     {
-        logger.Information("Write: {WriteMutationCount} - Read: {NewMutationCount}", writeMutation.Count, newMutations.Count);
+        //logger.Information("Write: {WriteMutationCount} - Read: {NewMutationCount}", writeMutation.Count, newMutations.Count);
         Thread.Sleep(1000);
     }
 });
@@ -56,7 +68,7 @@ var t2 = Task.Run(() =>
 
 for (var i = 0; i < 1; i++)
 {
-    writeMutation.Enqueue(new CreateProjectMutation()
+    writeMutation.Enqueue(new CreateProject()
     {
         ProjectId = Guid.NewGuid(),
         Name = "Project 1",
@@ -70,7 +82,7 @@ while (true)
     logger.Information("Ready for input");
     Console.ReadKey();
     
-    writeMutation.Enqueue(new DeleteProjectMutation()
+    writeMutation.Enqueue(new DeleteProject()
     {
         ProjectId = Guid.NewGuid(),
     });

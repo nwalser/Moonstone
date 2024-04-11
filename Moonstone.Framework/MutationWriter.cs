@@ -9,7 +9,7 @@ public class MutationWriter : BackgroundWorker<MutationWriter>
     private static readonly int MaxMutationsPerFile = 10_000;
     
     private readonly ConcurrentQueue<Mutation> _writeMutation;
-    
+
     private readonly PathProvider _paths;
 
     

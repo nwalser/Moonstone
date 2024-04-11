@@ -25,7 +25,7 @@ public static class JsonNewlineFile
 
     public static async Task<List<TItem>> Read<TItem>(string file)
     {
-        await using var stream = File.Open(file, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Write);
+        await using var stream = File.Open(file, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
         using var sr = new StreamReader(stream);
 
         var items = new List<TItem>();
