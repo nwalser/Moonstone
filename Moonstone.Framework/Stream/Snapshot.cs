@@ -23,14 +23,16 @@ public class Snapshot<TModel> where TModel : new()
 
         LastMutationOccurence = mutation.Occurence;
 
-        switch (mutation)
-        {
-            case CreateProjectMutation createProject:
-                Model.CreatedProjects++;
-                break;
-            case DeleteProjectMutation deleteProject:
-                Model.CreatedProjects++;
-                break;
-        }
+        // todo: implement command handling
+        
+        //switch (mutation)
+        //{
+        //    case CreateProjectMutation createProject:
+        //        Model.CreatedProjects++;
+        //        break;
+        //    case DeleteProjectMutation deleteProject:
+        //        Model.CreatedProjects++;
+        //        break;
+        //}
     }
 }
