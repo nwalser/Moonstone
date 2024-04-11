@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
 using Moonstone.Framework;
 using Moonstone.Framework.Mutations;
 using Moonstone.Framework.Projection;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Extensions.Logging;
 
@@ -74,5 +74,3 @@ while (true)
         ProjectId = Guid.NewGuid(),
     });
 } 
-
-cts.Cancel();

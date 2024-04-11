@@ -5,9 +5,17 @@ VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.App", "Moonstone.App\Moonstone.App.csproj", "{DF13CD81-9A6B-4061-91DA-00F8423479B6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CRTD", "CRTD", "{D8705C1B-4A3A-4BA3-A3D5-3B4A181B2E82}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Domain", "Moonstone.Domain\Moonstone.Domain.csproj", "{183CC821-53B0-45F1-A627-40F08DB36798}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Framework", "Moonstone.Framework\Moonstone.Framework.csproj", "{3EC496C1-9536-4357-86ED-1739C64AD36F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Framework", "Moonstone.Framework\Moonstone.Framework.csproj", "{1F512DC2-DB32-49E0-96C2-4701AEA7B5E6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "90 - Sketches", "90 - Sketches", "{D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Framework.Test", "Moonstone.Framework.Test\Moonstone.Framework.Test.csproj", "{660D50F6-8727-49BB-B68B-4DCE3B00C5F5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "20 - Framework", "20 - Framework", "{84BFEE91-714E-49DE-BDEA-157D47653543}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "30 - Domain", "30 - Domain", "{A0AE8199-DB04-4948-8818-7AEB3E1BB66B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,10 +29,18 @@ Global
 		{DF13CD81-9A6B-4061-91DA-00F8423479B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF13CD81-9A6B-4061-91DA-00F8423479B6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DF13CD81-9A6B-4061-91DA-00F8423479B6}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{3EC496C1-9536-4357-86ED-1739C64AD36F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3EC496C1-9536-4357-86ED-1739C64AD36F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3EC496C1-9536-4357-86ED-1739C64AD36F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3EC496C1-9536-4357-86ED-1739C64AD36F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{183CC821-53B0-45F1-A627-40F08DB36798}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{183CC821-53B0-45F1-A627-40F08DB36798}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{183CC821-53B0-45F1-A627-40F08DB36798}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{183CC821-53B0-45F1-A627-40F08DB36798}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F512DC2-DB32-49E0-96C2-4701AEA7B5E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F512DC2-DB32-49E0-96C2-4701AEA7B5E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F512DC2-DB32-49E0-96C2-4701AEA7B5E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F512DC2-DB32-49E0-96C2-4701AEA7B5E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{660D50F6-8727-49BB-B68B-4DCE3B00C5F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{660D50F6-8727-49BB-B68B-4DCE3B00C5F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{660D50F6-8727-49BB-B68B-4DCE3B00C5F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{660D50F6-8727-49BB-B68B-4DCE3B00C5F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -33,6 +49,8 @@ Global
 		SolutionGuid = {B9210062-975C-478E-A0DC-60E1E7E319F3}
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{3EC496C1-9536-4357-86ED-1739C64AD36F} = {D8705C1B-4A3A-4BA3-A3D5-3B4A181B2E82}
+		{660D50F6-8727-49BB-B68B-4DCE3B00C5F5} = {D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}
+		{1F512DC2-DB32-49E0-96C2-4701AEA7B5E6} = {84BFEE91-714E-49DE-BDEA-157D47653543}
+		{183CC821-53B0-45F1-A627-40F08DB36798} = {A0AE8199-DB04-4948-8818-7AEB3E1BB66B}
 	EndGlobalSection
 EndGlobal
