@@ -1,4 +1,6 @@
-﻿namespace Moonstone.Framework.Mutations;
+﻿using Moonstone.Framework.Stream;
+
+namespace Moonstone.Framework.Mutations;
 
 public class DeleteProjectMutation : Mutation
 {

@@ -1,11 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Moonstone.Framework.Mutations;
-using Moonstone.Framework.Projection;
-using Moonstone.Framework.Stream;
 
-namespace Moonstone.Framework;
+namespace Moonstone.Framework.Stream;
 
 public class MutationStream : BackgroundWorker<MutationStream>
 {

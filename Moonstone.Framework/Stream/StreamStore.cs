@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Moonstone.Framework.Projection;
 
 namespace Moonstone.Framework.Stream;
 

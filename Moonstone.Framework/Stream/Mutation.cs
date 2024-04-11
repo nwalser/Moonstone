@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Moonstone.Framework.Mutations;
+namespace Moonstone.Framework.Stream;
 
 public abstract class Mutation
 {

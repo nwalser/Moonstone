@@ -1,6 +1,6 @@
 ﻿using Moonstone.Framework.Mutations;
 
-namespace Moonstone.Framework.Projection;
+namespace Moonstone.Framework.Stream;
 
 public class Snapshot
 {

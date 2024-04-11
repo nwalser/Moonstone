@@ -2,7 +2,7 @@
 using System.Text;
 using Newtonsoft.Json;
 
-namespace Moonstone.Framework.Projection;
+namespace Moonstone.Framework.Stream;
 
 public class CachedSnapshot
 {

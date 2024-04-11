@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Moonstone.Framework.Mutations;
+using Moonstone.Framework.Stream;
 
 namespace Moonstone.Framework;
 

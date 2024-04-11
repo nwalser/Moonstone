@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Moonstone.Framework;
 using Moonstone.Framework.Mutations;
-using Moonstone.Framework.Projection;
+using Moonstone.Framework.Stream;
 using Serilog;
 using Serilog.Extensions.Logging;
 
