@@ -6,7 +6,6 @@ namespace Moonstone.Framework.Stream;
 public class CachedMutation
 {
     public required Guid MutationId { get; init; }
-    public required DateTime Occurence { get; init; }
     public required byte[] Mutation { get; init; }
     
     
@@ -24,7 +23,6 @@ public class CachedMutation
         {
             MutationId = mutation.Id,
             Mutation = bytes,
-            Occurence = mutation.Occurence,
         };
     }
     

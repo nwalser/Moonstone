@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using RT.Comb;
 
 namespace Moonstone.Framework.Stream;
 
@@ -82,7 +83,7 @@ public class MutationStream<TModel> : BackgroundWorker<MutationStream<TModel>> w
             
             eventsIngested = true;
             
-            if (mutation.Occurence < oldestMutation?.Occurence)
+            if (mutation.Id < oldestMutation?.Id | oldestMutation is null)
                 oldestMutation = mutation;
         }
 
@@ -90,7 +91,7 @@ public class MutationStream<TModel> : BackgroundWorker<MutationStream<TModel>> w
         if (oldestMutation is not null)
         {
             var invalidCaches = _store.CachedSnapshots
-                .Where(s => oldestMutation.Occurence < s.LastMutationOccurence)
+                .Where(s => oldestMutation.Id < s.LastMutationId)
                 .ToList();
             
             foreach (var invalidCache in invalidCaches)
@@ -108,20 +109,21 @@ public class MutationStream<TModel> : BackgroundWorker<MutationStream<TModel>> w
 
         foreach (var wantedSnapshotAge in WantedSnapshotAges.OrderDescending())
         {
-            var targetDate = now - wantedSnapshotAge;
+            var pro = new PostgreSqlCombProvider(new SqlDateTimeStrategy());
+            var targetDateGuid = pro.Create(now - wantedSnapshotAge);
             
             var bestParent = await _store.CachedSnapshots
-                .Where(s => s.LastMutationOccurence < targetDate)
-                .OrderByDescending(s => s.LastMutationOccurence)
+                .Where(s => s.LastMutationId < targetDateGuid)
+                .OrderByDescending(s => s.LastMutationId)
                 .FirstOrDefaultAsync(cancellationToken: ct);
 
             var snapshot = bestParent != null ? CachedSnapshot.CopyFromCached<TModel>(bestParent) : Snapshot<TModel>.Create();
             
             // apply remaining mutations on top of it
             var remainingMutations = _store.CachedMutations
-                .Where(m => m.Occurence > snapshot.LastMutationOccurence)
-                .Where(m => m.Occurence <= targetDate)
-                .OrderBy(m => m.Occurence)
+                .Where(m => m.MutationId > snapshot.LastMutationId)
+                .Where(m => m.MutationId <= targetDateGuid)
+                .OrderBy(m => m.MutationId)
                 .AsAsyncEnumerable();
             
             await foreach (var cachedMutation in remainingMutations)

@@ -3,7 +3,7 @@ namespace Moonstone.Framework.Stream;
 
 public class Snapshot<TModel> where TModel : new()
 {
-    public required DateTime LastMutationOccurence { get; set; }
+    public required Guid LastMutationId { get; set; }
     public required TModel Model { get; set; }
     
     
@@ -12,17 +12,16 @@ public class Snapshot<TModel> where TModel : new()
         return new Snapshot<TModel>()
         {
             Model = new TModel(),
-            LastMutationOccurence = DateTime.MinValue,
+            LastMutationId = Guid.Empty
         };
     }
     
     public void AppendMutation(Mutation mutation, MutationHandler<TModel> handler)
     {
-        // todo implement collision of timestamps
-        if (LastMutationOccurence > mutation.Occurence)
+        if (LastMutationId >= mutation.Id)
             throw new InvalidOperationException("Mutation is not applied in order");
 
-        LastMutationOccurence = mutation.Occurence;
+        LastMutationId = mutation.Id;
 
         handler.Handle(Model, mutation);
     }

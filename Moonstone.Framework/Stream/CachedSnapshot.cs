@@ -11,7 +11,7 @@ public class CachedSnapshot
     
     public required TimeSpan TargetAge { get; set; }
     
-    public required DateTime LastMutationOccurence { get; set; }
+    public required Guid LastMutationId { get; set; }
     
     public required byte[] Snapshot { get; set; }
     
@@ -31,7 +31,7 @@ public class CachedSnapshot
             Id = id,
             TargetAge = targetAge,
             Snapshot = bytes,
-            LastMutationOccurence = snapshot.LastMutationOccurence,
+            LastMutationId = snapshot.LastMutationId,
         };
     }
     

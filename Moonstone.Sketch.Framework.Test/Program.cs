@@ -52,7 +52,7 @@ var t1 = Task.Run(() =>
             logger.Information("Projects: {Counter}", snapshot.Model.CreatedProjects);
         }
         
-        Thread.Sleep(1000);
+        Thread.Sleep(10);
     }
 });
 

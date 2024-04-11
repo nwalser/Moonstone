@@ -12,7 +12,6 @@ public class StreamStore(DbContextOptions<StreamStore> options) : DbContext(opti
         builder.Entity<CachedMutation>(e =>
         {
             e.HasKey(u => u.MutationId);
-            e.HasIndex(u => u.Occurence).IsUnique();
         });
     }
 }
