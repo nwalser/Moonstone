@@ -7,8 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Mutations\ChangeProjectNameMutation\" />
-      <Folder Include="Mutations\CreateProjectMutation\" />
+      <ProjectReference Include="..\Moonstone.Framework\Moonstone.Framework.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Mutations\Project\" />
     </ItemGroup>
 
 </Project>

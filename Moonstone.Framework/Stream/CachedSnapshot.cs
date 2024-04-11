@@ -21,7 +21,7 @@ public class CachedSnapshot
         TypeNameHandling = TypeNameHandling.All,
     };
     
-    public static CachedSnapshot ToCached(Guid id, TimeSpan targetAge, Snapshot snapshot)
+    public static CachedSnapshot ToCached<TModel>(Guid id, TimeSpan targetAge, Snapshot<TModel> snapshot) where TModel : new()
     {
         var json = JsonConvert.SerializeObject(snapshot, Settings);
         var bytes = Encoding.UTF8.GetBytes(json);
@@ -35,9 +35,9 @@ public class CachedSnapshot
         };
     }
     
-    public static Snapshot CopyFromCached(CachedSnapshot cached)
+    public static Snapshot<TModel> CopyFromCached<TModel>(CachedSnapshot cached) where TModel : new()
     {
         var json = Encoding.UTF8.GetString(cached.Snapshot);
-        return JsonConvert.DeserializeObject<Snapshot>(json, Settings)!;
+        return JsonConvert.DeserializeObject<Snapshot<TModel>>(json, Settings)!;
     }
 }

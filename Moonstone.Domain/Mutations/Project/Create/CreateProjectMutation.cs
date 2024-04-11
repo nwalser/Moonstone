@@ -1,6 +1,6 @@
 ﻿using Moonstone.Framework.Stream;
 
-namespace Moonstone.Framework.Mutations;
+namespace Moonstone.Domain.Mutations.Project.Create;
 
 public class CreateProjectMutation : Mutation
 {    

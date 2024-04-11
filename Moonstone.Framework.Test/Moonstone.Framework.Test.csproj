@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Moonstone.Domain\Moonstone.Domain.csproj" />
       <ProjectReference Include="..\Moonstone.Framework\Moonstone.Framework.csproj" />
     </ItemGroup>
 

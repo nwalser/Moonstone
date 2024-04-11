@@ -4,12 +4,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Moonstone.Framework.Stream;
 
-public class MutationStream : BackgroundWorker<MutationStream>
+public class MutationStream<TModel> : BackgroundWorker<MutationStream<TModel>> where TModel : new()
 {
     private readonly HashSet<Guid> _mutationIds;
     
     private readonly ConcurrentQueue<Mutation> _newMutations;
-    private readonly ConcurrentQueue<Snapshot> _newSnapshot;
+    private readonly ConcurrentQueue<Snapshot<TModel>> _newSnapshot;
     
     
     private readonly PathProvider _paths;
@@ -23,7 +23,7 @@ public class MutationStream : BackgroundWorker<MutationStream>
         TimeSpan.FromDays(7)
     ];
     
-    public MutationStream(ConcurrentQueue<Mutation> newMutations, ConcurrentQueue<Snapshot> newSnapshot, PathProvider paths, CancellationToken ct, ILogger<MutationStream> logger) : base(ct, logger)
+    public MutationStream(ConcurrentQueue<Mutation> newMutations, ConcurrentQueue<Snapshot<TModel>> newSnapshot, PathProvider paths, CancellationToken ct, ILogger<MutationStream<TModel>> logger) : base(ct, logger)
     {
         _newMutations = newMutations;
         _newSnapshot = newSnapshot;
@@ -114,7 +114,7 @@ public class MutationStream : BackgroundWorker<MutationStream>
                 .OrderByDescending(s => s.LastMutationOccurence)
                 .FirstOrDefaultAsync(cancellationToken: ct);
 
-            var snapshot = bestParent != null ? CachedSnapshot.CopyFromCached(bestParent) : Snapshot.Create();
+            var snapshot = bestParent != null ? CachedSnapshot.CopyFromCached<TModel>(bestParent) : Snapshot<TModel>.Create();
             
             // apply remaining mutations on top of it
             var remainingMutations = _store.CachedMutations

@@ -1,18 +1,17 @@
-﻿using Moonstone.Framework.Mutations;
-
+﻿
 namespace Moonstone.Framework.Stream;
 
-public class Snapshot
+public class Snapshot<TModel> where TModel : new()
 {
     public required DateTime LastMutationOccurence { get; set; }
-    public required ProjectionModel Model { get; set; }
+    public required TModel Model { get; set; }
     
     
-    public static Snapshot Create()
+    public static Snapshot<TModel> Create()
     {
-        return new Snapshot()
+        return new Snapshot<TModel>()
         {
-            Model = ProjectionModel.Empty(),
+            Model = new TModel(),
             LastMutationOccurence = DateTime.MinValue,
         };
     }

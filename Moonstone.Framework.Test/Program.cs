@@ -1,7 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using Moonstone.Domain.Mutations.Project.Create;
+using Moonstone.Domain.Mutations.Project.Delete;
 using Moonstone.Framework;
-using Moonstone.Framework.Mutations;
 using Moonstone.Framework.Stream;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -22,11 +23,11 @@ var paths = new PathProvider()
 
 var writeMutation = new ConcurrentQueue<Mutation>();
 var newMutations = new ConcurrentQueue<Mutation>();
-var newSnapshots = new ConcurrentQueue<Snapshot>();
+var newSnapshots = new ConcurrentQueue<Snapshot<ProjectionModel>>();
     
 var writer = new MutationWriter(writeMutation, paths, cts.Token, loggerFactory.CreateLogger<MutationWriter>());
 var reader = new MutationReader(newMutations, paths, cts.Token, loggerFactory.CreateLogger<MutationReader>());
-var stream = new MutationStream(newMutations, newSnapshots, paths, cts.Token, loggerFactory.CreateLogger<MutationStream>());
+var stream = new MutationStream<ProjectionModel>(newMutations, newSnapshots, paths, cts.Token, loggerFactory.CreateLogger<MutationStream<ProjectionModel>>());
 
 
 // tests ----------
