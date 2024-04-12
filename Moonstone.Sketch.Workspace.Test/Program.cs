@@ -1,5 +1,4 @@
-﻿
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Moonstone.Domain.Mutations.Project.ChangeName;
 using Moonstone.Domain.Mutations.Project.Create;
 using Moonstone.Domain.Mutations.Project.Delete;
@@ -32,6 +31,8 @@ var handler = new MutationHandler<ProjectionModel>()
 };
 
 var workspace = new Workspace<ProjectionModel>(paths, handler);
+
+workspace.Projection.Subscribe(p => Log.Information("{Count}", p.CreatedProjects));
 
 Log.Information("Init of objects took: {Seconds:N3}s", (double)sw.ElapsedMilliseconds/1000);
 sw.Restart();
