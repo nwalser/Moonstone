@@ -45,7 +45,7 @@ public class MutationWriter : BackgroundWorker<MutationWriter>
         else
         {
             // read mutations from latest file
-            var mutations = await JsonNewlineFile.ReadAsync<Mutation>(_paths.GetSessionMutationsFile(fileCounter.Value));
+            var mutations = JsonNewlineFile.Read<Mutation>(_paths.GetSessionMutationsFile(fileCounter.Value));
             
             _fileCounter = fileCounter.Value;
             _mutations = mutations.Count;

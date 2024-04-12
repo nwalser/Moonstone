@@ -77,8 +77,14 @@ public class SnapshotManager<TProjection> where TProjection : new()
         // store changes to database
         await _store.SaveChangesAsync(ct);
     }
+
+
+    public async Task<TProjection> RebuildLiveProjection(CancellationToken ct = default)
+    {
+        throw new NotImplementedException();
+    }
     
-    public async Task<TProjection> RebuildProjection(CancellationToken ct = default)
+    public async Task<TProjection> RebuildBackupProjections(CancellationToken ct = default)
     {
         if (!_initialized)
             throw new InvalidOperationException();
@@ -104,9 +110,6 @@ public class SnapshotManager<TProjection> where TProjection : new()
                 .OrderBy(m => m.MutationId)
                 .ToListAsync(cancellationToken: ct);
             
-            //if(remainingMutations.Count == 0)
-            //    continue;
-            
             foreach (var cachedMutation in remainingMutations)
                 snapshot.AppendMutation(CachedMutation.ToMutation(cachedMutation), _handler);
             
@@ -119,7 +122,7 @@ public class SnapshotManager<TProjection> where TProjection : new()
             _store.CachedSnapshots.Add(CachedSnapshot.ToCached(Guid.NewGuid(), wantedSnapshotAge, snapshot));
 
             Log.Logger.Information("Rebuilt Snapshot with target age of {TargetAge} with parent {ParentAge}", wantedSnapshotAge, bestParent?.TargetAge);
-        }
+        } 
 
         await _store.SaveChangesAsync(ct);
 

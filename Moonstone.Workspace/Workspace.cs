@@ -73,7 +73,7 @@ public class Workspace<TProjection> where TProjection : new()
 
         foreach (var changedFile in changedFiles)
         {
-            var mutations = await JsonNewlineFile.ReadAsync<Mutation>(changedFile, ct);
+            var mutations = JsonNewlineFile.Read<Mutation>(changedFile, ct);
             await _mutationStream.IngestMutations(mutations, ct);
         }
 
@@ -128,7 +128,7 @@ public class Workspace<TProjection> where TProjection : new()
                 await ProcessMutationWrites(ct);
                 await ProcessChangedFiles(ct);
 
-                await Task.Delay(100, ct);
+                await Task.Delay(10, ct);
                 // todo implement good retry strategy
             }
             catch (TaskCanceledException)
@@ -168,7 +168,7 @@ public class Workspace<TProjection> where TProjection : new()
         while (_changedFiles.TryPeek(out var relativePath) && !ct.IsCancellationRequested)
         {
             var path = Path.Join(_paths.Workspace, relativePath);
-            var mutations  = await JsonNewlineFile.ReadAsync<Mutation>(path, ct);
+            var mutations  = JsonNewlineFile.Read<Mutation>(path, ct);
             
             await _mutationStream.IngestMutations(mutations, ct);
             
@@ -205,7 +205,7 @@ public class Workspace<TProjection> where TProjection : new()
         if (_mutationStream is null)
             throw new InvalidOperationException();
         
-        var newProjection = await _mutationStream.RebuildProjection(ct);
+        var newProjection = await _mutationStream.RebuildBackupProjections(ct);
         _projection.OnNext(newProjection);
     }
 }

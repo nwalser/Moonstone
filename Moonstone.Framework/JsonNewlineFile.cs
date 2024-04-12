@@ -23,16 +23,17 @@ public static class JsonNewlineFile
         sw.Close();
     }
 
-    public static async Task<List<TItem>> ReadAsync<TItem>(string file, CancellationToken ct = default)
+    public static List<TItem> Read<TItem>(string file, CancellationToken ct = default)
     {
-        await using var stream = File.Open(file, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
+        using var stream = File.Open(file, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
         using var sr = new StreamReader(stream);
 
         var items = new List<TItem>();
         
         while (!sr.EndOfStream && !ct.IsCancellationRequested)
         {
-            var line = await sr.ReadLineAsync(ct);
+            // ReSharper disable once MethodHasAsyncOverloadWithCancellation
+            var line = sr.ReadLine();
 
             if (line is null) 
                 break;

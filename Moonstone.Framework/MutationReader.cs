@@ -63,7 +63,7 @@ public class MutationReader : BackgroundWorker<MutationReader>
     {
         while (_updatedPaths.TryPeek(out var path) && !ct.IsCancellationRequested)
         {
-            var mutations  = await JsonNewlineFile.ReadAsync<Mutation>(path);
+            var mutations  = JsonNewlineFile.Read<Mutation>(path);
             
             foreach (var mutation in mutations)
                 _mutationRead.Enqueue(mutation);
