@@ -11,7 +11,7 @@ public class SnapshotManager<TProjection> where TProjection : new()
     private readonly HashSet<Guid> _mutationIds;
     private readonly MutationHandler<TProjection> _handler;
     private readonly StreamStore _store;
-    private bool _initialized = false;
+    private bool _initialized;
 
     private static readonly List<TimeSpan> WantedSnapshotAges =
     [
@@ -68,7 +68,7 @@ public class SnapshotManager<TProjection> where TProjection : new()
                 .Where(s => oldestUnprocessedMutation.Id < s.LastMutationId)
                 .ToList();
 
-            _store.Remove(invalidCaches);
+            _store.RemoveRange(invalidCaches);
         
             foreach (var invalidCache in invalidCaches)
                 Log.Logger.Information("Invalidated Snapshot of age {SnapshotAge}", invalidCache.TargetAge);
@@ -104,8 +104,8 @@ public class SnapshotManager<TProjection> where TProjection : new()
                 .OrderBy(m => m.MutationId)
                 .ToListAsync(cancellationToken: ct);
             
-            if(remainingMutations.Count == 0)
-                continue;
+            //if(remainingMutations.Count == 0)
+            //    continue;
             
             foreach (var cachedMutation in remainingMutations)
                 snapshot.AppendMutation(CachedMutation.ToMutation(cachedMutation), _handler);

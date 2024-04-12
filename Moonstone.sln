@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "30 - Domain", "30 - Domain"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Workspace", "Moonstone.Workspace\Moonstone.Workspace.csproj", "{28828C26-CABF-49DF-8650-1902A87BB1BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Sketch.Workspace.Test", "Moonstone.Sketch.Workspace.Test\Moonstone.Sketch.Workspace.Test.csproj", "{F92D594C-A021-4D1F-A6F5-C8003103C15F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{28828C26-CABF-49DF-8650-1902A87BB1BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28828C26-CABF-49DF-8650-1902A87BB1BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28828C26-CABF-49DF-8650-1902A87BB1BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F92D594C-A021-4D1F-A6F5-C8003103C15F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F92D594C-A021-4D1F-A6F5-C8003103C15F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F92D594C-A021-4D1F-A6F5-C8003103C15F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F92D594C-A021-4D1F-A6F5-C8003103C15F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,5 +66,6 @@ Global
 		{183CC821-53B0-45F1-A627-40F08DB36798} = {A0AE8199-DB04-4948-8818-7AEB3E1BB66B}
 		{DF13CD81-9A6B-4061-91DA-00F8423479B6} = {D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}
 		{28828C26-CABF-49DF-8650-1902A87BB1BA} = {84BFEE91-714E-49DE-BDEA-157D47653543}
+		{F92D594C-A021-4D1F-A6F5-C8003103C15F} = {D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}
 	EndGlobalSection
 EndGlobal

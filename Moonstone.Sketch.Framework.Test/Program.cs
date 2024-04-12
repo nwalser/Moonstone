@@ -17,9 +17,9 @@ var loggerFactory = new SerilogLoggerFactory(logger);
 
 var paths = new PathProvider()
 {
-    Temporary = @"C:\Users\NathanielWalser\Desktop\temp",
-    Session = "040461cf-f8cb-4bcb-9352-1edeb67c5d9c",
-    Workspace = @"C:\Users\NathanielWalser\OneDrive - esp-engineering gmbh\Moonstone\workspace3",
+    Temporary = @"C:\Users\Nathaniel Walser\Desktop\temp",
+    Session = "040461cf-f8cb-4bcb-9352-1edeb67c5d9a",
+    Workspace = @"C:\Users\Nathaniel Walser\OneDrive - esp-engineering gmbh\Moonstone\workspace3",
 };
 
 var writeMutation = new ConcurrentQueue<Mutation>();
@@ -60,8 +60,8 @@ var t2 = Task.Run(() =>
 {
     while (true)
     {
-        //logger.Information("Write: {WriteMutationCount} - Read: {NewMutationCount}", writeMutation.Count, newMutations.Count);
-        Thread.Sleep(1000);
+        logger.Information("Write: {WriteMutationCount} - Read: {NewMutationCount}", writeMutation.Count, newMutations.Count);
+        Thread.Sleep(10);
     }
 });
 

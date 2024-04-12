@@ -126,17 +126,20 @@ public class MutationStream<TModel> : BackgroundWorker<MutationStream<TModel>> w
             var snapshot = bestParent != null ? CachedSnapshot.CopyFromCached<TModel>(bestParent) : Snapshot<TModel>.Create();
             
             // apply remaining mutations on top of it
-            var remainingMutations = await _store.CachedMutations
+            var remainingMutations = _store.CachedMutations
                 .Where(m => m.MutationId > snapshot.LastMutationId)
                 .Where(m => m.MutationId <= targetDateGuid)
                 .OrderBy(m => m.MutationId)
-                .ToListAsync(cancellationToken: ct);
+                .AsEnumerable()
+                .Select(CachedMutation.ToMutation)
+                .ToList();
             
-            if(!remainingMutations.Any())
-                continue;
+            // todo implement something that works
+            //if(remainingMutations.Count == 0)
+            //    continue;
             
             foreach (var cachedMutation in remainingMutations)
-                snapshot.AppendMutation(CachedMutation.ToMutation(cachedMutation), _handler);
+                snapshot.AppendMutation(cachedMutation, _handler);
             
             var snapshotToReplace = _store.CachedSnapshots
                 .SingleOrDefault(s => s.TargetAge == wantedSnapshotAge);
@@ -147,11 +150,11 @@ public class MutationStream<TModel> : BackgroundWorker<MutationStream<TModel>> w
             _store.CachedSnapshots.Add(CachedSnapshot.ToCached(Guid.NewGuid(), wantedSnapshotAge, snapshot));
 
             _logger.LogInformation("Rebuilt Snapshot with target age of {TargetAge} with parent {ParentAge}", wantedSnapshotAge, bestParent?.TargetAge);
+        
+            await _store.SaveChangesAsync(ct);
             
             if (wantedSnapshotAge == TimeSpan.Zero)
                 _newSnapshot.Enqueue(snapshot);
         }
-
-        await _store.SaveChangesAsync(ct);
     }
 }
