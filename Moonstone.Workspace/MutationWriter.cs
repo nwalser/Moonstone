@@ -53,7 +53,7 @@ public class MutationWriter
         }
 
         var mutationsFile = _paths.GetSessionMutationsFile(_fileCounter);
-        await JsonNewlineFile.Append(mutation, mutationsFile);
+        await JsonNewlineFile.AppendAsync(mutation, mutationsFile);
         _mutations++;
     }
 }

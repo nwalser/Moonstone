@@ -11,7 +11,7 @@ public static class JsonNewlineFile
         Formatting = Formatting.None
     };
     
-    public static async Task Append(object obj, string file)
+    public static async Task AppendAsync(object obj, string file)
     {
         await using var stream = File.Open(file, FileMode.Append, FileAccess.Write, FileShare.Read);
         await using var sw = new StreamWriter(stream);
