@@ -54,7 +54,7 @@ await workspace.Open();
 Log.Information("Opening workspace took: {Seconds:N3}s", (double)sw.ElapsedMilliseconds/1000);
 sw.Restart();
 
-for (var i = 0; i < 100_000; i++)
+for (var i = 0; i < 1_000; i++)
 {
     workspace.ApplyMutation(new CreateProject()
     {

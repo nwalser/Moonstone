@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Workspace", "Moon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Sketch.Workspace.Test", "Moonstone.Sketch.Workspace.Test\Moonstone.Sketch.Workspace.Test.csproj", "{F92D594C-A021-4D1F-A6F5-C8003103C15F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Sketch.LazyStore", "Moonstone.Sketch.LazyStore\Moonstone.Sketch.LazyStore.csproj", "{F8C21FB3-8F02-41F1-B59F-BCECCCE52A17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{F92D594C-A021-4D1F-A6F5-C8003103C15F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F92D594C-A021-4D1F-A6F5-C8003103C15F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F92D594C-A021-4D1F-A6F5-C8003103C15F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8C21FB3-8F02-41F1-B59F-BCECCCE52A17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8C21FB3-8F02-41F1-B59F-BCECCCE52A17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8C21FB3-8F02-41F1-B59F-BCECCCE52A17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8C21FB3-8F02-41F1-B59F-BCECCCE52A17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,5 +73,6 @@ Global
 		{DF13CD81-9A6B-4061-91DA-00F8423479B6} = {D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}
 		{28828C26-CABF-49DF-8650-1902A87BB1BA} = {84BFEE91-714E-49DE-BDEA-157D47653543}
 		{F92D594C-A021-4D1F-A6F5-C8003103C15F} = {D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}
+		{F8C21FB3-8F02-41F1-B59F-BCECCCE52A17} = {D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}
 	EndGlobalSection
 EndGlobal
