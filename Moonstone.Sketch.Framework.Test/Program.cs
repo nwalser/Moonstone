@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moonstone.Domain.Mutations.Project.ChangeName;
 using Moonstone.Domain.Mutations.Project.Create;
 using Moonstone.Domain.Mutations.Project.Delete;
+using Moonstone.Domain.Projection;
 using Moonstone.Framework;
 using Moonstone.Framework.Stream;
 using Serilog;

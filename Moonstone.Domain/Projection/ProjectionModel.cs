@@ -1,4 +1,4 @@
-﻿namespace Moonstone.Framework.Stream;
+﻿namespace Moonstone.Domain.Projection;
 
 public class ProjectionModel
 {

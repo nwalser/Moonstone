@@ -1,10 +1,13 @@
 ﻿using System.Diagnostics;
+using System.Reactive.Subjects;
 using Moonstone.Domain.Mutations.Project.ChangeName;
 using Moonstone.Domain.Mutations.Project.Create;
 using Moonstone.Domain.Mutations.Project.Delete;
+using Moonstone.Domain.Projection;
 using Moonstone.Framework;
 using Moonstone.Framework.Stream;
 using Moonstone.Workspace;
+using Moonstone.Workspace.OpenEvents;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -33,6 +36,15 @@ var handler = new MutationHandler<ProjectionModel>()
 var workspace = new Workspace<ProjectionModel>(paths, handler);
 
 workspace.Projection.Subscribe(p => Log.Information("{Count}", p.CreatedProjects));
+workspace.OpeningEvents.Subscribe(e =>
+{
+    switch (e)
+    {
+        case ProcessChangedFiles f:
+            Log.Information("{Current}/{Total}", f.Current, f.Total);
+            break;
+    }
+});
 
 Log.Information("Init of objects took: {Seconds:N3}s", (double)sw.ElapsedMilliseconds/1000);
 sw.Restart();
@@ -41,6 +53,16 @@ await workspace.Open();
 
 Log.Information("Opening workspace took: {Seconds:N3}s", (double)sw.ElapsedMilliseconds/1000);
 sw.Restart();
+
+for (var i = 0; i < 100_000; i++)
+{
+    workspace.ApplyMutation(new CreateProject()
+    {
+        Name = "Project 2",
+        Id = Guid.NewGuid(),
+        ProjectId = Guid.NewGuid(),
+    });
+}
 
 while (true)
 {

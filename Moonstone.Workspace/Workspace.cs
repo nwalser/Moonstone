@@ -3,6 +3,7 @@ using System.Reactive.Subjects;
 using Microsoft.EntityFrameworkCore;
 using Moonstone.Framework;
 using Moonstone.Framework.Stream;
+using Moonstone.Workspace.OpenEvents;
 using Serilog;
 
 namespace Moonstone.Workspace;
@@ -19,9 +20,10 @@ public class Workspace<TProjection> where TProjection : new()
     private readonly ConcurrentQueue<string> _changedFiles = new();
     private readonly ConcurrentQueue<Mutation> _mutationsToWrite = new();
 
-    public IObservable<TProjection> Projection => _projection;
-    private readonly Subject<TProjection> _projection = new();
+    public BehaviorSubject<TProjection> Projection { get; set; }
+    public Subject<WorkspaceEvent> OpeningEvents { get; set; }
 
+    
     private Task? _backgroundTask;
     private CancellationTokenSource? _backgroundTaskCts;
     
@@ -31,12 +33,14 @@ public class Workspace<TProjection> where TProjection : new()
     {
         _paths = paths;
         _mutationHandler = mutationHandler;
+        Projection = new BehaviorSubject<TProjection>(new TProjection());
+        OpeningEvents = new Subject<WorkspaceEvent>();
     }
 
     
     public async Task Open(CancellationToken ct = default)
     {
-        Log.Logger.Information("Start opening workspace");
+        OpeningEvents.OnNext(new StartOpening());
         
         // create all directories needed
         Directory.CreateDirectory(_paths.Workspace);
@@ -71,12 +75,20 @@ public class Workspace<TProjection> where TProjection : new()
             .EnumerateFiles(_paths.Workspace, string.Empty, SearchOption.AllDirectories)
             .ToList();
 
-        foreach (var changedFile in changedFiles)
+        for (var i = 0; i < changedFiles.Count; i++)
         {
+            var changedFile = changedFiles[i];
             var mutations = JsonNewlineFile.Read<Mutation>(changedFile, ct);
             await _mutationStream.IngestMutations(mutations, ct);
+            OpeningEvents.OnNext(new ProcessChangedFiles()
+            {
+                Current = i+1,
+                Total = changedFiles.Count
+            });
         }
 
+        OpeningEvents.OnNext(new RebuildingProjections());
+        
         // calculate initial projection
         await RebuildProjection(ct);
         
@@ -89,7 +101,8 @@ public class Workspace<TProjection> where TProjection : new()
         _backgroundTask = Task.Run(async () => await WorkerTask(_backgroundTaskCts.Token), _backgroundTaskCts.Token);
 
         _initialized = true;
-        Log.Logger.Information("Workspace opened");
+        
+        OpeningEvents.OnCompleted();
     }
     
     public async Task Close(CancellationToken ct = default)
@@ -203,6 +216,7 @@ public class Workspace<TProjection> where TProjection : new()
             throw new InvalidOperationException();
         
         var newProjection = await _mutationStream.RebuildProjections(ct);
-        _projection.OnNext(newProjection);
+
+        Projection.OnNext(newProjection);
     }
 }
