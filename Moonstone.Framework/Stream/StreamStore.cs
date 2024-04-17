@@ -13,5 +13,11 @@ public class StreamStore(DbContextOptions<StreamStore> options) : DbContext(opti
         {
             e.HasKey(u => u.MutationId);
         });
+        
+        builder.Entity<CachedSnapshot>(e =>
+        {
+            e.HasKey(u => u.Id);
+            e.HasIndex(u => u.TargetAge).IsUnique();
+        });
     }
 }

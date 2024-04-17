@@ -77,14 +77,9 @@ public class SnapshotManager<TProjection> where TProjection : new()
         // store changes to database
         await _store.SaveChangesAsync(ct);
     }
-
-
-    public async Task<TProjection> RebuildLiveProjection(CancellationToken ct = default)
-    {
-        throw new NotImplementedException();
-    }
     
-    public async Task<TProjection> RebuildBackupProjections(CancellationToken ct = default)
+    
+    public async Task<TProjection> RebuildProjections(CancellationToken ct = default)
     {
         if (!_initialized)
             throw new InvalidOperationException();
@@ -100,16 +95,26 @@ public class SnapshotManager<TProjection> where TProjection : new()
                 .Where(s => s.LastMutationId < targetDateGuid)
                 .OrderByDescending(s => s.LastMutationId)
                 .FirstOrDefaultAsync(cancellationToken: ct);
-
-            var snapshot = bestParent != null ? CachedSnapshot.CopyFromCached<TProjection>(bestParent) : Snapshot<TProjection>.Create();
+            
+            var lastMutationId = bestParent?.LastMutationId ?? Guid.Empty;
+            
+            // todo: load snapshots into memory and only store sometimes
             
             // apply remaining mutations on top of it
             var remainingMutations = await _store.CachedMutations
-                .Where(m => m.MutationId > snapshot.LastMutationId)
+                .Where(m => m.MutationId > lastMutationId)
                 .Where(m => m.MutationId <= targetDateGuid)
                 .OrderBy(m => m.MutationId)
                 .ToListAsync(cancellationToken: ct);
+
+            if (remainingMutations.Count == 0 && bestParent?.TargetAge == wantedSnapshotAge)
+            {
+                Log.Logger.Information("Skipped fast forwarding snapshot of target age {TargetAge}", wantedSnapshotAge);
+                continue;
+            }
             
+            var snapshot = bestParent != null ? CachedSnapshot.CopyFromCached<TProjection>(bestParent) : Snapshot<TProjection>.Create();
+
             foreach (var cachedMutation in remainingMutations)
                 snapshot.AppendMutation(CachedMutation.ToMutation(cachedMutation), _handler);
             
@@ -120,12 +125,19 @@ public class SnapshotManager<TProjection> where TProjection : new()
                 _store.CachedSnapshots.Remove(snapshotToReplace);
 
             _store.CachedSnapshots.Add(CachedSnapshot.ToCached(Guid.NewGuid(), wantedSnapshotAge, snapshot));
-
-            Log.Logger.Information("Rebuilt Snapshot with target age of {TargetAge} with parent {ParentAge}", wantedSnapshotAge, bestParent?.TargetAge);
+            
+            if (wantedSnapshotAge == bestParent?.TargetAge)
+            {
+                Log.Logger.Information("Fast forwarded Snapshot with target age of {TargetAge}", wantedSnapshotAge);
+            }
+            else
+            {
+                Log.Logger.Information("Rebuilt Snapshot with target age of {TargetAge} from parent {ParentAge}", wantedSnapshotAge, bestParent?.TargetAge);
+            }
+            
+            await _store.SaveChangesAsync(ct);
         } 
-
-        await _store.SaveChangesAsync(ct);
-
+        
         var liveCachedSnapshot = await _store.CachedSnapshots.SingleAsync(s => s.TargetAge == TimeSpan.Zero, cancellationToken: ct);
         
         return CachedSnapshot.CopyFromCached<TProjection>(liveCachedSnapshot).Model;

@@ -125,11 +125,13 @@ public class Workspace<TProjection> where TProjection : new()
         {
             try
             {
-                await ProcessMutationWrites(ct);
-                await ProcessChangedFiles(ct);
+                if(!_mutationsToWrite.IsEmpty)
+                    await ProcessMutationWrites(ct);
+                
+                if(!_changedFiles.IsEmpty)
+                    await ProcessChangedFiles(ct);
 
                 await Task.Delay(10, ct);
-                // todo implement good retry strategy
             }
             catch (TaskCanceledException)
             {
@@ -137,6 +139,7 @@ public class Workspace<TProjection> where TProjection : new()
             }
             catch (Exception ex)
             {
+                // todo implement good retry strategy
                 Log.Logger.Error(ex, "Workspace background task encountered an error");   
             }
         }
@@ -161,9 +164,6 @@ public class Workspace<TProjection> where TProjection : new()
     {
         if (_mutationStream is null)
             throw new InvalidOperationException();
-
-        if (_changedFiles.IsEmpty) 
-            return;
         
         while (_changedFiles.TryPeek(out var relativePath) && !ct.IsCancellationRequested)
         {
@@ -182,9 +182,6 @@ public class Workspace<TProjection> where TProjection : new()
     {
         if (_mutationStream is null || _mutationWriter is null)
             throw new InvalidOperationException();
-
-        if (_mutationsToWrite.IsEmpty) 
-            return;
 
         var mutationsToIngest = new List<Mutation>();
         while (_mutationsToWrite.TryPeek(out var mutation) && !ct.IsCancellationRequested)
@@ -205,7 +202,7 @@ public class Workspace<TProjection> where TProjection : new()
         if (_mutationStream is null)
             throw new InvalidOperationException();
         
-        var newProjection = await _mutationStream.RebuildBackupProjections(ct);
+        var newProjection = await _mutationStream.RebuildProjections(ct);
         _projection.OnNext(newProjection);
     }
 }
