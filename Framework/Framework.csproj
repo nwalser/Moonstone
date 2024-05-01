@@ -7,11 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Mutations\Project\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Moonstone.Workspace\Moonstone.Workspace.csproj" />
+      <PackageReference Include="MessagePack" Version="2.5.140" />
+      <PackageReference Include="RT.Comb" Version="4.0.1" />
     </ItemGroup>
 
 </Project>

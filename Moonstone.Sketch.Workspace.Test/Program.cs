@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
-using System.Reactive.Subjects;
 using Moonstone.Domain.Mutations.Project.ChangeName;
 using Moonstone.Domain.Mutations.Project.Create;
 using Moonstone.Domain.Mutations.Project.Delete;
 using Moonstone.Domain.Projection;
-using Moonstone.Framework;
-using Moonstone.Framework.Stream;
 using Moonstone.Workspace;
-using Moonstone.Workspace.OpenEvents;
+using Moonstone.Workspace.Stream;
+using Moonstone.Workspace.Workspace;
+using Moonstone.Workspace.Workspace.OpenEvents;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -59,7 +58,6 @@ for (var i = 0; i < 1_000; i++)
     workspace.ApplyMutation(new CreateProject()
     {
         Name = "Project 2",
-        Id = Guid.NewGuid(),
         ProjectId = Guid.NewGuid(),
     });
 }

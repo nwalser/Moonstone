@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Moonstone.Framework.Stream;
+using Moonstone.Workspace.Data;
+using Moonstone.Workspace.MutationStream;
+using Moonstone.Workspace.Stream;
 using RT.Comb;
 using Serilog;
 
@@ -42,12 +44,12 @@ public class SnapshotManager<TProjection> where TProjection : new()
         _initialized = true;
     }
     
-    public async Task IngestMutations(IEnumerable<Mutation> mutations, CancellationToken ct = default)
+    public async Task IngestMutations(IEnumerable<MutationEnvelope> mutations, CancellationToken ct = default)
     {
         if (!_initialized)
             throw new InvalidOperationException();
         
-        Mutation? oldestUnprocessedMutation = default;
+        MutationEnvelope? oldestUnprocessedMutation = default;
 
         // ingest new mutations
         foreach (var mutation in mutations)
@@ -55,7 +57,7 @@ public class SnapshotManager<TProjection> where TProjection : new()
             if (!_mutationIds.Add(mutation.Id))
                 continue;
     
-            _store.CachedMutations.Add(CachedMutation.FromMutation(mutation));
+            _store.CachedMutations.Add(CachedMutation.FromMutationEnvelope(mutation));
     
             if (oldestUnprocessedMutation is null | mutation.Id < oldestUnprocessedMutation?.Id)
                 oldestUnprocessedMutation = mutation;
@@ -116,7 +118,7 @@ public class SnapshotManager<TProjection> where TProjection : new()
             var snapshot = bestParent != null ? CachedSnapshot.CopyFromCached<TProjection>(bestParent) : Snapshot<TProjection>.Create();
 
             foreach (var cachedMutation in remainingMutations)
-                snapshot.AppendMutation(CachedMutation.ToMutation(cachedMutation), _handler);
+                snapshot.AppendMutation(CachedMutation.ToMutationEnvelope(cachedMutation), _handler);
             
             var snapshotToReplace = _store.CachedSnapshots
                 .SingleOrDefault(s => s.TargetAge == wantedSnapshotAge);

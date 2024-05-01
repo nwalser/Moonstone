@@ -1,9 +1,12 @@
-﻿using Moonstone.Framework.Stream;
+﻿using MessagePack;
+using Moonstone.Workspace.Data;
 
 namespace Moonstone.Domain.Mutations.Project.Create;
 
-public class CreateProject : Mutation
+
+[MessagePackObject]
+public class CreateProject : IMutation
 {    
-    public required Guid ProjectId { get; set; }
-    public required string Name { get; set; }
+    [Key(0)] public required Guid ProjectId { get; set; }
+    [Key(1)] public required string Name { get; set; }
 }

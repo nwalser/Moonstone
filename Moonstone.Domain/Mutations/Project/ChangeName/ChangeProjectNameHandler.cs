@@ -1,5 +1,5 @@
 ﻿using Moonstone.Domain.Projection;
-using Moonstone.Framework.Stream;
+using Moonstone.Workspace.Stream;
 
 namespace Moonstone.Domain.Mutations.Project.ChangeName;
 
