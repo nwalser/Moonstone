@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstractions", "Abstraction
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementation", "Implementation\Implementation.csproj", "{04CB57A0-BA3F-4B4C-8B40-56B9A48AE02A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Sketch.RollingLogFileTest", "Moonstone.Sketch.RollingLogFileTest\Moonstone.Sketch.RollingLogFileTest.csproj", "{76EB88B7-1A7C-44EA-A896-05D4C76A271F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{04CB57A0-BA3F-4B4C-8B40-56B9A48AE02A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04CB57A0-BA3F-4B4C-8B40-56B9A48AE02A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04CB57A0-BA3F-4B4C-8B40-56B9A48AE02A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76EB88B7-1A7C-44EA-A896-05D4C76A271F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76EB88B7-1A7C-44EA-A896-05D4C76A271F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76EB88B7-1A7C-44EA-A896-05D4C76A271F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76EB88B7-1A7C-44EA-A896-05D4C76A271F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,5 +105,6 @@ Global
 		{D452A337-CCAD-4300-A63E-D616D3B59CE8} = {D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}
 		{443E6F3B-F473-47C1-AFC0-A1ABD520D3DD} = {8E087B89-7744-40A3-85FC-A5E5059B845D}
 		{04CB57A0-BA3F-4B4C-8B40-56B9A48AE02A} = {8E087B89-7744-40A3-85FC-A5E5059B845D}
+		{76EB88B7-1A7C-44EA-A896-05D4C76A271F} = {D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}
 	EndGlobalSection
 EndGlobal

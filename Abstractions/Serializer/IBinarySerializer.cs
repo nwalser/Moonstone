@@ -1,4 +1,4 @@
-﻿namespace Abstractions;
+﻿namespace Abstractions.Serializer;
 
 public interface IBinarySerializer<TType>
 {

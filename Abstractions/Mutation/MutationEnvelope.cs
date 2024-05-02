@@ -1,4 +1,4 @@
-﻿namespace Abstractions;
+﻿namespace Abstractions.Mutation;
 
 public record MutationEnvelope<TMutation>
 {

@@ -1,4 +1,4 @@
-﻿namespace Abstractions;
+﻿namespace Abstractions.Serializer;
 
 public class ByteTextSerializer : ITextSerializer<byte[]>
 {

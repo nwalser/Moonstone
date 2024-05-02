@@ -1,4 +1,6 @@
-﻿namespace Abstractions;
+﻿using Abstractions.Mutation;
+
+namespace Abstractions.Serializer;
 
 public class MutationEnvelopeSerializer<TMutation> : ITextSerializer<MutationEnvelope<TMutation>>
 {
@@ -17,7 +19,7 @@ public class MutationEnvelopeSerializer<TMutation> : ITextSerializer<MutationEnv
         var mutationBytes = _mutationSerializer.Serialize(entry.Mutation);
         var mutationText = _byteSerializer.Serialize(mutationBytes);
         
-        return $"{guidText}, {mutationText}";
+        return $"{guidText},{mutationText}";
     }
 
     public MutationEnvelope<TMutation> Deserialize(string text)
