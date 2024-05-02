@@ -2,18 +2,21 @@
 
 public class MutationEnvelopeSerializer<TMutation> : ITextSerializer<MutationEnvelope<TMutation>>
 {
-    private readonly ITextSerializer<TMutation> _mutationSerializer;
+    private readonly IBinarySerializer<TMutation> _mutationSerializer;
+    private readonly ITextSerializer<byte[]> _byteSerializer;
 
-    public MutationEnvelopeSerializer(ITextSerializer<TMutation> mutationSerializer)
+    public MutationEnvelopeSerializer(IBinarySerializer<TMutation> mutationSerializer, ITextSerializer<byte[]> byteSerializer)
     {
         _mutationSerializer = mutationSerializer;
+        _byteSerializer = byteSerializer;
     }
 
     public string Serialize(MutationEnvelope<TMutation> entry)
     {
         var guidText = entry.Id.ToString();
-        var mutationText = _mutationSerializer.Serialize(entry.Mutation);
-
+        var mutationBytes = _mutationSerializer.Serialize(entry.Mutation);
+        var mutationText = _byteSerializer.Serialize(mutationBytes);
+        
         return $"{guidText}, {mutationText}";
     }
 
@@ -22,9 +25,10 @@ public class MutationEnvelopeSerializer<TMutation> : ITextSerializer<MutationEnv
         var splitted = text.Split(",");
         var guidText = splitted[0];
         var mutationText = splitted[1];
+        var mutationBytes = _byteSerializer.Deserialize(mutationText);
         
-        var mutation = _mutationSerializer.Deserialize(mutationText);
-
+        var mutation = _mutationSerializer.Deserialize(mutationBytes);
+        
         return new MutationEnvelope<TMutation>()
         {
             Id = Guid.Parse(guidText),
