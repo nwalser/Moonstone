@@ -30,8 +30,8 @@ public static class MutationLog
     {
         using var stream = File.Open(file, FileMode.Append, FileAccess.Write, FileShare.Read);
         using var sw = new StreamWriter(stream);
-        
-        var bytes = MessagePackSerializer.Serialize(entry, cancellationToken: ct);
+
+        var bytes = entry.Serialize();
         var base64 = Convert.ToBase64String(bytes);
         sw.WriteLine(base64);
 
