@@ -1,6 +1,6 @@
 ﻿namespace Abstractions;
 
-public interface ISerializer<TType>
+public interface IBinarySerializer<TType>
 {
     public byte[] Serialize(TType entry);
     public TType Deserialize(byte[] bytes);

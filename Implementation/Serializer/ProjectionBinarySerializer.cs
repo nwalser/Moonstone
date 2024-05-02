@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Implementation.Serializer;
 
-public class ProjectionSerializer : ISerializer<Projection>
+public class ProjectionBinarySerializer : IBinarySerializer<Projection>
 {
     public byte[] Serialize(Projection entry)
     {

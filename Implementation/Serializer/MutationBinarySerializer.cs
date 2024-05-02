@@ -4,7 +4,7 @@ using MessagePack;
 
 namespace Implementation.Serializer;
 
-public class MutationSerializer : ISerializer<IMutation>
+public class MutationBinarySerializer : IBinarySerializer<IMutation>
 {
     public byte[] Serialize(IMutation entry)
     {

@@ -2,7 +2,7 @@
 using Implementation.Mutations;
 using Implementation.Serializer;
 
-var serializer = new MutationSerializer();
+var serializer = new MutationBinarySerializer();
 
 var data = serializer.Serialize(new CreateTask()
 {
