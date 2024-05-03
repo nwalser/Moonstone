@@ -1,23 +1,27 @@
 ﻿using System.Collections.Concurrent;
 using Opal.Cache;
 using Opal.Mutations;
+using ProtoBuf;
 
 namespace Opal.Log;
 
-public class StreamSync
+public class MutationSync
 {
+    private const PrefixStyle PrefixStyle = ProtoBuf.PrefixStyle.Base128;
+    private const int FieldNumber = 0;
+    
     private readonly string _mutationsPath;
     private readonly CacheContext _store;
     private readonly ConcurrentQueue<MutationFile> _changedFiles;
     
-    public StreamSync(string mutationsPath, CacheContext store)
+    public MutationSync(string mutationsPath, CacheContext store)
     {
         _mutationsPath = mutationsPath;
         _store = store;
         _changedFiles = new ConcurrentQueue<MutationFile>();
     }
     
-    public async Task Initialize()
+    public void Initialize()
     {
         // create and enable file system watcher
         var fileSystemWatcher = new FileSystemWatcher
@@ -30,14 +34,12 @@ public class StreamSync
         fileSystemWatcher.Created += FileChanged;
         fileSystemWatcher.Changed += FileChanged;
 
-        // catch up with changes that occured while being offline
+        // retest all files for changes
         foreach (var file in GetAllMutationFiles())
             _changedFiles.Enqueue(file);
-
-        await ProcessChangedFiles();
     }
 
-    public async Task ProcessChangedFiles()
+    public async Task ProcessWork(CancellationToken ct = default)
     {
         while (_changedFiles.TryDequeue(out var changedFile))
             await SyncFile(changedFile);
@@ -73,25 +75,24 @@ public class StreamSync
             await _store.SaveChangesAsync();
         }
 
-        if (filePointer.ReadToEnd)
-            return;
-    
-        using var logReader = LogReader.Open(Path.Join(_mutationsPath, file.GetFilenameWithExtension()));
-    
-        logReader.Skip(filePointer.NumberOfReadEntries);
+        var filePath = Path.Join(_mutationsPath, file.GetFilenameWithExtension());
+        var fileSize = new FileInfo(filePath).Length;
 
-        while (!logReader.EndOfStream)
-        {
-            var mutationEnvelope = logReader.ReadNext<MutationEnvelope<MutationBase>>();
-            var mutation = Mutation.FromMutationEnvelope(mutationEnvelope);
+        if (filePointer.ReadBytes == fileSize)
+            return;
         
+        await using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        stream.Seek(filePointer.ReadBytes, SeekOrigin.Begin);
+
+        while (stream.Position < stream.Length)
+        {
+            var mutationEnvelope = Serializer.DeserializeWithLengthPrefix<MutationEnvelope<MutationBase>>(stream, PrefixStyle, FieldNumber);
+            var mutation = Mutation.FromMutationEnvelope(mutationEnvelope);
             _store.Mutation.Add(mutation);
-            filePointer.NumberOfReadEntries++;
         }
 
-        if (file.Lock == LockState.Closed)
-            filePointer.ReadToEnd = true;
-
+        filePointer.ReadBytes = stream.Position;
+        
         _store.Update(filePointer);
         await _store.SaveChangesAsync();
     }

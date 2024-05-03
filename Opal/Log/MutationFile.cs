@@ -1,6 +1,4 @@
-﻿using RT.Comb;
-
-namespace Opal.Log;
+﻿namespace Opal.Log;
 
 public record MutationFile
 {
@@ -8,11 +6,10 @@ public record MutationFile
     
     public Guid SessionId { get; init; }
     public Guid FileId { get; init; }
-    public LockState Lock { get; set; }
     
     public string GetFilename()
     {
-        return $"{SessionId}_{FileId}_{Lock}";
+        return $"{SessionId}_{FileId}";
     }
 
     public string GetFilenameWithExtension()
@@ -20,14 +17,9 @@ public record MutationFile
         return $"{GetFilename()}.{FileExtension}";
     }
 
-    public static string SearchPattern(Guid sessionId, LockState lockState)
+    public static string SearchPattern(Guid sessionId)
     {
-        return $"{sessionId}_*_{lockState}.{FileExtension}";
-    }
-
-    public void LockFile()
-    {
-        Lock = LockState.Closed;
+        return $"{sessionId}_*.{FileExtension}";
     }
     
     public static MutationFile ParseFromFilename(string filename)
@@ -38,7 +30,6 @@ public record MutationFile
         {
             SessionId = Guid.Parse(splitted[0]),
             FileId = Guid.Parse(splitted[1]),
-            Lock = Enum.Parse<LockState>(splitted[2])
         };
     }
 
@@ -48,7 +39,6 @@ public record MutationFile
         {
             SessionId = sessionId,
             FileId = Guid.NewGuid(),
-            Lock = LockState.Open
         };
     }
 }

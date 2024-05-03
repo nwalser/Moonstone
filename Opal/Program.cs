@@ -21,17 +21,17 @@ await store.Database.EnsureCreatedAsync();
 Console.WriteLine("Init: " + sw.ElapsedMilliseconds);
 sw.Restart();
 
-var streamSync = new StreamSync(mutationsPath, store);
-await streamSync.Initialize();
+var mutationSync = new MutationSync(mutationsPath, store);
+mutationSync.Initialize();
 
 Console.WriteLine("Sync: " + sw.ElapsedMilliseconds);
 sw.Restart();
 
-var streamWriter = RollingMutationWriter.InitializeFrom(mutationsPath, sessionId);
+var mutationWriter = MutationWriter.InitializeFrom(mutationsPath, sessionId);
 
 for (var i = 0; i < 100; i++)
 {
-    streamWriter.Append(new MutationEnvelope<MutationBase>()
+    mutationWriter.Append(new MutationEnvelope<MutationBase>()
     {
         Id = Guid.NewGuid(),
         Mutation = new CreateTask()
@@ -42,10 +42,12 @@ for (var i = 0; i < 100; i++)
     });
 }
 
+await mutationWriter.ProcessWork();
+
 Console.WriteLine("Write: " + sw.ElapsedMilliseconds);
 sw.Restart();
 
-await streamSync.ProcessChangedFiles();
+await mutationSync.ProcessWork();
 
 Console.WriteLine("Ingest: " + sw.ElapsedMilliseconds);
 sw.Restart();
