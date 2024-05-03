@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Opal.Cache;
 using Opal.Log;
 using Opal.Mutations;
+using RT.Comb;
 
 var sw = Stopwatch.StartNew();
 
@@ -10,6 +11,8 @@ var workspacePath = @"C:\Users\Nathaniel Walser\OneDrive - esp-engineering gmbh\
 var sessionId = Guid.Parse("794dcb19-a00e-4f5a-9eeb-5a2d3b582f60");
 var cachePath = @"C:\Users\Nathaniel Walser\Desktop\temp\cache.db";
 var mutationsPath = Path.Join(workspacePath, "mutations");
+
+var comb = new PostgreSqlCombProvider(new SqlDateTimeStrategy());
 
 Directory.CreateDirectory(mutationsPath);
 
@@ -21,19 +24,21 @@ await store.Database.EnsureCreatedAsync();
 Console.WriteLine("Init: " + sw.ElapsedMilliseconds);
 sw.Restart();
 
-var mutationSync = new MutationSync(mutationsPath, store);
+var mutationSync = new MutationSync<MutationBase>(mutationsPath, store);
 mutationSync.Initialize();
 
 Console.WriteLine("Sync: " + sw.ElapsedMilliseconds);
 sw.Restart();
 
-var mutationWriter = MutationWriter.InitializeFrom(mutationsPath, sessionId);
+var mutationWriter = new MutationWriter<MutationBase>(mutationsPath, sessionId);
+mutationWriter.Initialize();
 
-for (var i = 0; i < 100; i++)
+
+for (var i = 0; i < 0; i++)
 {
     mutationWriter.Append(new MutationEnvelope<MutationBase>()
     {
-        Id = Guid.NewGuid(),
+        Id = comb.Create(),
         Mutation = new CreateTask()
         {
             Id = Guid.NewGuid(),

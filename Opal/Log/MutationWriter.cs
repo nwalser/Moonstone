@@ -1,42 +1,58 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
-using Opal.Mutations;
 using ProtoBuf;
 
 namespace Opal.Log;
 
-public class MutationWriter
+public class MutationWriter<TMutation>
 {
     private const PrefixStyle PrefixStyle = ProtoBuf.PrefixStyle.Base128;
     private const int FieldNumber = 0;
     private const int RolloverFileSize = 1024 * 256;
 
-    public required string Folder { get; init; }
-    public required Guid SessionId { get; init; }
+    private readonly ConcurrentQueue<MutationEnvelope<TMutation>> _mutationsToWrite;
     
-    public required MutationFile CurrentFile { get; set; }
-
-    private readonly ConcurrentQueue<MutationEnvelope<MutationBase>> _mutationsToWrite;
-
-    private string GetFilePath(MutationFile file) => Path.Join(Folder, file.GetFilenameWithExtension());
+    private readonly string _folder;
+    private readonly Guid _sessionId;
+    private MutationFile? _currentFile;
+    
+    private string GetFilePath(MutationFile file) => Path.Join(_folder, file.GetFilenameWithExtension());
 
     
-    public MutationWriter()
+    public MutationWriter(string folder, Guid sessionId)
     {
-        _mutationsToWrite = new ConcurrentQueue<MutationEnvelope<MutationBase>>();
+        _folder = folder;
+        _sessionId = sessionId;
+        _mutationsToWrite = new ConcurrentQueue<MutationEnvelope<TMutation>>();
     }
 
+    public void Initialize()
+    {
+        var file = Directory
+            .EnumerateFiles(_folder, MutationFile.SearchPattern(_sessionId))
+            .Where(f => new FileInfo(f).Length < RolloverFileSize)
+            .Select(f => Path.GetFileNameWithoutExtension(f))
+            .Select(f => MutationFile.ParseFromFilename(f))
+            .FirstOrDefault();
+        
+        if(file is null)
+            file = MutationFile.CreateNew(_sessionId);
+
+        _currentFile = file;
+    }
     
-    public void Append(MutationEnvelope<MutationBase> entry)
+    public void Append(MutationEnvelope<TMutation> entry)
     {
         _mutationsToWrite.Enqueue(entry);
     }
 
     public async Task ProcessWork(CancellationToken ct = default)
     {
-        while (_mutationsToWrite.Any())
+        if (_currentFile is null)
+            throw new InvalidOperationException();
+        
+        while (!_mutationsToWrite.IsEmpty)
         {
-            await using var stream = File.Open(GetFilePath(CurrentFile), FileMode.Append, FileAccess.Write, FileShare.Read);
+            await using var stream = File.Open(GetFilePath(_currentFile), FileMode.Append, FileAccess.Write, FileShare.Read);
 
             while (_mutationsToWrite.TryDequeue(out var entry))
             {
@@ -45,7 +61,7 @@ public class MutationWriter
                 
                 if (stream.Length >= RolloverFileSize)
                 {
-                    CurrentFile = MutationFile.CreateNew(SessionId);
+                    _currentFile = MutationFile.CreateNew(_sessionId);
                     break;
                 }
             
@@ -54,25 +70,5 @@ public class MutationWriter
             
             await stream.FlushAsync(ct);
         }
-    }
-
-    public static MutationWriter InitializeFrom(string folder, Guid sessionId)
-    {
-        var file = Directory
-            .EnumerateFiles(folder, MutationFile.SearchPattern(sessionId))
-            .Where(f => new FileInfo(f).Length < RolloverFileSize)
-            .Select(f => Path.GetFileNameWithoutExtension(f))
-            .Select(f => MutationFile.ParseFromFilename(f))
-            .FirstOrDefault();
-        
-        if(file is null)
-            file = MutationFile.CreateNew(sessionId);
-        
-        return new MutationWriter()
-        {
-            SessionId = sessionId,
-            Folder = folder,
-            CurrentFile = file,
-        };
     }
 }

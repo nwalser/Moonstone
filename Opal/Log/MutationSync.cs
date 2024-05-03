@@ -5,7 +5,7 @@ using ProtoBuf;
 
 namespace Opal.Log;
 
-public class MutationSync
+public class MutationSync<TMutation>
 {
     private const PrefixStyle PrefixStyle = ProtoBuf.PrefixStyle.Base128;
     private const int FieldNumber = 0;
@@ -84,9 +84,11 @@ public class MutationSync
         await using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         stream.Seek(filePointer.ReadBytes, SeekOrigin.Begin);
 
+        throw new NotImplementedException(); // todo: fix skipping/missing of one unknown entry per file
+        
         while (stream.Position < stream.Length)
         {
-            var mutationEnvelope = Serializer.DeserializeWithLengthPrefix<MutationEnvelope<MutationBase>>(stream, PrefixStyle, FieldNumber);
+            var mutationEnvelope = Serializer.DeserializeWithLengthPrefix<MutationEnvelope<TMutation>>(stream, PrefixStyle, FieldNumber);
             var mutation = Mutation.FromMutationEnvelope(mutationEnvelope);
             _store.Mutation.Add(mutation);
         }
