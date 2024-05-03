@@ -11,6 +11,7 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.4" />
       <PackageReference Include="protobuf-net" Version="3.2.30" />
+      <PackageReference Include="RT.Comb" Version="4.0.1" />
     </ItemGroup>
 
 </Project>
