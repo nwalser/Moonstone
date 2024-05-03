@@ -35,6 +35,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementation", "Implement
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Sketch.RollingLogFileTest", "Moonstone.Sketch.RollingLogFileTest\Moonstone.Sketch.RollingLogFileTest.csproj", "{76EB88B7-1A7C-44EA-A896-05D4C76A271F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Sketch.SerializerSpeedTest", "Moonstone.Sketch.SerializerSpeedTest\Moonstone.Sketch.SerializerSpeedTest.csproj", "{01C97A7E-3EC8-4CDD-9176-79F9D7B822BC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Opal", "Opal", "{AC4F297B-BEDD-4627-AA95-BFA24E3CBAC7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opal", "Opal\Opal.csproj", "{B0907914-A658-4909-8093-4FB1E5FEF9B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +93,14 @@ Global
 		{76EB88B7-1A7C-44EA-A896-05D4C76A271F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76EB88B7-1A7C-44EA-A896-05D4C76A271F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76EB88B7-1A7C-44EA-A896-05D4C76A271F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01C97A7E-3EC8-4CDD-9176-79F9D7B822BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01C97A7E-3EC8-4CDD-9176-79F9D7B822BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01C97A7E-3EC8-4CDD-9176-79F9D7B822BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01C97A7E-3EC8-4CDD-9176-79F9D7B822BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0907914-A658-4909-8093-4FB1E5FEF9B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0907914-A658-4909-8093-4FB1E5FEF9B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0907914-A658-4909-8093-4FB1E5FEF9B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0907914-A658-4909-8093-4FB1E5FEF9B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,5 +120,7 @@ Global
 		{443E6F3B-F473-47C1-AFC0-A1ABD520D3DD} = {8E087B89-7744-40A3-85FC-A5E5059B845D}
 		{04CB57A0-BA3F-4B4C-8B40-56B9A48AE02A} = {8E087B89-7744-40A3-85FC-A5E5059B845D}
 		{76EB88B7-1A7C-44EA-A896-05D4C76A271F} = {D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}
+		{01C97A7E-3EC8-4CDD-9176-79F9D7B822BC} = {D8E1F5B1-EDDA-40D6-B6A9-6422DB8DB439}
+		{B0907914-A658-4909-8093-4FB1E5FEF9B7} = {AC4F297B-BEDD-4627-AA95-BFA24E3CBAC7}
 	EndGlobalSection
 EndGlobal
