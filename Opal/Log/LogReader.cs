@@ -2,7 +2,7 @@
 
 namespace Opal.Log;
 
-public class LogReader<TEntry> : IDisposable
+public class LogReader : IDisposable
 {
     private const PrefixStyle PrefixStyle = ProtoBuf.PrefixStyle.Base128;
     private const int FieldNumber = 0;
@@ -17,12 +17,25 @@ public class LogReader<TEntry> : IDisposable
         _stream = stream;
     }
 
-    public static LogReader<TEntry> Open(string file)
+    public static LogReader Open(string file)
     {
         var stream = File.Open(file, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
-        return new LogReader<TEntry>(stream);
+        return new LogReader(stream);
     }
 
+    public int NumberOfEntries()
+    {
+        var counter = 0;
+        
+        while (!EndOfStream)
+        {
+            counter++;
+            SkipNext();
+        }
+
+        return counter;
+    }
+    
     public void Skip(int numberOfEntries)
     {
         for (var i = 0; i < numberOfEntries; i++)
@@ -43,14 +56,13 @@ public class LogReader<TEntry> : IDisposable
         }
     }
     
-    public TEntry ReadNext()
+    public TEntry ReadNext<TEntry>()
     {
         return Serializer.DeserializeWithLengthPrefix<TEntry>(_stream, PrefixStyle, FieldNumber);
     }
 
     public void Dispose()
     {
-        _stream.Close();
         _stream.Dispose();
     }
 }

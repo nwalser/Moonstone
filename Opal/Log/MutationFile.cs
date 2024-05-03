@@ -1,4 +1,6 @@
-﻿namespace Opal.Log;
+﻿using RT.Comb;
+
+namespace Opal.Log;
 
 public record MutationFile
 {
@@ -25,6 +27,16 @@ public record MutationFile
             SessionId = Guid.Parse(splitted[0]),
             FileId = Guid.Parse(splitted[1]),
             Lock = Enum.Parse<LockState>(splitted[2])
+        };
+    }
+
+    public static MutationFile CreateNew(Guid sessionId)
+    {
+        return new MutationFile()
+        {
+            SessionId = sessionId,
+            FileId = Guid.NewGuid(),
+            Lock = LockState.Open
         };
     }
 }

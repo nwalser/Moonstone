@@ -72,13 +72,13 @@ public class StreamSync
         if (filePointer.ReadToEnd)
             return;
     
-        using var logReader = LogReader<MutationEnvelope<MutationBase>>.Open(Path.Join(_mutationsPath, file.GetFilename()));
+        using var logReader = LogReader.Open(Path.Join(_mutationsPath, file.GetFilename()));
     
         logReader.Skip(filePointer.NumberOfReadEntries);
 
         while (!logReader.EndOfStream)
         {
-            var mutationEnvelope = logReader.ReadNext();
+            var mutationEnvelope = logReader.ReadNext<MutationEnvelope<MutationBase>>();
             var mutation = Mutation.FromMutationEnvelope(mutationEnvelope);
         
             _store.Mutation.Add(mutation);
