@@ -4,6 +4,8 @@ namespace Opal.Log;
 
 public record MutationFile
 {
+    private const string FileExtension = "bin";
+    
     public Guid SessionId { get; init; }
     public Guid FileId { get; init; }
     public LockState Lock { get; set; }
@@ -11,6 +13,16 @@ public record MutationFile
     public string GetFilename()
     {
         return $"{SessionId}_{FileId}_{Lock}";
+    }
+
+    public string GetFilenameWithExtension()
+    {
+        return $"{GetFilename()}.{FileExtension}";
+    }
+
+    public static string SearchPattern(Guid sessionId, LockState lockState)
+    {
+        return $"{sessionId}_*_{lockState}.{FileExtension}";
     }
 
     public void LockFile()

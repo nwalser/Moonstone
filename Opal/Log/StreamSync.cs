@@ -67,12 +67,16 @@ public class StreamSync
         var filePointer = _store.FilePointers.SingleOrDefault(p => p.FileId == file.FileId);
 
         if (filePointer is null)
+        {
             filePointer = FilePointer.Create(file.FileId);
+            _store.Add(filePointer);
+            await _store.SaveChangesAsync();
+        }
 
         if (filePointer.ReadToEnd)
             return;
     
-        using var logReader = LogReader.Open(Path.Join(_mutationsPath, file.GetFilename()));
+        using var logReader = LogReader.Open(Path.Join(_mutationsPath, file.GetFilenameWithExtension()));
     
         logReader.Skip(filePointer.NumberOfReadEntries);
 
