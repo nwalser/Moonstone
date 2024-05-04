@@ -7,7 +7,7 @@ public class MutationWriter<TMutation>
 {
     private const PrefixStyle PrefixStyle = ProtoBuf.PrefixStyle.Base128;
     private const int FieldNumber = 0;
-    private const int RolloverFileSize = 1024 * 256;
+    private const int RolloverFileSize = 256 * 1024;
 
     private readonly ConcurrentQueue<MutationEnvelope<TMutation>> _mutationsToWrite;
     
@@ -54,7 +54,7 @@ public class MutationWriter<TMutation>
         {
             await using var stream = File.Open(GetFilePath(_currentFile), FileMode.Append, FileAccess.Write, FileShare.Read);
 
-            while (_mutationsToWrite.TryDequeue(out var entry))
+            while (!_mutationsToWrite.IsEmpty)
             {
                 if(ct.IsCancellationRequested)
                     break;
@@ -65,7 +65,8 @@ public class MutationWriter<TMutation>
                     break;
                 }
             
-                Serializer.SerializeWithLengthPrefix(stream, entry, PrefixStyle, FieldNumber);
+                if(_mutationsToWrite.TryDequeue(out var entry))
+                    Serializer.SerializeWithLengthPrefix(stream, entry, PrefixStyle, FieldNumber);
             }
             
             await stream.FlushAsync(ct);

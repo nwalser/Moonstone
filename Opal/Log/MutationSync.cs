@@ -23,6 +23,7 @@ public class MutationSync<TMutation>
     
     public void Initialize()
     {
+        // todo watcher does not work properly
         // create and enable file system watcher
         var fileSystemWatcher = new FileSystemWatcher
         {
@@ -78,13 +79,11 @@ public class MutationSync<TMutation>
         var filePath = Path.Join(_mutationsPath, file.GetFilenameWithExtension());
         var fileSize = new FileInfo(filePath).Length;
 
-        if (filePointer.ReadBytes == fileSize)
+        if (filePointer.ReadPosition == fileSize)
             return;
         
         await using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        stream.Seek(filePointer.ReadBytes, SeekOrigin.Begin);
-
-        throw new NotImplementedException(); // todo: fix skipping/missing of one unknown entry per file
+        stream.Seek(filePointer.ReadPosition, SeekOrigin.Begin);
         
         while (stream.Position < stream.Length)
         {
@@ -93,7 +92,7 @@ public class MutationSync<TMutation>
             _store.Mutation.Add(mutation);
         }
 
-        filePointer.ReadBytes = stream.Position;
+        filePointer.ReadPosition = stream.Position;
         
         _store.Update(filePointer);
         await _store.SaveChangesAsync();
