@@ -1,6 +1,6 @@
 ﻿using ProtoBuf;
 
-namespace Opal.Log;
+namespace Opal.Stream;
 
 [ProtoContract]
 public class MutationEnvelope<TMutation>

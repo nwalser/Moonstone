@@ -1,4 +1,4 @@
-﻿namespace Opal.Log;
+﻿namespace Opal.Stream;
 
 public record MutationFile
 {

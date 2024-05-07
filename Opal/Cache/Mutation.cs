@@ -1,12 +1,15 @@
-﻿using Opal.Log;
+﻿using Opal.Stream;
 using ProtoBuf;
 
 namespace Opal.Cache;
 
 public class Mutation
 {
+    /// <summary>
+    /// id field that is created in sequence with comb guid provider
+    /// </summary>
     public required Guid Id { get; init; }
-    public required bool Projected { get; set; }
+    public required bool CacheInvalidated { get; set; }
     
     public required byte[] Data { get; init; }
 
@@ -19,7 +22,7 @@ public class Mutation
         {
             Id = mutationEnvelope.Id,
             Data = stream.ToArray(),
-            Projected = false,
+            CacheInvalidated = false,
         };
     }
 }

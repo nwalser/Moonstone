@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using ProtoBuf;
 
-namespace Opal.Log;
+namespace Opal.Stream;
 
 public class MutationWriter<TMutation>
 {

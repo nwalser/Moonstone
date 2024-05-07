@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Opal;
 using Opal.Cache;
-using Opal.Log;
 using Opal.Mutations;
+using Opal.Stream;
 using RT.Comb;
 
 var sw = Stopwatch.StartNew();
@@ -20,6 +22,15 @@ var optionsBuilder = new DbContextOptionsBuilder<CacheContext>()
     .UseSqlite($"Data Source={cachePath}");
 var store = new CacheContext(optionsBuilder.Options);
 await store.Database.EnsureCreatedAsync();
+
+var snapshotManager = new SnapshotManager<Projection>(store, new Logger<SnapshotManager<Projection>>(new LoggerFactory()),
+    [
+        (0, 0),
+        (10, 100),
+        (100, 1000),
+        (1000, 10000)
+    ]);
+await snapshotManager.Initialize();
 
 Console.WriteLine("Init: " + sw.ElapsedMilliseconds);
 sw.Restart();

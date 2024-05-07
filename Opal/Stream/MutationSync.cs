@@ -1,9 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using Opal.Cache;
-using Opal.Mutations;
 using ProtoBuf;
 
-namespace Opal.Log;
+namespace Opal.Stream;
 
 public class MutationSync<TMutation>
 {
@@ -89,7 +88,7 @@ public class MutationSync<TMutation>
         {
             var mutationEnvelope = Serializer.DeserializeWithLengthPrefix<MutationEnvelope<TMutation>>(stream, PrefixStyle, FieldNumber);
             var mutation = Mutation.FromMutationEnvelope(mutationEnvelope);
-            _store.Mutation.Add(mutation);
+            _store.Mutations.Add(mutation);
         }
 
         filePointer.ReadPosition = stream.Position;
