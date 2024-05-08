@@ -54,6 +54,13 @@ public class SnapshotManager<TProjection> where TProjection : IProjection
         // rebuild projections
         foreach (var wantedSnapshotAge in _wantedSnapshotAges)
         {
+            var parentLastMutation = _store.Snapshots.Where(s => s.)
+            
+            
+            // load from parent
+            // load default values
+            // delete other entries in database
+            // save
             
             
         }
