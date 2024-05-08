@@ -1,7 +1,6 @@
 ﻿using Opal.Mutations;
-using Opal.Stream;
 
-namespace Opal;
+namespace Opal.Projection;
 
 public class Projection : IProjection
 {

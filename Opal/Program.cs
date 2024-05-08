@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Opal;
 using Opal.Cache;
 using Opal.Mutations;
+using Opal.Projection;
 using Opal.Stream;
 using RT.Comb;
 
@@ -23,7 +24,7 @@ var optionsBuilder = new DbContextOptionsBuilder<CacheContext>()
 var store = new CacheContext(optionsBuilder.Options);
 await store.Database.EnsureCreatedAsync();
 
-var snapshotManager = new SnapshotManager<Projection>(store, new Logger<SnapshotManager<Projection>>(new LoggerFactory()),
+var snapshotManager = new ProjectionManager<Projection>(store, new Logger<ProjectionManager<Projection>>(new LoggerFactory()),
     [
         (0, 0),
         (10, 100),
@@ -67,5 +68,29 @@ await mutationSync.ProcessWork();
 
 Console.WriteLine("Ingest: " + sw.ElapsedMilliseconds);
 sw.Restart();
+
+var mutations = store.Mutations.AsAsyncEnumerable();
+
+var counter2 = 0;
+var counter = 0;
+await foreach (var mutation in mutations)
+{
+    counter2++;
+    counter += mutation.Data.Length;
+    if (counter2 > 100_000)
+        break;
+}
+
+Console.WriteLine(counter);
+Console.WriteLine(counter2);
+Console.WriteLine("Reapply: " + sw.ElapsedMilliseconds);
+sw.Restart();
+
+var count3 = await store.Mutations.CountAsync();
+Console.WriteLine(count3);
+
+Console.WriteLine("Count: " + sw.ElapsedMilliseconds);
+sw.Restart();
+
 
 Console.WriteLine("Done");

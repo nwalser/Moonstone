@@ -1,19 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Opal.Cache;
-using RT.Comb;
 
-namespace Opal.Stream;
+namespace Opal.Projection;
 
-public class SnapshotManager<TProjection> where TProjection : IProjection
+public class ProjectionManager<TProjection> where TProjection : IProjection
 {
     private readonly CacheContext _store;
-    private readonly ILogger<SnapshotManager<TProjection>> _logger;
+    private readonly ILogger<ProjectionManager<TProjection>> _logger;
 
     private readonly List<(int min, int max)> _wantedSnapshotAges;
 
     
-    public SnapshotManager(CacheContext store, ILogger<SnapshotManager<TProjection>> logger, List<(int min, int max)> wantedSnapshotAges)
+    public ProjectionManager(CacheContext store, ILogger<ProjectionManager<TProjection>> logger, List<(int min, int max)> wantedSnapshotAges)
     {
         _store = store;
         _logger = logger;
@@ -26,7 +25,7 @@ public class SnapshotManager<TProjection> where TProjection : IProjection
         await UpdateProjections();
     }
 
-    private async Task InvalidateCaches(CancellationToken ct = default)
+    private async Task InvalidateSnapshotCaches(CancellationToken ct = default)
     {
         var oldestUnknownMutation = await _store.Mutations
             .Where(m => m.CacheInvalidated == false)
@@ -46,15 +45,20 @@ public class SnapshotManager<TProjection> where TProjection : IProjection
         
         await _store.SaveChangesAsync(ct);
     }
+
+    public async Task RebuildLiveProjection()
+    {
+        
+    }
     
     public async Task UpdateProjections(CancellationToken ct = default)
     {
-        await InvalidateCaches(ct);
+        await InvalidateSnapshotCaches(ct);
         
         // rebuild projections
         foreach (var wantedSnapshotAge in _wantedSnapshotAges)
         {
-            var parentLastMutation = _store.Snapshots.Where(s => s.)
+            //var parentLastMutation = _store.Snapshots.Where(s => s.)
             
             
             // load from parent
