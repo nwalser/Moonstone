@@ -24,6 +24,7 @@ public class ProjectionManager<TProjection> where TProjection : IProjection, new
 
     public async Task Initialize()
     {
+        //_store.Database.ExecuteSql() (TransactionalBehavior.DoNotEnsureTransaction, "VACUUM;");
         await UpdateSnapshotCaches();
     }
 
@@ -84,6 +85,7 @@ public class ProjectionManager<TProjection> where TProjection : IProjection, new
                 var remainingMutations = _store.Mutations
                     .Where(m => m.Id > snapshot.LastMutationId)
                     .OrderBy(m => m.Id)
+                    .AsNoTracking()
                     .AsAsyncEnumerable();
 
                 await foreach (var remainingMutation in remainingMutations)
@@ -99,9 +101,10 @@ public class ProjectionManager<TProjection> where TProjection : IProjection, new
                 snapshot.Projection = JsonSerializer.SerializeToUtf8Bytes(projection);
 
                 await _store.AddAsync(snapshot, ct);
+                await _store.SaveChangesAsync(ct);
+                
+                _logger.LogInformation("Rebuilt Projection for Region ({MinAge}, {MaxAge}) with number of mutations {NumberOfMutations}", regionWithNoSnapshot.MinAge, regionWithNoSnapshot.MaxAge, snapshot.NumberOfAppliedMutations);
             }
-
-            await _store.SaveChangesAsync(ct);
         }
         
         // remove snapshots that do not belong to a region

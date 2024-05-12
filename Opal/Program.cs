@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Opal.Cache;
@@ -26,9 +27,9 @@ await store.Database.EnsureCreatedAsync();
 var snapshotManager = new ProjectionManager<Projection>(store,
     new Logger<ProjectionManager<Projection>>(new LoggerFactory()),
     [
-        new Region(100, 1000),
-        new Region(1000, 10000),
-        new Region(10000, 100000)
+        new Region(100, 999),
+        new Region(1000, 9999),
+        new Region(10000, 99999)
     ]);
 await snapshotManager.Initialize();
 
@@ -45,7 +46,7 @@ var mutationWriter = new MutationWriter<MutationBase>(mutationsPath, sessionId);
 mutationWriter.Initialize();
 
 
-for (var i = 0; i < 0; i++)
+for (var i = 0; i < 1; i++)
 {
     mutationWriter.Append(new MutationEnvelope<MutationBase>()
     {
@@ -68,28 +69,16 @@ await mutationSync.ProcessWork();
 Console.WriteLine("Ingest: " + sw.ElapsedMilliseconds);
 sw.Restart();
 
-var mutations = store.Mutations.AsAsyncEnumerable();
+await snapshotManager.UpdateSnapshotCaches();
 
-var counter2 = 0;
-var counter = 0;
-await foreach (var mutation in mutations)
+Console.WriteLine("Rebuild Projections: " + sw.ElapsedMilliseconds);
+sw.Restart();
+
+var snapshots = await store.Snapshots.ToListAsync();
+foreach (var snapshot in snapshots)
 {
-    counter2++;
-    counter += mutation.Data.Length;
-    if (counter2 > 1000_000)
-        break;
+    var projection = JsonSerializer.Deserialize<Projection>(snapshot.Projection);
+    Console.WriteLine(projection.Counter);
 }
-
-Console.WriteLine(counter);
-Console.WriteLine(counter2);
-Console.WriteLine("Reapply: " + sw.ElapsedMilliseconds);
-sw.Restart();
-
-var count3 = await store.Mutations.CountAsync();
-Console.WriteLine(count3);
-
-Console.WriteLine("Count: " + sw.ElapsedMilliseconds);
-sw.Restart();
-
 
 Console.WriteLine("Done");
