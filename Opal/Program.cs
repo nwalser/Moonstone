@@ -36,6 +36,11 @@ await snapshotManager.Initialize();
 Console.WriteLine("Init: " + sw.ElapsedMilliseconds);
 sw.Restart();
 
+await store.Database.ExecuteSqlRawAsync("VACUUM;");
+
+Console.WriteLine("Vacuum: " + sw.ElapsedMilliseconds);
+sw.Restart();
+
 var mutationSync = new MutationSync<MutationBase>(mutationsPath, store);
 mutationSync.Initialize();
 
@@ -46,7 +51,7 @@ var mutationWriter = new MutationWriter<MutationBase>(mutationsPath, sessionId);
 mutationWriter.Initialize();
 
 
-for (var i = 0; i < 1; i++)
+for (var i = 0; i < 0; i++)
 {
     mutationWriter.Append(new MutationEnvelope<MutationBase>()
     {
