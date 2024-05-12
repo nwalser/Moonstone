@@ -1,37 +1,53 @@
-﻿namespace Opal.Cache;
+﻿using Opal.Mutations;
+using Opal.Projection;
+using Opal.Stream;
+
+namespace Opal.Cache;
 
 public class Snapshot
 {
-    public required Guid Id { get; init; }
+    public required Guid Id { get; set; }
     public required Guid LastMutationId { get; set; }
     
-    public required int MinAge { get; set; }
-    public required int MaxAge { get; set; }
+    public required int NumberOfAppliedMutations { get; set; }
     
     public required byte[] Projection { get; set; }
 
+
+    public void NewId()
+    {
+        Id = Guid.NewGuid();
+    }
     
-    public static Snapshot Create(int minAge, int maxAge, byte[] projection)
+    public void ApplyMutation(MutationEnvelope<MutationBase> mutation)
+    {
+        if (mutation.Id <= LastMutationId)
+            throw new InvalidOperationException();
+        
+        LastMutationId = mutation.Id;
+        NumberOfAppliedMutations++;
+    }
+    
+    
+    public static Snapshot Create(int numberOfAppliedMutations, byte[] projection)
     {
         return new Snapshot()
         {
             Id = Guid.NewGuid(),
             LastMutationId = Guid.Empty,
-            MinAge = minAge,
-            MaxAge = maxAge,
+            NumberOfAppliedMutations = numberOfAppliedMutations,
             Projection = projection
         };
     }
 
-    public static Snapshot Copy(int minAge, int maxAge, Snapshot parent)
+    public static Snapshot Copy(Snapshot parent)
     {
         return new Snapshot()
         {
             Id = Guid.NewGuid(),
             LastMutationId = parent.LastMutationId,
-            MinAge = minAge,
-            MaxAge = maxAge,
-            Projection = parent.Projection.ToArray() // copy data
+            NumberOfAppliedMutations = parent.NumberOfAppliedMutations,
+            Projection = parent.Projection.ToArray()
         };
     }
 }

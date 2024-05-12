@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Opal;
 using Opal.Cache;
 using Opal.Mutations;
 using Opal.Projection;
@@ -24,12 +23,12 @@ var optionsBuilder = new DbContextOptionsBuilder<CacheContext>()
 var store = new CacheContext(optionsBuilder.Options);
 await store.Database.EnsureCreatedAsync();
 
-var snapshotManager = new ProjectionManager<Projection>(store, new Logger<ProjectionManager<Projection>>(new LoggerFactory()),
+var snapshotManager = new ProjectionManager<Projection>(store,
+    new Logger<ProjectionManager<Projection>>(new LoggerFactory()),
     [
-        (0, 0),
-        (10, 100),
-        (100, 1000),
-        (1000, 10000)
+        new Region(100, 1000),
+        new Region(1000, 10000),
+        new Region(10000, 100000)
     ]);
 await snapshotManager.Initialize();
 
@@ -77,7 +76,7 @@ await foreach (var mutation in mutations)
 {
     counter2++;
     counter += mutation.Data.Length;
-    if (counter2 > 100_000)
+    if (counter2 > 1000_000)
         break;
 }
 

@@ -25,4 +25,13 @@ public class Mutation
             CacheInvalidated = false,
         };
     }
+    
+    public MutationEnvelope<TMutation> ToMutationEnvelope<TMutation>()
+    {
+        return new MutationEnvelope<TMutation>()
+        {
+            Id = Id,
+            Mutation = Serializer.Deserialize<TMutation>(new MemoryStream(Data)),
+        };
+    }
 }
