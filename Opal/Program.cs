@@ -79,11 +79,5 @@ await snapshotManager.UpdateSnapshotCaches();
 Console.WriteLine("Rebuild Projections: " + sw.ElapsedMilliseconds);
 sw.Restart();
 
-var snapshots = await store.Snapshots.ToListAsync();
-foreach (var snapshot in snapshots)
-{
-    var projection = JsonSerializer.Deserialize<Projection>(snapshot.Projection);
-    Console.WriteLine(projection.Counter);
-}
 
 Console.WriteLine("Done");

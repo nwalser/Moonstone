@@ -10,7 +10,6 @@ public class ProjectionManager<TProjection> where TProjection : IProjection, new
 {
     private readonly CacheContext _store;
     private readonly ILogger<ProjectionManager<TProjection>> _logger;
-
     private readonly List<Region> _snapshotRegions;
 
     
@@ -131,12 +130,5 @@ public class ProjectionManager<TProjection> where TProjection : IProjection, new
                 .Where(s => snapshotsToDelete.Contains(s.Id))
                 .ExecuteDeleteAsync(ct);
         }
-    }
-
-    private Snapshot CreateInitial()
-    {
-        var emptyProjection = new TProjection();
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(emptyProjection);
-        return Snapshot.Create(0, bytes);
     }
 }

@@ -9,8 +9,6 @@ public class Mutation
     /// id field that is created in sequence with comb guid provider
     /// </summary>
     public required Guid Id { get; init; }
-    public required bool CacheInvalidated { get; set; }
-    
     public required byte[] Data { get; init; }
 
     public static Mutation FromMutationEnvelope<TMutation>(MutationEnvelope<TMutation> mutationEnvelope)
@@ -22,7 +20,6 @@ public class Mutation
         {
             Id = mutationEnvelope.Id,
             Data = stream.ToArray(),
-            CacheInvalidated = false,
         };
     }
     
