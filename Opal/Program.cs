@@ -24,14 +24,14 @@ var optionsBuilder = new DbContextOptionsBuilder<CacheContext>()
 var store = new CacheContext(optionsBuilder.Options);
 await store.Database.EnsureCreatedAsync();
 
-var snapshotManager = new ProjectionManager<Projection>(store,
-    new Logger<ProjectionManager<Projection>>(new LoggerFactory()),
-    [
-        new Region(100, 999),
-        new Region(1000, 9999),
-        new Region(10000, 99999)
-    ]);
-await snapshotManager.Initialize();
+//var snapshotManager = new ProjectionManager<Projection>(store,
+//    new Logger<ProjectionManager<Projection>>(new LoggerFactory()),
+//    [
+//        new Region(100, 999),
+//        new Region(1000, 9999),
+//        new Region(10000, 99999)
+//    ]);
+//await snapshotManager.Initialize();
 
 Console.WriteLine("Init: " + sw.ElapsedMilliseconds);
 sw.Restart();
@@ -74,7 +74,7 @@ await mutationSync.ProcessWork();
 Console.WriteLine("Ingest: " + sw.ElapsedMilliseconds);
 sw.Restart();
 
-await snapshotManager.UpdateSnapshotCaches();
+//await snapshotManager.UpdateSnapshotCaches();
 
 Console.WriteLine("Rebuild Projections: " + sw.ElapsedMilliseconds);
 sw.Restart();
