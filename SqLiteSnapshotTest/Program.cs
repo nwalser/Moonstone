@@ -1,14 +1,13 @@
 ﻿using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using SqLiteSnapshotTest;
-using Microsoft.Data.Sqlite;
 
 var sw = Stopwatch.StartNew();
 
 var folder = "./databases";
 var liveDbPath = Path.Join(folder, "live.db");
 var optionsBuilder = new DbContextOptionsBuilder<TestContext>()
-    .UseSqlite($"Data Source={liveDbPath}");
+    .UseSqlite($"Data Source={liveDbPath};Pooling=false");
 
 Directory.Delete(folder, recursive: true);
 Directory.CreateDirectory(folder);
@@ -38,8 +37,8 @@ DeleteSnapshot("snap2");
 
 void CreateSnapshot(string name)
 {
-    var sw = Stopwatch.StartNew();
-    SqliteConnection.ClearAllPools();
+    //var sw = Stopwatch.StartNew();
+    //SqliteConnection.ClearAllPools();
 
     var path = Path.Join(folder, $"{name}.db");
     File.Copy(liveDbPath, path);
@@ -48,8 +47,8 @@ void CreateSnapshot(string name)
 
 void RestoreSnapshot(string name)
 {
-    var sw = Stopwatch.StartNew();
-    SqliteConnection.ClearAllPools();
+    //var sw = Stopwatch.StartNew();
+    //SqliteConnection.ClearAllPools();
 
     var path = Path.Join(folder, $"{name}.db");
     File.Copy(path, liveDbPath, overwrite: true);
@@ -58,8 +57,8 @@ void RestoreSnapshot(string name)
 
 void DeleteSnapshot(string name)
 {    
-    var sw = Stopwatch.StartNew();
-    SqliteConnection.ClearAllPools();
+    //var sw = Stopwatch.StartNew();
+    //SqliteConnection.ClearAllPools();
 
     var path = Path.Join(folder, $"{name}.db");
     File.Delete(path);
