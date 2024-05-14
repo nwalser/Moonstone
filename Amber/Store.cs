@@ -5,7 +5,7 @@ namespace Amber;
 
 public class Store
 {
-    private const PrefixStyle PrefixStyle = ProtoBuf.PrefixStyle.Base128;
+    private const PrefixStyle PrefixStyle = ProtoBuf.PrefixStyle.Base128; // todo: do not use protobuf as serialization framework, use JsonSerializer instead
     private const int FieldNumber = 0;
     
     private readonly string _path;
