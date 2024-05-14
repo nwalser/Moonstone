@@ -1,4 +1,4 @@
-﻿namespace Amber.Documents;
+﻿namespace Amber.Documents.Project;
 
 public class Project
 {

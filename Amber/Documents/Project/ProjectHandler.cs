@@ -1,4 +1,6 @@
-﻿namespace Amber.Documents;
+﻿using Amber.Documents.Project.Mutations;
+
+namespace Amber.Documents.Project;
 
 public class ProjectHandler
 {
@@ -17,7 +19,7 @@ public class ProjectHandler
         };
     }
 
-    public void ApplyMutation(Project project, IProjectMutation mutation)
+    public void ApplyMutation(Project project, object mutation)
     {
         throw new NotImplementedException();
     }
