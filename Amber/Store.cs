@@ -28,6 +28,8 @@ public class Store
             var documentTypeId = Convert.ToInt32(segments[1]); 
             var documentType = _documentTypes[documentTypeId]; 
             
+            // todo: only load available documents and types of them into buffer -> Folder Name: {DocumentId}_{DocumentType}
+            // todo: maybe split up into multiple levels to improve listing performance -> Folder Name: /{DocumentType}/{DocumentId_Part1}/{DocumentId_Part2}/etc...
             // read all mutations for given document
             var streamsFolder = GetStreamsFolder(documentId);
             var mutationFiles = Directory.EnumerateFiles(streamsFolder, ".bin");
