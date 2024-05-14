@@ -10,5 +10,8 @@
 // -- can be deleted
 // -- knows how to apply mutations to it
 
+// special remarks
+// -- do not list every available document
+// -- allow cold fetching with type and guid
 
 Console.WriteLine("Hello World");
