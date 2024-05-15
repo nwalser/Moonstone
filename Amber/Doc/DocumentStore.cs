@@ -1,4 +1,6 @@
-﻿namespace Amber.Doc;
+﻿using Amber.Mutation;
+
+namespace Amber.Doc;
 
 public class DocumentStore<TDocument> where TDocument : new()
 {
@@ -7,7 +9,7 @@ public class DocumentStore<TDocument> where TDocument : new()
     private List<MutationDefinition<TDocument>> _mutationDefinitions;
 
 
-    public List<DocumentEnvelope<TDocument>> Documents { get; init; } = [];
+    //public List<DocumentEnvelope<TDocument>> Documents { get; init; } = [];
     
     
     public DocumentStore(string name, List<MutationDefinition<TDocument>> mutationDefinitions, Guid sessionId)
@@ -29,7 +31,7 @@ public class DocumentStore<TDocument> where TDocument : new()
         throw new NotImplementedException();
     }
 
-    public Task<DocumentEnvelope> Create()
+    public Task Create()
     {
         throw new NotImplementedException();
     }

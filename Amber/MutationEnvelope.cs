@@ -2,6 +2,6 @@
 
 public class MutationEnvelope
 {
-    public Guid Id { get; init; }
-    
+    public required DateTime Occurence { get; init; }
+    public required object Mutation { get; init; }
 }
