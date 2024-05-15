@@ -1,8 +1,10 @@
 ﻿namespace Amber.Documents;
 
-public interface IHandler<TDocument>
+public interface IHandler
 {
+    public int DocumentTypeId { get; }
     public Dictionary<int, Type> MutationTypes { get; }
-    public TDocument CreateNew();
-    public void ApplyMutation(TDocument project, object mutation);
+    
+    public object CreateNew();
+    public void ApplyMutation(object project, object mutation);
 }

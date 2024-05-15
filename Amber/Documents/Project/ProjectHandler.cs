@@ -2,15 +2,17 @@
 
 namespace Amber.Documents.Project;
 
-public class ProjectHandler : IHandler<Project>
+public class ProjectHandler : IHandler
 {
+    public int DocumentTypeId => 0;
+
     public Dictionary<int, Type> MutationTypes { get; } = new()
     {
         { 0, typeof(ChangeProjectName) },
         { 1, typeof(IncreaseCounter) },
     };
     
-    public Project CreateNew()
+    public object CreateNew()
     {
         return new Project()
         {
@@ -19,8 +21,10 @@ public class ProjectHandler : IHandler<Project>
         };
     }
 
-    public void ApplyMutation(Project project, object mutation)
+    public void ApplyMutation(object entity, object mutation)
     {
+        var project = (Project)entity;
+        
         switch (mutation)
         {
             case ChangeProjectName changeProjectName: 

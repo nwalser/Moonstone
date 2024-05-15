@@ -27,16 +27,16 @@ var session = "794dcb19-a00e-4f5a-9eeb-5a2d3b582f60";
 var pathDoc1 = Path.Join(workspace, "project", "doc1");
 var pathDoc2 = Path.Join(workspace, "project", "doc2");
 
-var documentStore = new DocumentStore<Project>(session, new ProjectHandler());
-
-documentStore.Delete(pathDoc1);
+Directory.Delete(pathDoc1);
 
 var sw = Stopwatch.StartNew();
 
-var document = await documentStore.Create(pathDoc1);
-Console.WriteLine(document);
+var documentStore = DocumentFileStore<Project>.Create(pathDoc1, session, new ProjectHandler());
 
 LogStage("Create", sw);
+
+var fsw = new FileSystemWatcher()
+
 
 await documentStore.Append(pathDoc1, new ChangeProjectName()
 {
@@ -56,11 +56,13 @@ for (var i = 0; i < 10_000; i++)
 
 LogStage("Append 10k", sw);
 
-document = await documentStore.Read(pathDoc1);
+var document = await documentStore.Read(pathDoc1);
 
 LogStage("Read 10k", sw);
 
 Console.WriteLine(document);
+
+
 
 void LogStage(string name, Stopwatch sw)
 {
