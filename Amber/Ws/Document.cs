@@ -30,5 +30,5 @@ public class Document
     public async Task ApplyMutation(object mutation)
     {
         await _applyMutation(this, mutation);
-    }
+    } 
 }

@@ -52,8 +52,9 @@ public class Workspace
         workspace.Init();
         return workspace;
     }
-
-
+    
+    // todo: implement deletion of document
+    
     private void Init()
     {
         // setup file system watcher
