@@ -5,41 +5,121 @@ namespace Amber.Ws;
 
 public class Workspace
 {
-    private readonly string _folder;
+    private readonly string _path;
+    private readonly string _session;
     private readonly List<IHandler> _handlers;
     
-    private List<Document> _documentEnvelopes = [];
-    public IReadOnlyList<Document> DocumentEnvelopes => _documentEnvelopes;
+    private List<Document> _documents = [];
+    public IReadOnlyList<Document> Documents => _documents;
 
     private readonly Queue<FileSystemEventArgs> _changedFiles = new();
+
+    private Task? _backgroundTask;
+    private CancellationTokenSource? _backgroundTaskCts;
+
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
     
-    
-    public Workspace(string folder, List<IHandler> handlers)
+    public Workspace(string path, string session, List<IHandler> handlers)
     {
-        _folder = folder;
+        _path = path;
         _handlers = handlers;
+        _session = session;
     }
 
-    public void Init()
+    public static void Delete(string path)
     {
-        _documentEnvelopes = LoadDocumentMetadata().ToList();
+        if (!Directory.Exists(path)) throw new Exception(); // todo better exceptions
+        
+        Directory.Delete(path, recursive: true);
     }
     
-    private IEnumerable<Document> LoadDocumentMetadata()
+    public static Workspace Open(string path, string session, List<IHandler> handlers)
+    {
+        if (!Directory.Exists(path)) throw new Exception(); // todo better exceptions
+        
+        var workspace = new Workspace(path, session, handlers);
+        workspace.Init();
+        return workspace;
+    }
+
+    public static Workspace Create(string path, string session, List<IHandler> handlers)
+    {
+        if (Directory.Exists(path)) throw new Exception(); // todo better exceptions
+        
+        Directory.CreateDirectory(path);
+
+        var workspace = new Workspace(path, session, handlers);
+        workspace.Init();
+        return workspace;
+    }
+
+
+    private void Init()
     {
         // setup file system watcher
         var fileSystemWatcher = new FileSystemWatcher
         {
-            Path = _folder,
-            IncludeSubdirectories = false,
+            Path = _path,
+            IncludeSubdirectories = true,
             EnableRaisingEvents = true,
             NotifyFilter = NotifyFilters.LastWrite,
         };
-        fileSystemWatcher.Created += (_, e) => _changedFiles.Enqueue(e);
-        fileSystemWatcher.Changed += (_, e) => _changedFiles.Enqueue(e);
+        fileSystemWatcher.Created += (_, e) => _changedFiles.Enqueue(e); // todo: fix events get called twice sometimes
+        fileSystemWatcher.Changed += (_, e) => _changedFiles.Enqueue(e); // todo: fix events get called twice sometimes
         
+        // load document metadata
+        _documents = LoadDocumentMetadata().ToList();
+        
+        // start background task
+        _backgroundTaskCts = new CancellationTokenSource();
+        _backgroundTask = Task.Run(async () => await ProcessBackgroundWork(_backgroundTaskCts.Token));
+    }
+
+    public async Task<Document> CreateDocument<TDocument>()
+    {
+        try
+        {
+            await _semaphore.WaitAsync();
+
+            var documentId = Guid.NewGuid();
+            var handler = _handlers.Single(h => h.DocumentType == typeof(TDocument));
+
+            var documentPath = Path.Join(_path, handler.DocumentTypeId.ToString(CultureInfo.InvariantCulture), documentId.ToString());
+
+            DocumentReader.Create(documentPath);
+
+            await UpdateDocument(documentPath);
+
+            return Documents.Single(d => d.Id == documentId);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    private async Task ApplyMutation(Document document, object mutation)
+    {
+        try
+        {
+            await _semaphore.WaitAsync();
+            
+            var handler = _handlers.Single(h => h.DocumentType == document.Value.GetType());
+            var documentPath = Path.Join(_path, handler.DocumentTypeId.ToString(CultureInfo.InvariantCulture), document.Id.ToString());
+
+            await DocumentReader.Append(documentPath, _session, mutation, handler);
+            await UpdateDocument(documentPath);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+    
+    private IEnumerable<Document> LoadDocumentMetadata()
+    {
         // load all documents from disk
-        var documentTypeFolders = Directory.EnumerateDirectories(_folder);
+        var documentTypeFolders = Directory.EnumerateDirectories(_path);
         foreach (var documentTypeFolder in documentTypeFolders)
         {
             var documentTypeId = Convert.ToInt32(Path.GetFileName(documentTypeFolder));
@@ -52,50 +132,76 @@ public class Workspace
                 var documentId = Guid.Parse(Path.GetFileName(documentFolder), CultureInfo.InvariantCulture);
                 var documentValue = DocumentReader.Read(documentFolder, documentHandler);
 
-                yield return new Document(documentId, documentValue);
+                yield return new Document(documentId, documentValue, ApplyMutation);
             }
         }
     }
 
-    private void ProcessWork(CancellationToken ct = default)
+    private async Task ProcessBackgroundWork(CancellationToken ct = default)
     {
         while (!ct.IsCancellationRequested)
         {
-            // process all changed files
-            while (!ct.IsCancellationRequested && _changedFiles.TryDequeue(out var changedFile))
-                ProcessChangedFile(changedFile);
+            try
+            {
+                await _semaphore.WaitAsync(ct);
+
+                // process all changed files
+                while (!ct.IsCancellationRequested && _changedFiles.TryDequeue(out var changedFile))
+                    await ProcessChangedFile(changedFile);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+            
+            Thread.Sleep(100);
         }
     }
 
-    private void ProcessChangedFile(FileSystemEventArgs e)
+    private async Task ProcessChangedFile(FileSystemEventArgs e)
     {
-        var subpath = Path.GetRelativePath(_folder, e.FullPath);
-        var subpathSegments = subpath.Split(@"\/", StringSplitOptions.RemoveEmptyEntries);
+        // do not handle folder changes
+        if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory))
+            return;
+        
+        var separators = new char[] {
+            Path.DirectorySeparatorChar,  
+            Path.AltDirectorySeparatorChar  
+        };
+        
+        var subpath = Path.GetRelativePath(_path, e.FullPath);
+        var subpathSegments = subpath.Split(separators, StringSplitOptions.RemoveEmptyEntries); // todo implement better path splitting
 
-        // directory of new document -> index it and add it to documents list
-        if (subpath.Length == 2)
-        {
-            var documentId = Guid.Parse(subpathSegments[-1], CultureInfo.InvariantCulture);
-            var documentTypeId = Convert.ToInt32(subpathSegments[-2], CultureInfo.InvariantCulture);
-            var documentHandler = _handlers.Single(h => h.DocumentTypeId == documentTypeId);
-
-            var documentValue = DocumentReader.Read(e.FullPath, documentHandler);
-
-            _documentEnvelopes.Add(new Document(documentId, documentValue));
-        }
-
-        // file of existing document -> update document
-        if (subpath.Length == 3)
+        // update or index document
+        if (subpathSegments.Length == 3)
         {
             var documentFolder = Path.GetDirectoryName(e.FullPath) ?? throw new Exception();
-            var documentId = Guid.Parse(subpathSegments[-2], CultureInfo.InvariantCulture);
-            var documentTypeId = Convert.ToInt32(subpathSegments[-3], CultureInfo.InvariantCulture);
-            var documentHandler = _handlers.Single(h => h.DocumentTypeId == documentTypeId);
+            await UpdateDocument(documentFolder);
+        }
+    }
 
-            var documentValue = DocumentReader.Read(documentFolder, documentHandler);
+    private async Task UpdateDocument(string documentFolder)
+    {
+        var separators = new char[] {
+            Path.DirectorySeparatorChar,  
+            Path.AltDirectorySeparatorChar  
+        };
+        
+        var subpathSegments = documentFolder.Split(separators, StringSplitOptions.RemoveEmptyEntries); // todo implement better path splitting
 
-            var document = _documentEnvelopes.Single(d => d.Id == documentId && d.Value.GetType() == documentValue.GetType());
-            
+        var documentId = Guid.Parse(subpathSegments[^1], CultureInfo.InvariantCulture);
+        var documentTypeId = Convert.ToInt32(subpathSegments[^2], CultureInfo.InvariantCulture);
+        var documentHandler = _handlers.Single(h => h.DocumentTypeId == documentTypeId);
+
+        var documentValue = await DocumentReader.Read(documentFolder, documentHandler);
+
+        var document = _documents.SingleOrDefault(d => d.Id == documentId);
+        if (document is null)
+        {
+            _documents.Add(new Document(documentId, documentValue, ApplyMutation));
+        }
+        else
+        {
             document.UpdateValue(documentValue);
         }
     }

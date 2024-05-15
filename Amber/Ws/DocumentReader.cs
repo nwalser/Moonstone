@@ -5,6 +5,14 @@ namespace Amber.Ws;
 
 public class DocumentReader
 {
+    public static void Create(string folder)
+    {
+        if (Directory.Exists(folder)) throw new Exception(); // todo
+        
+        Directory.CreateDirectory(folder);
+        File.Create(Path.Join(folder, ".keep"));
+    }
+    
     public static async Task Append(string folder, string session, object mutation, IHandler handler, CancellationToken ct = default)
     {
         if (!Directory.Exists(folder)) throw new DirectoryNotFoundException();
@@ -26,7 +34,7 @@ public class DocumentReader
 
     public static async Task<object> Read(string folder, IHandler handler, CancellationToken ct = default)
     {
-        var mutationLogs = Directory.EnumerateFiles(folder);
+        var mutationLogs = Directory.EnumerateFiles(folder, "*.txt");
         var mutations = new List<(DateTime occurence, object mutation)>();
         
         foreach (var mutationLog in mutationLogs)

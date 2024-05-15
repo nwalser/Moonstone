@@ -5,6 +5,7 @@ namespace Amber.Documents.Project;
 public class ProjectHandler : IHandler
 {
     public int DocumentTypeId => 0;
+    public Type DocumentType => typeof(Project);
 
     public Dictionary<int, Type> MutationTypes { get; } = new()
     {

@@ -19,50 +19,46 @@
 using System.Diagnostics;
 using Amber.Documents.Project;
 using Amber.Documents.Project.Mutations;
-using Amber.Mutation;
-
-var workspace = "C:\\Users\\Nathaniel Walser\\OneDrive - esp-engineering gmbh\\Moonstone\\workspace5";
-var session = "794dcb19-a00e-4f5a-9eeb-5a2d3b582f60";
-
-var pathDoc1 = Path.Join(workspace, "project", "doc1");
-var pathDoc2 = Path.Join(workspace, "project", "doc2");
-
-Directory.Delete(pathDoc1);
+using Amber.Ws;
 
 var sw = Stopwatch.StartNew();
 
-var documentStore = DocumentFileStore<Project>.Create(pathDoc1, session, new ProjectHandler());
+var folder = "C:\\Users\\Nathaniel Walser\\OneDrive - esp-engineering gmbh\\Moonstone\\workspace6";
+var session = "794dcb19-a00e-4f5a-9eeb-5a2d3b582f60";
+if(Directory.Exists(folder))
+    Workspace.Delete(folder);
 
-LogStage("Create", sw);
+var workspace = Workspace.Create(folder, session, [new ProjectHandler()]);
 
-var fsw = new FileSystemWatcher()
+LogStage("Init", sw);
 
+var project = await workspace.CreateDocument<Project>();
+LogStage("Create Project", sw);
 
-await documentStore.Append(pathDoc1, new ChangeProjectName()
+project.ValueObservable.Subscribe(d => Console.WriteLine("Got: " + d));
+    
+await project.ApplyMutation(new ChangeProjectName()
 {
     Name = "Project 1",
 });
+LogStage("Apply single mutation", sw);
 
-LogStage("Append One", sw);
-
-for (var i = 0; i < 10_000; i++)
+for (var i = 0; i < 10; i++)
 {
-    await documentStore.Append(pathDoc1, new IncreaseCounter()
+    await project.ApplyMutation(new IncreaseCounter()
     {
         Count = 1,
     });
-    await Task.Delay(TimeSpan.FromMilliseconds(0.01));
+    var proj = (Project)project.Value;
+    Console.WriteLine($"{i}: {proj.Counter}");
 }
 
-LogStage("Append 10k", sw);
-
-var document = await documentStore.Read(pathDoc1);
-
-LogStage("Read 10k", sw);
-
-Console.WriteLine(document);
+LogStage("Apply 100 mutations", sw);
 
 
+LogStage("Enumerate", sw);
+
+Console.ReadKey();
 
 void LogStage(string name, Stopwatch sw)
 {
