@@ -1,4 +1,4 @@
-﻿namespace Amber.Documents.Project;
+﻿namespace Amber.Sapphire.Documents.Project;
 
 public class Project
 {

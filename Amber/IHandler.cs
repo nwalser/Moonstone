@@ -1,4 +1,4 @@
-﻿namespace Amber.Documents;
+﻿namespace Amber;
 
 public interface IHandler
 {

@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
-using Amber.Documents;
 
-namespace Amber.Ws;
+namespace Amber;
 
 public class DocumentReader
 {

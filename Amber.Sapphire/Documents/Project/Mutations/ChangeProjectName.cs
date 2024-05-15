@@ -1,4 +1,4 @@
-﻿namespace Amber.Documents.Project.Mutations;
+﻿namespace Amber.Sapphire.Documents.Project.Mutations;
 
 public record ChangeProjectName
 {

@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
-using Amber.Documents;
 
-namespace Amber.Ws;
+namespace Amber;
 
 public class Workspace
 {

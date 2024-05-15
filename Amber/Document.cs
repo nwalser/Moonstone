@@ -1,6 +1,6 @@
 ﻿using System.Reactive.Subjects;
 
-namespace Amber.Ws;
+namespace Amber;
 
 public class Document
 {

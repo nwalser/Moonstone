@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using Amber.Documents.Project;
-using Amber.Documents.Project.Mutations;
-using Amber.Ws;
+using Amber;
+using Amber.Sapphire.Documents.Project;
+using Amber.Sapphire.Documents.Project.Mutations;
 
 var sw = Stopwatch.StartNew();
 

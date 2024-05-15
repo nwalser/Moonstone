@@ -1,19 +1,19 @@
-﻿using Amber.Documents.Project.Mutations;
+﻿using Amber.Sapphire.Documents.Project.Mutations;
 
-namespace Amber.Documents.Project;
+namespace Amber.Sapphire.Documents.Project;
 
-public class ProjectHandler : IHandler
+public class ProjectHandler : Handler<Project>
 {
-    public int DocumentTypeId => 0;
-    public Type DocumentType => typeof(Project);
+    public override int DocumentTypeId => 0;
+    public override Type DocumentType => typeof(Project);
 
-    public Dictionary<int, Type> MutationTypes { get; } = new()
+    public override Dictionary<int, Type> MutationTypes { get; } = new()
     {
         { 0, typeof(ChangeProjectName) },
         { 1, typeof(IncreaseCounter) },
     };
     
-    public object CreateNew()
+    public override Project CreateNew()
     {
         return new Project()
         {
@@ -22,10 +22,8 @@ public class ProjectHandler : IHandler
         };
     }
 
-    public void ApplyMutation(object entity, object mutation)
+    public override void ApplyMutation(Project project, object mutation)
     {
-        var project = (Project)entity;
-        
         switch (mutation)
         {
             case ChangeProjectName changeProjectName: 
