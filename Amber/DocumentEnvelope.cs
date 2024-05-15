@@ -37,7 +37,7 @@ public class DocumentEnvelope<TDocument>
 {
     public Guid Id => _documentEnvelope.Id;
     public TDocument Value => (TDocument)_documentEnvelope.Value;
-    public IObservable<TDocument> ValueObservable => (IObservable<TDocument>)_documentEnvelope.ValueObservable;
+    public IObservable<TDocument> ValueObservable => (IObservable<TDocument>)_documentEnvelope.ValueObservable; // todo: implement working 
 
     private readonly DocumentEnvelope _documentEnvelope;
     
