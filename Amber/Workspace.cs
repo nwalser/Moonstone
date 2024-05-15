@@ -8,8 +8,8 @@ public class Workspace
     private readonly string _session;
     private readonly List<IHandler> _handlers;
     
-    private List<Document> _documents = [];
-    public IReadOnlyList<Document> Documents => _documents;
+    private List<DocumentEnvelope> _documents = [];
+    public IReadOnlyList<DocumentEnvelope> Documents => _documents;
 
     private readonly Queue<FileSystemEventArgs> _changedFiles = new();
 
@@ -75,7 +75,7 @@ public class Workspace
         _backgroundTask = Task.Run(async () => await ProcessBackgroundWork(_backgroundTaskCts.Token));
     }
 
-    public async Task<Document> CreateDocument<TDocument>()
+    public async Task<DocumentEnvelope<TDocument>> CreateDocument<TDocument>()
     {
         try
         {
@@ -90,7 +90,7 @@ public class Workspace
 
             await UpdateDocument(documentPath);
 
-            return Documents.Single(d => d.Id == documentId);
+            return new DocumentEnvelope<TDocument>(Documents.Single(d => d.Id == documentId));
         }
         finally
         {
@@ -98,14 +98,14 @@ public class Workspace
         }
     }
 
-    private async Task ApplyMutation(Document document, object mutation)
+    private async Task ApplyMutation(DocumentEnvelope documentEnvelope, object mutation)
     {
         try
         {
             await _semaphore.WaitAsync();
             
-            var handler = _handlers.Single(h => h.DocumentType == document.Value.GetType());
-            var documentPath = Path.Join(_path, handler.DocumentTypeId.ToString(CultureInfo.InvariantCulture), document.Id.ToString());
+            var handler = _handlers.Single(h => h.DocumentType == documentEnvelope.Value.GetType());
+            var documentPath = Path.Join(_path, handler.DocumentTypeId.ToString(CultureInfo.InvariantCulture), documentEnvelope.Id.ToString());
 
             await DocumentReader.Append(documentPath, _session, mutation, handler);
             await UpdateDocument(documentPath);
@@ -116,7 +116,7 @@ public class Workspace
         }
     }
     
-    private IEnumerable<Document> LoadDocumentMetadata()
+    private IEnumerable<DocumentEnvelope> LoadDocumentMetadata()
     {
         // load all documents from disk
         var documentTypeFolders = Directory.EnumerateDirectories(_path);
@@ -132,7 +132,7 @@ public class Workspace
                 var documentId = Guid.Parse(Path.GetFileName(documentFolder), CultureInfo.InvariantCulture);
                 var documentValue = DocumentReader.Read(documentFolder, documentHandler);
 
-                yield return new Document(documentId, documentValue, ApplyMutation);
+                yield return new DocumentEnvelope(documentId, documentValue, ApplyMutation);
             }
         }
     }
@@ -198,7 +198,7 @@ public class Workspace
         var document = _documents.SingleOrDefault(d => d.Id == documentId);
         if (document is null)
         {
-            _documents.Add(new Document(documentId, documentValue, ApplyMutation));
+            _documents.Add(new DocumentEnvelope(documentId, documentValue, ApplyMutation));
         }
         else
         {
