@@ -28,17 +28,18 @@ public class DocumentStore<TDocument>(string session, IHandler<TDocument> handle
     public async Task Append(string folder, object mutation, CancellationToken ct = default)
     {
         if (!Directory.Exists(folder)) throw new DirectoryNotFoundException();
-
+        
         var sessionPath = Path.Join(folder, $"{session}.txt");
-        var occurence = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture);
+        
+        var occurenceBase64 = Convert.ToBase64String(BitConverter.GetBytes(DateTime.UtcNow.Ticks));
         
         var typeId = handler.MutationTypes.Single(t => t.Value == mutation.GetType()).Key;
         
-        var json = JsonSerializer.Serialize(mutation);
-        var bytes = System.Text.Encoding.UTF8.GetBytes(json);
-        var base64 = Convert.ToBase64String(bytes);
+        var mutationJson = JsonSerializer.Serialize(mutation);
+        var mutationBytes = System.Text.Encoding.UTF8.GetBytes(mutationJson);
+        var mutationBase64 = Convert.ToBase64String(mutationBytes);
 
-        var line = string.Join(",", typeId, occurence, base64);
+        var line = string.Join(",", typeId, occurenceBase64, mutationBase64);
         
         await File.AppendAllLinesAsync(sessionPath, [line], ct);
     }
@@ -61,7 +62,7 @@ public class DocumentStore<TDocument>(string session, IHandler<TDocument> handle
                 var segments = line.Split(',');
 
                 var typeId = int.Parse(segments[0]);
-                var occurence = DateTime.Parse(segments[1], CultureInfo.InvariantCulture);
+                var occurence = new DateTime(BitConverter.ToInt64(Convert.FromBase64String(segments[1]), 0));
                 var json = Convert.FromBase64String(segments[2]);
                 
                 var type = handler.MutationTypes[typeId];
