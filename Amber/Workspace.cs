@@ -41,6 +41,15 @@ public class Workspace
         return workspace;
     }
 
+    public async Task Close()
+    {
+        if(_backgroundTaskCts is not null)
+            await _backgroundTaskCts.CancelAsync();
+        
+        if(_backgroundTask is not null)
+            await _backgroundTask;
+    }
+
     public static Workspace Create(string path, string session, List<IHandler> handlers)
     {
         if (Directory.Exists(path)) throw new Exception(); // todo better exceptions
@@ -64,8 +73,8 @@ public class Workspace
             EnableRaisingEvents = true,
             NotifyFilter = NotifyFilters.LastWrite,
         };
-        fileSystemWatcher.Created += (_, e) => _changedFiles.Enqueue(e); // todo: fix events get called twice sometimes
-        fileSystemWatcher.Changed += (_, e) => _changedFiles.Enqueue(e); // todo: fix events get called twice sometimes
+        fileSystemWatcher.Created += (_, e) => _changedFiles.Enqueue(e);
+        fileSystemWatcher.Changed += (_, e) => _changedFiles.Enqueue(e);
         
         // load document metadata
         _documents = LoadDocumentMetadata().ToList();
@@ -75,13 +84,13 @@ public class Workspace
         _backgroundTask = Task.Run(async () => await ProcessBackgroundWork(_backgroundTaskCts.Token));
     }
 
-    public async Task<DocumentEnvelope<TDocument>> CreateDocument<TDocument>()
+    public async Task<DocumentEnvelope<TDocument>> CreateDocument<TDocument>(Guid? id = default)
     {
         try
         {
             await _semaphore.WaitAsync();
 
-            var documentId = Guid.NewGuid();
+            var documentId = id ?? Guid.NewGuid();
             var handler = _handlers.Single(h => h.DocumentType == typeof(TDocument));
 
             var documentPath = Path.Join(_path, handler.DocumentTypeId.ToString(CultureInfo.InvariantCulture), documentId.ToString());
