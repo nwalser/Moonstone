@@ -5,22 +5,22 @@ using Amber.Sapphire.Documents.Project.Mutations;
 
 var sw = Stopwatch.StartNew();
 
-var folder = "C:\\Users\\Nathaniel Walser\\OneDrive - esp-engineering gmbh\\Moonstone\\workspace6";
+var folder = "C:\\Users\\NathanielWalser\\OneDrive - esp-engineering gmbh\\Moonstone\\workspace6";
 var session = "794dcb19-a00e-4f5a-9eeb-5a2d3b582f60";
 var doc1Id = Guid.Parse("794dcb19-a00e-4f5a-9eeb-5a2d3b582f62");
-var seed = true;
+var seed = false;
 
 if (seed)
 {
     if(Directory.Exists(folder))
         Workspace.Delete(folder);
     
-    var workspace1 = Workspace.Create(folder, session, [new ProjectHandler()]);
+    var workspace1 = await Workspace.Create(folder, session, [new ProjectHandler()]);
     var project1 = await workspace1.CreateDocument<Project>(doc1Id);
     await workspace1.Close();
 }
 
-var workspace = Workspace.Open(folder, session, [new ProjectHandler()]);
+var workspace = await Workspace.Open(folder, session, [new ProjectHandler()]);
 
 LogStage("Init", sw);
 

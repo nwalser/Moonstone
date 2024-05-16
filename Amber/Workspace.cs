@@ -32,12 +32,12 @@ public class Workspace
         Directory.Delete(path, recursive: true);
     }
     
-    public static Workspace Open(string path, string session, List<IHandler> handlers)
+    public static async Task<Workspace> Open(string path, string session, List<IHandler> handlers)
     {
         if (!Directory.Exists(path)) throw new Exception(); // todo better exceptions
         
         var workspace = new Workspace(path, session, handlers);
-        workspace.Init();
+        await workspace.Init();
         return workspace;
     }
 
@@ -50,20 +50,20 @@ public class Workspace
             await _backgroundTask;
     }
 
-    public static Workspace Create(string path, string session, List<IHandler> handlers)
+    public static async Task<Workspace> Create(string path, string session, List<IHandler> handlers)
     {
         if (Directory.Exists(path)) throw new Exception(); // todo better exceptions
         
         Directory.CreateDirectory(path);
 
         var workspace = new Workspace(path, session, handlers);
-        workspace.Init();
+        await workspace.Init();
         return workspace;
     }
     
     // todo: implement deletion of document
     
-    private void Init()
+    private async Task Init()
     {
         // setup file system watcher
         var fileSystemWatcher = new FileSystemWatcher
@@ -77,7 +77,7 @@ public class Workspace
         fileSystemWatcher.Changed += (_, e) => _changedFiles.Enqueue(e);
         
         // load document metadata
-        _documents = LoadDocumentMetadata().ToList();
+        _documents = await LoadDocumentMetadata();
         
         // start background task
         _backgroundTaskCts = new CancellationTokenSource();
@@ -125,8 +125,9 @@ public class Workspace
         }
     }
     
-    private IEnumerable<DocumentEnvelope> LoadDocumentMetadata()
+    private async Task<List<DocumentEnvelope>> LoadDocumentMetadata()
     {
+        var documents = new List<DocumentEnvelope>();
         // load all documents from disk
         var documentTypeFolders = Directory.EnumerateDirectories(_path);
         foreach (var documentTypeFolder in documentTypeFolders)
@@ -139,11 +140,13 @@ public class Workspace
             foreach (var documentFolder in documentFolders)
             {
                 var documentId = Guid.Parse(Path.GetFileName(documentFolder), CultureInfo.InvariantCulture);
-                var documentValue = DocumentReader.Read(documentFolder, documentHandler);
+                var documentValue = await DocumentReader.Read(documentFolder, documentHandler);
 
-                yield return new DocumentEnvelope(documentId, documentValue, ApplyMutation);
+                documents.Add(new DocumentEnvelope(documentId, documentValue, ApplyMutation));
             }
         }
+
+        return documents;
     }
 
     private async Task ProcessBackgroundWork(CancellationToken ct = default)
@@ -156,14 +159,18 @@ public class Workspace
 
                 // process all changed files
                 while (!ct.IsCancellationRequested && _changedFiles.TryDequeue(out var changedFile))
-                    await ProcessChangedFile(changedFile);
+                    await ProcessChangedFile(changedFile); // todo fix bug that this routing doesnt get called
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
             finally
             {
                 _semaphore.Release();
             }
             
-            Thread.Sleep(100);
+            await Task.Delay(100, ct);
         }
     }
 
