@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Reactive.Linq;
 
 namespace Amber;
 
@@ -86,31 +87,25 @@ public class Workspace : IWorkspace
         _fileSystemWatcher.Changed += (_, e) => _changedFiles.Enqueue(e);
         
         // load document metadata
-        _documents = await LoadDocumentMetadata();
+        await CacheAllDocuments();
         
         // start background task
         _backgroundTaskCts = new CancellationTokenSource();
         _backgroundTask = Task.Run(async () => await ProcessBackgroundWork(_backgroundTaskCts.Token));
     }
     
-    private async Task<List<Document>> LoadDocumentMetadata()
+    private async Task CacheAllDocuments()
     {
-        var documents = new List<Document>();
         // load all documents from disk
         var documentTypeFolders = Directory.EnumerateDirectories(_path);
         foreach (var documentTypeFolder in documentTypeFolders)
         {
-            var documentTypeId = Convert.ToInt32(Path.GetFileName(documentTypeFolder));
-            var documentReader = _documentCollections.Single(r => r.Handler.DocumentTypeId == documentTypeId);
-
             var documentFolders = Directory.EnumerateDirectories(documentTypeFolder);
             foreach (var documentFolder in documentFolders)
             {
                 await CacheDocument(documentFolder);
             }
         }
-
-        return documents;
     }
 
     private async Task ProcessBackgroundWork(CancellationToken ct = default)
@@ -176,7 +171,7 @@ public class Workspace : IWorkspace
         var documentValue = await documentReader.Read(documentFolder);
 
         // if document is not cached already load into cache
-        if(_documents.Any(d => d.Id == documentId))
+        if(_documents.All(d => d.Id != documentId))
             _documents.Add(new Document(documentId, documentValue));
         
         // update document value
@@ -225,7 +220,7 @@ public class Workspace : IWorkspace
 
     public IObservable<TDocument> Observe<TDocument>(Guid id)
     {
-        return (IObservable<TDocument>)_documents.Single(d => d.Id == id).ValueObservable; // todo: implement working cast
+        return _documents.Single(d => d.Id == id).ValueObservable.Cast<TDocument>(); // todo: implement working cast
     }
 
     public async Task ApplyMutation<TDocument>(Guid documentId, object mutation)
