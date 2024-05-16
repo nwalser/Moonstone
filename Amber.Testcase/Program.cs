@@ -5,7 +5,7 @@ using Amber.Sapphire.Documents.Project.Mutations;
 
 var sw = Stopwatch.StartNew();
 
-var folder = "C:\\Users\\NathanielWalser\\OneDrive - esp-engineering gmbh\\Moonstone\\workspace6";
+var folder = "C:\\Users\\Nathaniel Walser\\OneDrive - esp-engineering gmbh\\Moonstone\\workspace6";
 var session = "794dcb19-a00e-4f5a-9eeb-5a2d3b582f60";
 var doc1Id = Guid.Parse("794dcb19-a00e-4f5a-9eeb-5a2d3b582f62");
 var seed = false;
@@ -16,7 +16,7 @@ if (seed)
         Workspace.Delete(folder);
     
     var workspace1 = await Workspace.Create(folder, session, [new ProjectHandler()]);
-    var project1 = await workspace1.CreateDocument<Project>(doc1Id);
+    await workspace1.Create<Project>(doc1Id);
     await workspace1.Close();
 }
 
@@ -24,12 +24,11 @@ var workspace = await Workspace.Open(folder, session, [new ProjectHandler()]);
 
 LogStage("Init", sw);
 
-var project = workspace.Documents.Single(w => w.Id == doc1Id);
 LogStage("Create Project", sw);
 
-project.ValueObservable.Subscribe(d => Console.WriteLine("Got: " + d));
-    
-await project.ApplyMutation(new ChangeProjectName()
+workspace.Observe<Project>(doc1Id).Subscribe(d => Console.WriteLine("Got: " + d));
+
+await workspace.ApplyMutation<Project>(doc1Id, new ChangeProjectName()
 {
     Name = "Project 1",
 });
@@ -37,12 +36,10 @@ LogStage("Apply single mutation", sw);
 
 for (var i = 0; i < 10; i++)
 {
-    await project.ApplyMutation(new IncreaseCounter()
+    await workspace.ApplyMutation<Project>(doc1Id, new IncreaseCounter()
     {
         Count = 1,
     });
-    var proj = (Project)project.Value;
-    Console.WriteLine($"{i}: {proj.Counter}");
 }
 
 LogStage("Apply 100 mutations", sw);
@@ -54,7 +51,7 @@ while (true)
 {
     Console.ReadKey();
     
-    await project.ApplyMutation(new IncreaseCounter()
+    await workspace.ApplyMutation<Project>(doc1Id, new IncreaseCounter()
     {
         Count = 1,
     });

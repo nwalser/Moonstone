@@ -8,4 +8,6 @@ public interface IHandler
     
     public object CreateNew();
     public void ApplyMutation(object project, object mutation);
+
+    public int GetMutationTypeId(Type mutationType) => MutationTypes.Single(t => t.Value == mutationType).Key;
 }

@@ -4,23 +4,33 @@ namespace Amber;
 
 public class DocumentReader
 {
-    public static void Create(string folder)
+    public required string Session { get; init; }
+    public required IHandler Handler { get; init; }
+    
+    
+    public void Create(string folder) // todo do not pass folder directly
     {
-        if (Directory.Exists(folder)) throw new Exception(); // todo
+        if (Directory.Exists(folder)) throw new Exception(); // todo: better exception
         
         Directory.CreateDirectory(folder);
         File.Create(Path.Join(folder, ".keep"));
     }
-    
-    public static async Task Append(string folder, string session, object mutation, IHandler handler, CancellationToken ct = default)
+
+    public void Delete(string folder)
     {
+        if (!Directory.Exists(folder)) throw new Exception();
+        Directory.Delete(folder, recursive: true);
+    }
+    
+    public async Task Append(string folder, object mutation, CancellationToken ct = default)
+    {
+        var filePath = Path.Join(folder, $"{Session}.txt");
+
         if (!Directory.Exists(folder)) throw new DirectoryNotFoundException();
-        
-        var sessionPath = Path.Join(folder, $"{session}.txt");
         
         var occurenceBase64 = Convert.ToBase64String(BitConverter.GetBytes(DateTime.UtcNow.Ticks));
         
-        var typeId = handler.MutationTypes.Single(t => t.Value == mutation.GetType()).Key;
+        var typeId = Handler.GetMutationTypeId(mutation.GetType());
         
         var mutationJson = JsonSerializer.Serialize(mutation);
         var mutationBytes = System.Text.Encoding.UTF8.GetBytes(mutationJson);
@@ -28,10 +38,10 @@ public class DocumentReader
 
         var line = string.Join(",", typeId, occurenceBase64, mutationBase64);
         
-        await File.AppendAllLinesAsync(sessionPath, [line], ct);
+        await File.AppendAllLinesAsync(filePath, [line], ct);
     }
 
-    public static async Task<object> Read(string folder, IHandler handler, CancellationToken ct = default)
+    public async Task<object> Read(string folder, CancellationToken ct = default)
     {
         var mutationLogs = Directory.EnumerateFiles(folder, "*.txt");
         var mutations = new List<(DateTime occurence, object mutation)>();
@@ -50,21 +60,21 @@ public class DocumentReader
                 var occurence = new DateTime(BitConverter.ToInt64(Convert.FromBase64String(segments[1]), 0));
                 var json = Convert.FromBase64String(segments[2]);
                 
-                var type = handler.MutationTypes[typeId];
+                var type = Handler.MutationTypes[typeId];
                 var mutation = JsonSerializer.Deserialize(json, type) ?? throw new InvalidOperationException();
                 
                 mutations.Add((occurence, mutation));
             }
         }
 
-        var document = handler.CreateNew();
+        var document = Handler.CreateNew();
 
         var orderedMutations = mutations
             .OrderBy(m => m.occurence)
             .Select(m => m.mutation);
         
         foreach (var orderedMutation in orderedMutations)
-            handler.ApplyMutation(document, orderedMutation);
+            Handler.ApplyMutation(document, orderedMutation);
 
         return document;
     }

@@ -2,27 +2,33 @@
 
 namespace Amber;
 
-public class Workspace
+public class Workspace : IWorkspace
 {
     private readonly string _path;
     private readonly string _session;
-    private readonly List<IHandler> _handlers;
+    private readonly List<DocumentReader> _documentCollections;
     
-    private List<DocumentEnvelope> _documents = [];
-    public IReadOnlyList<DocumentEnvelope> Documents => _documents;
+    private List<Document> _documents = [];
 
     private readonly Queue<FileSystemEventArgs> _changedFiles = new();
 
     private Task? _backgroundTask;
     private CancellationTokenSource? _backgroundTaskCts;
+    private FileSystemWatcher? _fileSystemWatcher;
 
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
     
-    public Workspace(string path, string session, List<IHandler> handlers)
+    public Workspace(string path, string session, List<IHandler> documentCollections)
     {
         _path = path;
-        _handlers = handlers;
         _session = session;
+        _documentCollections = documentCollections
+            .Select(h => new DocumentReader()
+            {
+                Handler = h,
+                Session = session,
+            })
+            .ToList();
     }
 
     public static void Delete(string path)
@@ -48,6 +54,9 @@ public class Workspace
         
         if(_backgroundTask is not null)
             await _backgroundTask;
+
+        if (_fileSystemWatcher is not null)
+            _fileSystemWatcher.EnableRaisingEvents = false;
     }
 
     public static async Task<Workspace> Create(string path, string session, List<IHandler> handlers)
@@ -66,15 +75,15 @@ public class Workspace
     private async Task Init()
     {
         // setup file system watcher
-        var fileSystemWatcher = new FileSystemWatcher
+        _fileSystemWatcher = new FileSystemWatcher
         {
             Path = _path,
             IncludeSubdirectories = true,
             EnableRaisingEvents = true,
             NotifyFilter = NotifyFilters.LastWrite,
         };
-        fileSystemWatcher.Created += (_, e) => _changedFiles.Enqueue(e);
-        fileSystemWatcher.Changed += (_, e) => _changedFiles.Enqueue(e);
+        _fileSystemWatcher.Created += (_, e) => _changedFiles.Enqueue(e);
+        _fileSystemWatcher.Changed += (_, e) => _changedFiles.Enqueue(e);
         
         // load document metadata
         _documents = await LoadDocumentMetadata();
@@ -83,66 +92,21 @@ public class Workspace
         _backgroundTaskCts = new CancellationTokenSource();
         _backgroundTask = Task.Run(async () => await ProcessBackgroundWork(_backgroundTaskCts.Token));
     }
-
-    public async Task<DocumentEnvelope<TDocument>> CreateDocument<TDocument>(Guid? id = default)
-    {
-        try
-        {
-            await _semaphore.WaitAsync();
-
-            var documentId = id ?? Guid.NewGuid();
-            var handler = _handlers.Single(h => h.DocumentType == typeof(TDocument));
-
-            var documentPath = Path.Join(_path, handler.DocumentTypeId.ToString(CultureInfo.InvariantCulture), documentId.ToString());
-
-            DocumentReader.Create(documentPath);
-
-            await UpdateDocument(documentPath);
-
-            return new DocumentEnvelope<TDocument>(Documents.Single(d => d.Id == documentId));
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
-
-    private async Task ApplyMutation(DocumentEnvelope documentEnvelope, object mutation)
-    {
-        try
-        {
-            await _semaphore.WaitAsync();
-            
-            var handler = _handlers.Single(h => h.DocumentType == documentEnvelope.Value.GetType());
-            var documentPath = Path.Join(_path, handler.DocumentTypeId.ToString(CultureInfo.InvariantCulture), documentEnvelope.Id.ToString());
-
-            await DocumentReader.Append(documentPath, _session, mutation, handler);
-            await UpdateDocument(documentPath);
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
     
-    private async Task<List<DocumentEnvelope>> LoadDocumentMetadata()
+    private async Task<List<Document>> LoadDocumentMetadata()
     {
-        var documents = new List<DocumentEnvelope>();
+        var documents = new List<Document>();
         // load all documents from disk
         var documentTypeFolders = Directory.EnumerateDirectories(_path);
         foreach (var documentTypeFolder in documentTypeFolders)
         {
             var documentTypeId = Convert.ToInt32(Path.GetFileName(documentTypeFolder));
-            var documentHandler = _handlers.Single(h => h.DocumentTypeId == documentTypeId);
+            var documentReader = _documentCollections.Single(r => r.Handler.DocumentTypeId == documentTypeId);
 
             var documentFolders = Directory.EnumerateDirectories(documentTypeFolder);
-
             foreach (var documentFolder in documentFolders)
             {
-                var documentId = Guid.Parse(Path.GetFileName(documentFolder), CultureInfo.InvariantCulture);
-                var documentValue = await DocumentReader.Read(documentFolder, documentHandler);
-
-                documents.Add(new DocumentEnvelope(documentId, documentValue, ApplyMutation));
+                await CacheDocument(documentFolder);
             }
         }
 
@@ -192,13 +156,13 @@ public class Workspace
         if (subpathSegments.Length == 3)
         {
             var documentFolder = Path.GetDirectoryName(e.FullPath) ?? throw new Exception();
-            await UpdateDocument(documentFolder);
+            await CacheDocument(documentFolder);
         }
     }
 
-    private async Task UpdateDocument(string documentFolder)
+    private async Task CacheDocument(string documentFolder) // todo: do not pass path but type and id
     {
-        var separators = new char[] {
+        var separators = new[] {
             Path.DirectorySeparatorChar,  
             Path.AltDirectorySeparatorChar  
         };
@@ -207,18 +171,110 @@ public class Workspace
 
         var documentId = Guid.Parse(subpathSegments[^1], CultureInfo.InvariantCulture);
         var documentTypeId = Convert.ToInt32(subpathSegments[^2], CultureInfo.InvariantCulture);
-        var documentHandler = _handlers.Single(h => h.DocumentTypeId == documentTypeId);
+        var documentReader = GetReaderForTypeId(documentTypeId);
+        
+        var documentValue = await documentReader.Read(documentFolder);
 
-        var documentValue = await DocumentReader.Read(documentFolder, documentHandler);
+        // if document is not cached already load into cache
+        if(_documents.Any(d => d.Id == documentId))
+            _documents.Add(new Document(documentId, documentValue));
+        
+        // update document value
+        var document = _documents.Single(d => d.Id == documentId);
+        document.UpdateValue(documentValue);
+    }
 
-        var document = _documents.SingleOrDefault(d => d.Id == documentId);
-        if (document is null)
+    private DocumentReader GetReaderForType(Type type) =>
+        _documentCollections.Single(d => d.Handler.DocumentType == type);
+
+    private DocumentReader GetReaderForTypeId(int typeId) =>
+        _documentCollections.Single(d => d.Handler.DocumentTypeId == typeId);
+    
+    private string BuildPath(Type type, Guid documentId)
+    {
+        var documentReader = GetReaderForType(type);
+        return Path.Join(_path, documentReader.Handler.DocumentTypeId.ToString(CultureInfo.InvariantCulture), documentId.ToString());
+    }
+    
+    public async Task Create<TDocument>(Guid? id = default)
+    {
+        try
         {
-            _documents.Add(new DocumentEnvelope(documentId, documentValue, ApplyMutation));
+            await _semaphore.WaitAsync();
+
+            var documentId = id ?? Guid.NewGuid();
+            var documentType = typeof(TDocument);
+            
+            var documentReader = GetReaderForType(documentType);
+            var documentPath = BuildPath(typeof(TDocument), documentId);
+            
+            documentReader.Create(documentPath);
+
+            await CacheDocument(documentPath);
         }
-        else
+        finally
         {
-            document.UpdateValue(documentValue);
+            _semaphore.Release();
+        }
+    }
+
+    public TDocument Load<TDocument>(Guid id)
+    {
+        return (TDocument)_documents.Single(d => d.Id == id).Value;
+    }
+
+    public IObservable<TDocument> Observe<TDocument>(Guid id)
+    {
+        return (IObservable<TDocument>)_documents.Single(d => d.Id == id).ValueObservable; // todo: implement working cast
+    }
+
+    public async Task ApplyMutation<TDocument>(Guid documentId, object mutation)
+    {
+        try
+        {
+            await _semaphore.WaitAsync();
+            
+            var documentType = typeof(TDocument);
+
+            var documentReader = GetReaderForType(documentType);
+            var documentPath = BuildPath(documentType, documentId);
+            
+            // update document values in ram
+            var document = _documents.Single(d => d.Id == documentId);
+            documentReader.Handler.ApplyMutation(document.Value, mutation);
+            document.UpdateValue(document.Value);
+            
+            // write to disk
+            await documentReader.Append(documentPath, mutation);
+            
+            // recache
+            await CacheDocument(documentPath);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public async Task Delete<TDocument>(Guid documentId)
+    {
+        try
+        {
+            await _semaphore.WaitAsync();
+            
+            var documentType = typeof(TDocument);
+
+            var documentReader = GetReaderForType(documentType);
+            var documentPath = BuildPath(documentType, documentId);
+            
+            documentReader.Delete(documentPath);
+            _documents.Remove(_documents.Single(d => d.Id == documentId));
+
+            // todo implement deletion log
+        }
+        finally
+        {
+            _semaphore.Release();
         }
     }
 }
