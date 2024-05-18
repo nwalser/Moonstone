@@ -1,0 +1,19 @@
+﻿@using Amber.App.Services
+@using Amber.Domain.Documents.Project
+<h3>Projects</h3>
+
+@if (Workspaces.Current is not null)
+{
+    var projectDocuments = Workspaces.Current.EnumerateDocuments().Where(d => d.Type == typeof(ProjectAggregate));
+    
+    @foreach (var projectDocument in projectDocuments)
+    {
+        var project = Workspaces.Current.Load<ProjectAggregate>(projectDocument.Id);
+        
+        
+    }
+}
+
+@code {
+    [Inject] public required Workspaces Workspaces { get; set; }
+}

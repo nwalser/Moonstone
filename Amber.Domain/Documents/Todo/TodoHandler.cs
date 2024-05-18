@@ -5,7 +5,7 @@ namespace Amber.Domain.Documents.Todo;
 public class TodoHandler : IHandler
 {
     public int DocumentTypeId { get; } = 0;
-    public Type DocumentType { get; } = typeof(Todo);
+    public Type DocumentType { get; } = typeof(TodoAggregate);
 
     public Dictionary<int, Type> MutationTypes { get; } = new()
     {
@@ -16,12 +16,12 @@ public class TodoHandler : IHandler
     
     public object CreateNew()
     {
-        return new Todo(string.Empty);
+        return new TodoAggregate(string.Empty);
     }
 
     public void ApplyMutation(object aggregate, object mutation)
     {
-        var todo = (Todo)aggregate;
+        var todo = (TodoAggregate)aggregate;
         
         switch (mutation)
         {

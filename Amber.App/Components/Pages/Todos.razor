@@ -8,7 +8,7 @@
 @if (Workspaces.Current is not null)
 {
     var todos = Workspaces.Current.EnumerateDocuments()
-        .Where(d => d.Type == typeof(Todo));
+        .Where(d => d.Type == typeof(TodoAggregate));
     
     @foreach (var todo in todos)
     {
@@ -26,7 +26,7 @@
     private async Task Create()
     {
         var id = Guid.NewGuid();
-        await Workspaces.Current?.Create<Todo>(id)!;
+        await Workspaces.Current?.Create<TodoAggregate>(id)!;
         await InvokeAsync(StateHasChanged);
     }
 }

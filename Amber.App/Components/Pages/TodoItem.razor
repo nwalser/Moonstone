@@ -4,9 +4,9 @@
 @if (_todo is not null && Workspaces.Current is not null)
 {   
     <MudStack Row="true">
-        <MudTextField T="string" Value="_todo.Name" Immediate="false" ValueChanged="name => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeName(name))"/>
-        <MudNumericField T="double" Value="_todo.EstimatedEffort.TotalHours" Immediate="false" ValueChanged="hours => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeEstimatedEffort(TimeSpan.FromHours(hours)))"/>
-        <MudCheckBox T="bool" Value="_todo.Completed" ValueChanged="completed => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeCompletion(completed))"/>
+        <MudTextField T="string" Value="_todo.Name" Immediate="false" ValueChanged="name => Workspaces.Current.ApplyMutation<TodoAggregate>(Id, new ChangeName(name))"/>
+        <MudNumericField T="double" Value="_todo.EstimatedEffort.TotalHours" Immediate="false" ValueChanged="hours => Workspaces.Current.ApplyMutation<TodoAggregate>(Id, new ChangeEstimatedEffort(TimeSpan.FromHours(hours)))"/>
+        <MudCheckBox T="bool" Value="_todo.Completed" ValueChanged="completed => Workspaces.Current.ApplyMutation<TodoAggregate>(Id, new ChangeCompletion(completed))"/>
     </MudStack>
 }
 
@@ -15,11 +15,11 @@
     
     [Parameter] public Guid Id { get; set; }
 
-    private Todo? _todo;
+    private TodoAggregate? _todo;
     
     protected override Task OnParametersSetAsync()
     {
-        Workspaces.Current?.Observe<Todo>(Id).Subscribe(todo =>
+        Workspaces.Current?.Observe<TodoAggregate>(Id).Subscribe(todo =>
         {
             _todo = todo; 
             InvokeAsync(StateHasChanged);
