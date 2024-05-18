@@ -9,7 +9,7 @@ public class Document(Guid id, Type type, object value) : IDocument
     private readonly BehaviorSubject<object> _valueSubject = new(value);
 
     public object Value => _valueSubject.Value;
-    public IObservable<object> ValueObservable => _valueSubject;
+    public BehaviorSubject<object> ValueObservable => _valueSubject;
 
     
     public void UpdateValue(object value)

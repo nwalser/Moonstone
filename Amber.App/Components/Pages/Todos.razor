@@ -6,9 +6,9 @@
 
 <h3>Todos</h3>
 
-@if (WorkspaceService.Current is not null)
+@if (Workspaces.Current is not null)
 {
-    var todos = WorkspaceService.Current.EnumerateDocuments()
+    var todos = Workspaces.Current.EnumerateDocuments()
         .Where(d => d.Type == typeof(Todo));
     
     @foreach (var todo in todos)
@@ -21,14 +21,14 @@
 
 
 @code {
-    [Inject] public required WorkspaceService WorkspaceService { get; set; }
+    [Inject] public required Workspaces Workspaces { get; set; }
 
 
     private async Task Create()
     {
         var id = Guid.NewGuid();
-        await WorkspaceService.Current?.Create<Todo>(id)!;
-        await WorkspaceService.Current?.ApplyMutation<Todo>(id, new ChangeName()
+        await Workspaces.Current?.Create<Todo>(id)!;
+        await Workspaces.Current?.ApplyMutation<Todo>(id, new ChangeName()
         {
             Name = "Test"
         })!;

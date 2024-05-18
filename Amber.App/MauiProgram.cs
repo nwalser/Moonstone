@@ -21,7 +21,7 @@ namespace Amber.App
 
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddSingleton(FolderPicker.Default);
-            builder.Services.AddSingleton(new WorkspaceService());
+            builder.Services.AddSingleton(new Workspaces());
             builder.Services.AddMudServices();
 
 #if DEBUG

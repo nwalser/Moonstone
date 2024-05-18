@@ -2,7 +2,7 @@
 
 namespace Amber.App.Services;
 
-public class WorkspaceService
+public class Workspaces
 {
     public IWorkspace? Current { get; set; }
 }

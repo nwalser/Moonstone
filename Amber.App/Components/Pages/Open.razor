@@ -10,7 +10,7 @@
 
 @code {
     [Inject] public required IFolderPicker FolderPicker { get; init; }
-    [Inject] public required WorkspaceService WorkspaceService { get; init; }
+    [Inject] public required Workspaces Workspaces { get; init; }
     
     public async Task OpenTodoList()
     {
@@ -19,6 +19,6 @@
         if (result.Folder is null)
             return;
         
-        WorkspaceService.Current = await Workspace.Open(result.Folder.Path, "session1", [new TodoHandler()]);
+        Workspaces.Current = await Workspace.Open(result.Folder.Path, "session1", [new TodoHandler()]);
     }
 }

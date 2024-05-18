@@ -2,16 +2,17 @@
 @using Amber.Domain.Documents.Todo
 @using Amber.Domain.Documents.Todo.Mutations
 
-@if (_todo is not null)
+@if (_todo is not null && Workspaces.Current is not null)
 {   
-    <div>
-        <MudTextField T="string" Value="_todo.Name" Immediate="false" ValueChanged="(v) => WorkspaceService.Current.ApplyMutation<Todo>(Id, new ChangeName(){Name = v})" />
-    </div>
+    <MudStack Row="true">
+        <MudTextField T="string" Value="_todo.Name" Immediate="false" ValueChanged="(v) => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeName() { Name = v })"/>
+        <MudNumericField T="double" Value="_todo.EstimatedEffort.TotalHours" ValueChanged="v => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeEstimatedEffort() { EstimatedEffort = TimeSpan.FromHours(v) })"/>
+        <MudCheckBox T="bool" Value="_todo.Completed" ValueChanged="(v) => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeCompletion() { Completed = v })"/>
+    </MudStack>
 }
 
-
 @code {
-    [Inject] public required WorkspaceService WorkspaceService { get; init; }
+    [Inject] public required Workspaces Workspaces { get; init; }
     
     [Parameter] public Guid Id { get; set; }
 
@@ -19,8 +20,7 @@
     
     protected override Task OnParametersSetAsync()
     {
-        WorkspaceService.Current?.Observe<Todo>(Id).Subscribe((t) => UpdateTodo(t));
-        
+        Workspaces.Current?.Observe<Todo>(Id).Subscribe((t) => _ = UpdateTodo(t));
         return base.OnParametersSetAsync();
     }
 
