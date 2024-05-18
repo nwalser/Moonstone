@@ -11,9 +11,9 @@ public abstract class Handler<TDocument> : IHandler
         return CreateNew() ?? throw new InvalidOperationException();
     }
 
-    void IHandler.ApplyMutation(object project, object mutation)
+    void IHandler.ApplyMutation(object aggregate, object mutation)
     {
-        ApplyMutation((TDocument)project, mutation);
+        ApplyMutation((TDocument)aggregate, mutation);
     }
 
     public abstract TDocument CreateNew();

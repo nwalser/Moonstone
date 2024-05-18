@@ -7,7 +7,7 @@ public interface IHandler
     public Dictionary<int, Type> MutationTypes { get; }
     
     public object CreateNew();
-    public void ApplyMutation(object project, object mutation);
+    public void ApplyMutation(object aggregate, object mutation);
 
     public int GetMutationTypeId(Type mutationType) => MutationTypes.Single(t => t.Value == mutationType).Key;
 }

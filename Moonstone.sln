@@ -5,11 +5,13 @@ VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "10 - File Format", "10 - File Format", "{EBBF66E0-382C-465D-B4AA-AF8AD744E87B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone", "Moonstone\Moonstone.csproj", "{4F0F36B7-9F57-4324-AE58-310412D0B24B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moonstone", "Moonstone\Moonstone.csproj", "{4F0F36B7-9F57-4324-AE58-310412D0B24B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amber.Domain", "Amber.Domain\Amber.Domain.csproj", "{E22E9DEE-43DD-4682-B758-145467EC45ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amber.Domain", "Amber.Domain\Amber.Domain.csproj", "{E22E9DEE-43DD-4682-B758-145467EC45ED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Amber", "Amber", "{D57242B0-7D05-408B-B5CA-DC3597D001B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amber.App", "Amber.App\Amber.App.csproj", "{C9626699-FFB5-44BC-B82A-1E69E1CBA67C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,15 +27,22 @@ Global
 		{E22E9DEE-43DD-4682-B758-145467EC45ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E22E9DEE-43DD-4682-B758-145467EC45ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E22E9DEE-43DD-4682-B758-145467EC45ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9626699-FFB5-44BC-B82A-1E69E1CBA67C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9626699-FFB5-44BC-B82A-1E69E1CBA67C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9626699-FFB5-44BC-B82A-1E69E1CBA67C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{C9626699-FFB5-44BC-B82A-1E69E1CBA67C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9626699-FFB5-44BC-B82A-1E69E1CBA67C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9626699-FFB5-44BC-B82A-1E69E1CBA67C}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {B9210062-975C-478E-A0DC-60E1E7E319F3}
-	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4F0F36B7-9F57-4324-AE58-310412D0B24B} = {EBBF66E0-382C-465D-B4AA-AF8AD744E87B}
 		{E22E9DEE-43DD-4682-B758-145467EC45ED} = {D57242B0-7D05-408B-B5CA-DC3597D001B5}
+		{C9626699-FFB5-44BC-B82A-1E69E1CBA67C} = {D57242B0-7D05-408B-B5CA-DC3597D001B5}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9210062-975C-478E-A0DC-60E1E7E319F3}
 	EndGlobalSection
 EndGlobal
