@@ -13,7 +13,7 @@ public class DocumentReader
         if (Directory.Exists(folder)) throw new Exception(); // todo: better exception
         
         Directory.CreateDirectory(folder);
-        File.Create(Path.Join(folder, ".keep"));
+        File.AppendAllLines(Path.Join(folder, "keep.me"), ["keep.me"]);
     }
 
     public void Delete(string folder)

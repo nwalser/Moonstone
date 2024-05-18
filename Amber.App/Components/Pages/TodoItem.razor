@@ -1,0 +1,32 @@
+﻿@using Amber.App.Services
+@using Amber.Domain.Documents.Todo
+@using Amber.Domain.Documents.Todo.Mutations
+
+@if (_todo is not null)
+{   
+    <div>
+        <MudTextField T="string" Value="_todo.Name" Immediate="false" ValueChanged="(v) => WorkspaceService.Current.ApplyMutation<Todo>(Id, new ChangeName(){Name = v})" />
+    </div>
+}
+
+
+@code {
+    [Inject] public required WorkspaceService WorkspaceService { get; init; }
+    
+    [Parameter] public Guid Id { get; set; }
+
+    private Todo? _todo;
+    
+    protected override Task OnParametersSetAsync()
+    {
+        WorkspaceService.Current?.Observe<Todo>(Id).Subscribe((t) => UpdateTodo(t));
+        
+        return base.OnParametersSetAsync();
+    }
+
+    private async Task UpdateTodo(Todo todo)
+    {
+        _todo = todo;
+        await InvokeAsync(StateHasChanged);
+    }
+}
