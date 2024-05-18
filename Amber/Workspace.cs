@@ -118,7 +118,7 @@ public class Workspace : IWorkspace
 
                 // process all changed files
                 while (!ct.IsCancellationRequested && _changedFiles.TryDequeue(out var changedFile))
-                    await ProcessChangedFile(changedFile); // todo fix bug that this routing doesnt get called
+                    await ProcessChangedFile(changedFile);
             }
             catch (Exception ex)
             {
