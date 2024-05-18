@@ -2,6 +2,8 @@
 
 public interface IWorkspace
 {
+    public IEnumerable<IDocument> EnumerateDocuments();
+    
     public Task Create<TDocument>(Guid? id = default);
     
     public TDocument Load<TDocument>(Guid id);

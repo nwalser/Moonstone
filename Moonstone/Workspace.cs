@@ -6,10 +6,9 @@ namespace Moonstone;
 public class Workspace : IWorkspace
 {
     private readonly string _path;
-    private readonly string _session;
     private readonly List<DocumentReader> _documentCollections;
     
-    private List<Document> _documents = [];
+    private readonly List<Document> _documents = [];
 
     private readonly Queue<FileSystemEventArgs> _changedFiles = new();
 
@@ -22,7 +21,6 @@ public class Workspace : IWorkspace
     public Workspace(string path, string session, List<IHandler> documentCollections)
     {
         _path = path;
-        _session = session;
         _documentCollections = documentCollections
             .Select(h => new DocumentReader()
             {
@@ -39,7 +37,7 @@ public class Workspace : IWorkspace
         Directory.Delete(path, recursive: true);
     }
     
-    public static async Task<Workspace> Open(string path, string session, List<IHandler> handlers)
+    public static async Task<IWorkspace> Open(string path, string session, List<IHandler> handlers)
     {
         if (!Directory.Exists(path)) throw new Exception(); // todo better exceptions
         
@@ -60,7 +58,7 @@ public class Workspace : IWorkspace
             _fileSystemWatcher.EnableRaisingEvents = false;
     }
 
-    public static async Task<Workspace> Create(string path, string session, List<IHandler> handlers)
+    public static async Task<IWorkspace> Create(string path, string session, List<IHandler> handlers)
     {
         if (Directory.Exists(path)) throw new Exception(); // todo better exceptions
         
@@ -172,7 +170,7 @@ public class Workspace : IWorkspace
 
         // if document is not cached already load into cache
         if(_documents.All(d => d.Id != documentId))
-            _documents.Add(new Document(documentId, documentValue));
+            _documents.Add(new Document(documentId, documentReader.Handler.DocumentType, documentValue));
         
         // update document value
         var document = _documents.Single(d => d.Id == documentId);
@@ -190,7 +188,12 @@ public class Workspace : IWorkspace
         var documentReader = GetReaderForType(type);
         return Path.Join(_path, documentReader.Handler.DocumentTypeId.ToString(CultureInfo.InvariantCulture), documentId.ToString());
     }
-    
+
+    public IEnumerable<IDocument> EnumerateDocuments()
+    {
+        return _documents;
+    }
+
     public async Task Create<TDocument>(Guid? id = default)
     {
         try

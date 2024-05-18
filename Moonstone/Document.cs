@@ -2,9 +2,10 @@
 
 namespace Moonstone;
 
-public class Document(Guid id, object value)
+public class Document(Guid id, Type type, object value) : IDocument
 {
     public Guid Id { get; } = id;
+    public Type Type { get; } = type;
     private readonly BehaviorSubject<object> _valueSubject = new(value);
 
     public object Value => _valueSubject.Value;
