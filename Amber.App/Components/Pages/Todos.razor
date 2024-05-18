@@ -1,6 +1,5 @@
 ﻿@using Amber.App.Services
 @using Amber.Domain.Documents.Todo
-@using Amber.Domain.Documents.Todo.Mutations
 
 @page "/todos"
 
@@ -16,7 +15,7 @@
         <TodoItem Id="todo.Id" />
     }
     
-    <button @onclick="Create">add todo</button>
+    <MudButton OnClick="Create">Add Todo</MudButton>
 }
 
 
@@ -28,11 +27,6 @@
     {
         var id = Guid.NewGuid();
         await Workspaces.Current?.Create<Todo>(id)!;
-        await Workspaces.Current?.ApplyMutation<Todo>(id, new ChangeName()
-        {
-            Name = "Test"
-        })!;
-       
         await InvokeAsync(StateHasChanged);
     }
 }

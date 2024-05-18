@@ -1,13 +1,12 @@
 ﻿@using Amber.App.Services
 @using Amber.Domain.Documents.Todo
-@using Amber.Domain.Documents.Todo.Mutations
 
 @if (_todo is not null && Workspaces.Current is not null)
 {   
     <MudStack Row="true">
-        <MudTextField T="string" Value="_todo.Name" Immediate="false" ValueChanged="(v) => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeName() { Name = v })"/>
-        <MudNumericField T="double" Value="_todo.EstimatedEffort.TotalHours" ValueChanged="v => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeEstimatedEffort() { EstimatedEffort = TimeSpan.FromHours(v) })"/>
-        <MudCheckBox T="bool" Value="_todo.Completed" ValueChanged="(v) => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeCompletion() { Completed = v })"/>
+        <MudTextField T="string" Value="_todo.Name" Immediate="false" ValueChanged="name => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeName(name))"/>
+        <MudNumericField T="double" Value="_todo.EstimatedEffort.TotalHours" Immediate="false" ValueChanged="hours => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeEstimatedEffort(TimeSpan.FromHours(hours)))"/>
+        <MudCheckBox T="bool" Value="_todo.Completed" ValueChanged="completed => Workspaces.Current.ApplyMutation<Todo>(Id, new ChangeCompletion(completed))"/>
     </MudStack>
 }
 
@@ -20,13 +19,12 @@
     
     protected override Task OnParametersSetAsync()
     {
-        Workspaces.Current?.Observe<Todo>(Id).Subscribe((t) => _ = UpdateTodo(t));
+        Workspaces.Current?.Observe<Todo>(Id).Subscribe(todo =>
+        {
+            _todo = todo; 
+            InvokeAsync(StateHasChanged);
+        });
+        
         return base.OnParametersSetAsync();
-    }
-
-    private async Task UpdateTodo(Todo todo)
-    {
-        _todo = todo;
-        await InvokeAsync(StateHasChanged);
     }
 }

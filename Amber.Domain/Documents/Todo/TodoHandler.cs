@@ -1,5 +1,4 @@
-﻿using Amber.Domain.Documents.Todo.Mutations;
-using Moonstone;
+﻿using Moonstone;
 
 namespace Amber.Domain.Documents.Todo;
 
@@ -38,3 +37,8 @@ public class TodoHandler : IHandler
         }
     }
 }
+
+
+public record ChangeCompletion(bool Completed);
+public record ChangeEstimatedEffort(TimeSpan EstimatedEffort);
+public record ChangeName(string Name);

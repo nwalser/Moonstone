@@ -10,8 +10,4 @@
       <ProjectReference Include="..\Moonstone\Moonstone.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Documents\Todo\ValueObjects\" />
-    </ItemGroup>
-
 </Project>
