@@ -2,6 +2,14 @@
 using Amber.Domain.Documents.Todo;
 using Moonstone;
 
+// remarks:
+// -- do not use caching of records
+// -- do not use file system watcher to notify for every single document that changed. just notify the application that something has changed :)
+//    application can then refetch everything
+// -- enable better filtering of documents before loading them into memory
+
+
+
 
 var tempPath = "C:\\Users\\Nathaniel Walser\\Desktop\\test";
 //Directory.Delete(tempPath, recursive: true);
