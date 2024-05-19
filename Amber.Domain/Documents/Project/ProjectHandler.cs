@@ -7,7 +7,8 @@ public class ProjectHandler : IHandler<ProjectAggregate>
     public Dictionary<int, Type> MutationTypes { get; } = new()
     {
         { 0, typeof(ChangeName) },
-        { 1, typeof(AddTodo) }
+        { 1, typeof(AddTodo) },
+        { 2, typeof(RemoveTodo) }
     };
     
     public ProjectAggregate CreateNew()
