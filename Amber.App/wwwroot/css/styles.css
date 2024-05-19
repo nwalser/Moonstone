@@ -1,5 +1,10 @@
-﻿.mud-button-outlined {
-    border-color: var(--mud-palette-lines-default);
+﻿.mud-icon-size-small {
+    font-size: 1.2rem !important;
+}
+
+.mud-button-outlined {
+    border-color: var(--mud-palette-lines-default) !important;
+    padding: 4px !important;
 }
 
 .mud-chip-outlined {
@@ -28,4 +33,17 @@
 .mud-chip.mud-chip-size-small{
     height: 18px !important;
     padding: 0 5px;
+}
+
+
+.mud-popover {
+    background-color: var(--mud-palette-background) !important;
+}
+
+.mud-tooltip-arrow {
+    background-color: var(--mud-palette-background) !important;
+}
+
+.button-left-aligned {
+    justify-content: flex-start !important;
 }

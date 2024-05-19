@@ -1,8 +1,9 @@
 ﻿@page "/"
-@layout DashboardLayout
+
 
 <h1>Open</h1>
 <button @onclick="async () => await OpenWorkspace()">Open Workspace</button>
+
 
 @code {
     [Inject] public required IFolderPicker FolderPicker { get; init; }
