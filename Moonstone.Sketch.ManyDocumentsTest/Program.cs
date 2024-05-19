@@ -14,7 +14,7 @@ var workspace = new Workspace(tempPath, new Dictionary<int, Type>
     { 1, typeof(TodoAggregate) }
 });
 
-var todoReader = new Reader<TodoAggregate>(tempPath, "session1", new TodoHandler());
+var todoReader = ProjectHandler.GetReader("session1");
 
 var sw = Stopwatch.StartNew();
 

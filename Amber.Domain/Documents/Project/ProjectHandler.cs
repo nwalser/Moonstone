@@ -23,6 +23,11 @@ public class ProjectHandler : IHandler<ProjectAggregate>
                 break;
         }
     }
+
+    public static Reader<ProjectAggregate> GetReader(string session)
+    {
+        return new Reader<ProjectAggregate>(session, new ProjectHandler());
+    }
 }
 
 public record ChangeName(string Name);

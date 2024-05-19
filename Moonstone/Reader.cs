@@ -4,25 +4,19 @@ namespace Moonstone;
 
 public class Reader<TDocument>
 {
-    private readonly string _path;
     private readonly string _session;
     private readonly IHandler<TDocument> _handler;
+
     
-    public Reader(string path, string session, IHandler<TDocument> handler)
+    public Reader(string session, IHandler<TDocument> handler)
     {
-        _path = path;
         _session = session;
         _handler = handler;
-    }
-
-    private string GetDocumentPath(DocumentIdentity identity)
-    {
-        return Path.Join(_path, identity.TypeId.ToString(), identity.Id.ToString());
     }
     
     public void AppendMutation(DocumentIdentity identity, object mutation)
     {
-        var folder = GetDocumentPath(identity);
+        var folder = identity.GetPath();
         var filePath = Path.Join(folder, $"{_session}.txt");
 
         if (!Directory.Exists(folder)) throw new DirectoryNotFoundException();
@@ -34,7 +28,7 @@ public class Reader<TDocument>
 
     public TDocument Read(DocumentIdentity identity, CancellationToken ct = default)
     {
-        var folder = GetDocumentPath(identity);
+        var folder = identity.GetPath();
 
         var mutationLogs = Directory.EnumerateFiles(folder, "*.txt");
         var mutations = new List<(long occurence, object mutation)>();
@@ -63,7 +57,7 @@ public class Reader<TDocument>
         return document;
     }
     
-    private void SerializeEntry(StreamWriter sw, long occurence, object mutation)
+    private void SerializeEntry(TextWriter sw, long occurence, object mutation)
     {
         {
             var typeId = _handler.MutationTypes.Single(t => t.Value == mutation.GetType()).Key.ToString();
@@ -92,10 +86,10 @@ public class Reader<TDocument>
         var line = sr.ReadLine() ?? throw new InvalidOperationException();
         var segments = line.Split(',');
 
-        var occurence = BitConverter.ToInt64(Convert.FromBase64String(segments[1]), 0);
-                
         var typeId = int.Parse(segments[0]);
+        var occurence = BitConverter.ToInt64(Convert.FromBase64String(segments[1]), 0);
         var json = Convert.FromBase64String(segments[2]);
+                
         var type = _handler.MutationTypes[typeId];
         var mutation = JsonSerializer.Deserialize(json, type) ?? throw new InvalidOperationException();
 

@@ -1,7 +1,10 @@
 ﻿using Amber.App.Services;
+using Amber.Domain.Documents.Project;
+using Amber.Domain.Documents.Todo;
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Storage;
 using Microsoft.Extensions.Logging;
+using Moonstone;
 using MudBlazor.Services;
 
 namespace Amber.App
@@ -21,9 +24,12 @@ namespace Amber.App
 
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddSingleton(FolderPicker.Default);
-            builder.Services.AddSingleton(new Workspaces());
             builder.Services.AddMudServices();
-
+            
+            builder.Services.AddSingleton(new Workspaces());
+            builder.Services.AddSingleton(ProjectHandler.GetReader("session1"));
+            builder.Services.AddSingleton(TodoHandler.GetReader("session1"));
+            
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();

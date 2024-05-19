@@ -31,6 +31,11 @@ public class TodoHandler : IHandler<TodoAggregate>
                 break;
         }
     }
+    
+    public static Reader<TodoAggregate> GetReader(string session)
+    {
+        return new Reader<TodoAggregate>(session, new TodoHandler());
+    }
 }
 
 

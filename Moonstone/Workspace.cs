@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Subjects;
-using System.Reflection.Metadata;
 using Moonstone.Exceptions;
 
 namespace Moonstone;
@@ -46,12 +45,12 @@ public class Workspace
         
         _externalChange.OnNext(new DocumentIdentity()
         {
+            Workspace = _path,
             Id = documentId,
             TypeId = typeId,
             Type = type
         });
     }
-
 
     public IEnumerable<DocumentIdentity> EnumerateDocuments()
     {
@@ -68,6 +67,7 @@ public class Workspace
                 var documentId = Guid.Parse(Path.GetFileNameWithoutExtension(documentFolder));
                 yield return new DocumentIdentity()
                 {
+                    Workspace = _path,
                     Id = documentId,
                     Type = type,
                     TypeId = typeId,
@@ -85,6 +85,7 @@ public class Workspace
     {
         return new DocumentIdentity()
         {
+            Workspace = _path,
             Id = id,
             Type = typeof(TDocument),
             TypeId = _typeMap.Single(t => t.Value == typeof(TDocument)).Key
@@ -100,6 +101,7 @@ public class Workspace
     {
         var identity = new DocumentIdentity()
         {
+            Workspace = _path,
             Id = id ?? Guid.NewGuid(),
             Type = typeof(TDocument),
             TypeId = _typeMap.Single(t => t.Value == typeof(TDocument)).Key

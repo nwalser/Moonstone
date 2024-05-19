@@ -6,6 +6,4 @@ public interface IHandler<TDocument>
     
     public TDocument CreateNew();
     public void ApplyMutation(TDocument aggregate, object mutation);
-
-    public int GetMutationTypeId(Type mutationType) => MutationTypes.Single(t => t.Value == mutationType).Key;
 }

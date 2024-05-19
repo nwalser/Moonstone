@@ -6,9 +6,9 @@
 
 @if (Workspaces.Current is not null)
 {
-    var projectDocuments = Workspaces.Current.EnumerateDocuments<ProjectAggregate>();
+    var workspace = Workspaces.Current;
     
-    @foreach (var projectDocument in projectDocuments)
+    @foreach (var projectDocument in workspace.EnumerateDocuments<ProjectAggregate>())
     {
         var project = Reader.Read(projectDocument);
         
