@@ -12,10 +12,8 @@
             <OnLoad Context="project">
                 <h1>@project.Name</h1>
 
-                @foreach (var todoId in project.Todos)
+                @foreach (var todoIdentity in project.Todos.Select(todoId => workspace.GetById<TodoAggregate>(todoId)))
                 {
-                    var todoIdentity = workspace.GetById<TodoAggregate>(todoId);
-
                     <ReaderComponent TDocument="TodoAggregate" Identity="todoIdentity">
                         <OnLoad Context="todo">
                             <MudStack Row="true">
@@ -25,20 +23,12 @@
                                 <MudButton OnClick="() => DeleteTodoItem(workspace, projectIdentity, todoIdentity)">Delete</MudButton>
                             </MudStack>
                         </OnLoad>
-                        <OnError Context="exception">
-                            <p>@exception.Message</p>
-                        </OnError>
                     </ReaderComponent>
                 }
-                
+
                 <MudButton OnClick="() => CreateTodoItem(workspace, projectIdentity)">Add</MudButton>
             </OnLoad>
-            <OnError Context="exception">
-                <p>@exception.Message</p>
-            </OnError>
         </ReaderComponent>
-        
-
     }
 </CurrentWorkspace>
 
