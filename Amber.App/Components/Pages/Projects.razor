@@ -1,5 +1,4 @@
-﻿@using System.Reactive.Linq
-@using Amber.App.Services
+﻿@using Amber.App.Services
 @using Amber.Domain.Documents.Project
 @using Moonstone
 
@@ -18,25 +17,16 @@
         </MudStack>
     }
     
-    <MudButton OnClick="CreateProject">Add Project</MudButton>
+    <MudButton OnClick="() => Workspaces.Current?.Create<ProjectAggregate>()">Add Project</MudButton>
 }
 
 @code {
     [Inject] public required Workspaces Workspaces { get; set; }
     [Inject] public required Reader<ProjectAggregate> Reader { get; set; }
 
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
-        Workspaces.Current?.ExternalChange
-            .ObserveOn(new SynchronizationContext())
-            .Do(i => InvokeAsync(StateHasChanged));
-        
-        base.OnParametersSet();
-    }
-
-    private void CreateProject()
-    {
-        Workspaces.Current?.Create<ProjectAggregate>();
-        InvokeAsync(StateHasChanged);
+        Workspaces.Current?.ExternalChange.Subscribe(_ => InvokeAsync(StateHasChanged));
+        base.OnInitialized();
     }
 }

@@ -3,4 +3,5 @@
 public class ProjectAggregate
 {
     public string Name { get; set; } = "Your Project Name";
+    public List<Guid> Todos { get; set; } = [];
 }

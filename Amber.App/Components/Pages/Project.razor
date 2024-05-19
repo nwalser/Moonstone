@@ -1,8 +1,46 @@
 ﻿@page "/project/{ProjectId:guid}"
+@using Amber.Domain.Documents.Project
+@using Amber.Domain.Documents.Todo
+@using Moonstone
+@using ChangeName = Amber.Domain.Documents.Todo.ChangeName
 
-
-
+<CurrentWorkspace Context="workspace">
+    @{
+        var projectDocument = workspace.GetById<ProjectAggregate>(ProjectId);
+        var project = ProjectReader.Read(projectDocument);
+        
+        <h1>@project.Name</h1>
+        
+        @foreach (var todoId in project.Todos)
+        {
+            var todoDocument = workspace.GetById<TodoAggregate>(todoId);
+            var todo = TodoReader.Read(todoDocument);
+            
+            <MudStack Row="true">
+                <MudTextField T="string" Value="@todo.Name" ValueChanged="name => TodoReader.AppendMutation(todoDocument, new ChangeName(name))" Immediate="false" />
+                <MudNumericField T="double" Value="@todo.EstimatedEffort.TotalHours" ValueChanged="effort => TodoReader.AppendMutation(todoDocument, new ChangeEstimatedEffort(TimeSpan.FromHours(effort))" Immediate="false" />
+                <MudCheckBox T="bool" Value="@todo.Completed" ValueChanged="completed => TodoReader.AppendMutation(todoDocument, new ChangeCompletion(completed))" />
+                <MudButton OnClick="() => workspace.Delete(todoDocument)">Delete</MudButton>
+            </MudStack>
+        }
+        
+        <MudButton OnClick="() => CreateTodoItem(workspace, projectDocument)">Add</MudButton>
+    }
+</CurrentWorkspace>
 
 @code {
+    [Inject] public required Reader<ProjectAggregate> ProjectReader { get; set; }
+    [Inject] public required Reader<TodoAggregate> TodoReader { get; set; }
+    
     [Parameter] public Guid ProjectId { get; init; }
+
+    private void CreateTodoItem(Workspace workspace, DocumentIdentity projectDocument)
+    {
+        var newTodo = workspace.Create<TodoAggregate>();
+        ProjectReader.AppendMutation(projectDocument, new AddTodo(newTodo.Id));
+    }
+}
+
+@code {
+
 }
