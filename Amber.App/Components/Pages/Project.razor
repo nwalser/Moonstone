@@ -6,25 +6,39 @@
 
 <CurrentWorkspace Context="workspace">
     @{
-        var projectDocument = workspace.GetById<ProjectAggregate>(ProjectId);
-        var project = ProjectReader.Read(projectDocument);
+        var projectIdentity = workspace.GetById<ProjectAggregate>(ProjectId);
+
+        <ReaderComponent TDocument="ProjectAggregate" Identity="projectIdentity">
+            <OnLoad Context="project">
+                <h1>@project.Name</h1>
+
+                @foreach (var todoId in project.Todos)
+                {
+                    var todoIdentity = workspace.GetById<TodoAggregate>(todoId);
+
+                    <ReaderComponent TDocument="TodoAggregate" Identity="todoIdentity">
+                        <OnLoad Context="todo">
+                            <MudStack Row="true">
+                                <MudTextField T="string" Value="@todo.Name" ValueChanged="name => TodoReader.AppendMutation(todoIdentity, new ChangeName(name))" Immediate="false" />
+                                <MudNumericField T="double" Value="@todo.EstimatedEffort.TotalHours" ValueChanged="effort => TodoReader.AppendMutation(todoIdentity, new ChangeEstimatedEffort(TimeSpan.FromHours(effort)))" Immediate="false" />
+                                <MudCheckBox T="bool" Value="@todo.Completed" ValueChanged="completed => TodoReader.AppendMutation(todoIdentity, new ChangeCompletion(completed))" />
+                                <MudButton OnClick="() => DeleteTodoItem(workspace, projectIdentity, todoIdentity)">Delete</MudButton>
+                            </MudStack>
+                        </OnLoad>
+                        <OnError Context="exception">
+                            <p>@exception.Message</p>
+                        </OnError>
+                    </ReaderComponent>
+                }
+                
+                <MudButton OnClick="() => CreateTodoItem(workspace, projectIdentity)">Add</MudButton>
+            </OnLoad>
+            <OnError Context="exception">
+                <p>@exception.Message</p>
+            </OnError>
+        </ReaderComponent>
         
-        <h1>@project.Name</h1>
-        
-        @foreach (var todoId in project.Todos)
-        {
-            var todoDocument = workspace.GetById<TodoAggregate>(todoId);
-            var todo = TodoReader.Read(todoDocument);
-            
-            <MudStack Row="true">
-                <MudTextField T="string" Value="@todo.Name" ValueChanged="name => TodoReader.AppendMutation(todoDocument, new ChangeName(name))" Immediate="false" />
-                <MudNumericField T="double" Value="@todo.EstimatedEffort.TotalHours" ValueChanged="effort => TodoReader.AppendMutation(todoDocument, new ChangeEstimatedEffort(TimeSpan.FromHours(effort)))" Immediate="false" />
-                <MudCheckBox T="bool" Value="@todo.Completed" ValueChanged="completed => TodoReader.AppendMutation(todoDocument, new ChangeCompletion(completed))" />
-                <MudButton OnClick="() => DeleteTodoItem(workspace, projectDocument, todoDocument)">Delete</MudButton>
-            </MudStack>
-        }
-        
-        <MudButton OnClick="() => CreateTodoItem(workspace, projectDocument)">Add</MudButton>
+
     }
 </CurrentWorkspace>
 

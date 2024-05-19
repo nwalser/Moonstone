@@ -4,6 +4,7 @@ using Amber.Domain.Documents.Todo;
 using Moonstone;
 using ChangeName = Amber.Domain.Documents.Todo.ChangeName;
 
+// todo: implement try get
 
 var tempPath = "C:\\Users\\Nathaniel Walser\\Desktop\\test";
 if(Directory.Exists(tempPath)) Directory.Delete(tempPath, recursive: true);

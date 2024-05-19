@@ -1,0 +1,21 @@
+﻿@using Moonstone
+@typeparam TDocument
+
+@try
+{
+    var document = Reader.Read(Identity);
+    @OnLoad?.Invoke(document)
+}
+catch (Exception ex)
+{
+    @OnError?.Invoke(ex)
+}
+
+@code {
+    [Inject] public required Reader<TDocument> Reader { get; set; }
+    
+    [Parameter] public required DocumentIdentity Identity { get; set; }
+    
+    [Parameter] public RenderFragment<TDocument>? OnLoad { get; set; }
+    [Parameter] public RenderFragment<Exception>? OnError { get; set; }
+}

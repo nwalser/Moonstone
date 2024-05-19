@@ -25,11 +25,11 @@ public class Reader<TDocument>
         using var sw = new StreamWriter(stream);
         SerializeEntry(sw, DateTime.UtcNow.Ticks, mutation);
     }
-
+    
     public TDocument Read(DocumentIdentity identity, CancellationToken ct = default)
     {
         var folder = identity.GetPath();
-
+        
         var mutationLogs = Directory.EnumerateFiles(folder, "*.txt");
         var mutations = new List<(long occurence, object mutation)>();
         
