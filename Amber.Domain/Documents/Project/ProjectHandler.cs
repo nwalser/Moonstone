@@ -22,6 +22,9 @@ public class ProjectHandler : IHandler<ProjectAggregate>
             case ChangeName changeName:
                 aggregate.Name = changeName.Name;
                 break;
+            case AddTodo addTodo:
+                aggregate.Todos.Add(addTodo.TodoId);
+                break;
         }
     }
 
