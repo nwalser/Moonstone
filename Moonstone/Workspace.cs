@@ -34,7 +34,7 @@ public class Workspace
 
     private void RegisterExternalChange(object sender, FileSystemEventArgs args)
     {
-        if ((File.GetAttributes(args.FullPath) & FileAttributes.Directory) == FileAttributes.Directory) return;
+        if (!File.Exists(args.FullPath) || (File.GetAttributes(args.FullPath) & FileAttributes.Directory) == FileAttributes.Directory) return;
         
         var relativePath = Path.GetRelativePath(_path, args.FullPath);
         var segments = relativePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
