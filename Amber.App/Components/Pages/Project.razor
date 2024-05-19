@@ -20,7 +20,7 @@
                 <MudTextField T="string" Value="@todo.Name" ValueChanged="name => TodoReader.AppendMutation(todoDocument, new ChangeName(name))" Immediate="false" />
                 <MudNumericField T="double" Value="@todo.EstimatedEffort.TotalHours" ValueChanged="effort => TodoReader.AppendMutation(todoDocument, new ChangeEstimatedEffort(TimeSpan.FromHours(effort)))" Immediate="false" />
                 <MudCheckBox T="bool" Value="@todo.Completed" ValueChanged="completed => TodoReader.AppendMutation(todoDocument, new ChangeCompletion(completed))" />
-                <MudButton OnClick="() => workspace.Delete(todoDocument)">Delete</MudButton>
+                <MudButton OnClick="() => DeleteTodoItem(workspace, projectDocument, todoDocument)">Delete</MudButton>
             </MudStack>
         }
         
