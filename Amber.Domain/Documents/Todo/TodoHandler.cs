@@ -2,37 +2,32 @@
 
 namespace Amber.Domain.Documents.Todo;
 
-public class TodoHandler : IHandler
+public class TodoHandler : IHandler<TodoAggregate>
 {
-    public int DocumentTypeId { get; } = 0;
-    public Type DocumentType { get; } = typeof(TodoAggregate);
-
     public Dictionary<int, Type> MutationTypes { get; } = new()
     {
         {0, typeof(ChangeName)},
         {1, typeof(ChangeEstimatedEffort)},
         {2, typeof(ChangeCompletion)},
     };
-    
-    public object CreateNew()
+
+    public TodoAggregate CreateNew()
     {
         return new TodoAggregate(string.Empty);
     }
 
-    public void ApplyMutation(object aggregate, object mutation)
+    public void ApplyMutation(TodoAggregate aggregate, object mutation)
     {
-        var todo = (TodoAggregate)aggregate;
-        
         switch (mutation)
         {
             case ChangeName m:
-                todo.Name = m.Name;
+                aggregate.Name = m.Name;
                 break;
             case ChangeEstimatedEffort m:
-                todo.EstimatedEffort = m.EstimatedEffort;
+                aggregate.EstimatedEffort = m.EstimatedEffort;
                 break;
             case ChangeCompletion m:
-                todo.Completed = m.Completed;
+                aggregate.Completed = m.Completed;
                 break;
         }
     }

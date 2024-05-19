@@ -1,13 +1,11 @@
 ﻿namespace Moonstone;
 
-public interface IHandler
+public interface IHandler<TDocument>
 {
-    public int DocumentTypeId { get; }
-    public Type DocumentType { get; }
     public Dictionary<int, Type> MutationTypes { get; }
     
-    public object CreateNew();
-    public void ApplyMutation(object aggregate, object mutation);
+    public TDocument CreateNew();
+    public void ApplyMutation(TDocument aggregate, object mutation);
 
     public int GetMutationTypeId(Type mutationType) => MutationTypes.Single(t => t.Value == mutationType).Key;
 }

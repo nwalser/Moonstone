@@ -1,278 +1,125 @@
-﻿using System.Globalization;
-using System.Reactive.Linq;
+﻿using System.Reactive.Subjects;
+using System.Reflection.Metadata;
+using Moonstone.Exceptions;
 
 namespace Moonstone;
 
-public class Workspace : IWorkspace
+public class Workspace
 {
     private readonly string _path;
-    private readonly List<DocumentReader> _documentCollections;
+    private readonly Dictionary<int, Type> _typeMap;
+    private readonly FileSystemWatcher _watcher;
+
+    private readonly Subject<DocumentIdentity> _externalChange;
+    public IObservable<DocumentIdentity> ExternalChange => _externalChange;
     
-    private readonly List<Document> _documents = [];
-
-    private readonly Queue<FileSystemEventArgs> _changedFiles = new();
-
-    private Task? _backgroundTask;
-    private CancellationTokenSource? _backgroundTaskCts;
-    private FileSystemWatcher? _fileSystemWatcher;
-
-    private readonly SemaphoreSlim _semaphore = new(1, 1);
     
-    public Workspace(string path, string session, List<IHandler> documentCollections)
+    public Workspace(string path, Dictionary<int, Type> typeMap)
     {
         _path = path;
-        _documentCollections = documentCollections
-            .Select(h => new DocumentReader()
-            {
-                Handler = h,
-                Session = session,
-            })
-            .ToList();
-    }
+        _typeMap = typeMap;
 
-    public static void Delete(string path)
-    {
-        if (!Directory.Exists(path)) throw new Exception(); // todo better exceptions
+        _externalChange = new Subject<DocumentIdentity>();
         
-        Directory.Delete(path, recursive: true);
-    }
-    
-    public static async Task<IWorkspace> Open(string path, string session, List<IHandler> handlers)
-    {
-        if (!Directory.Exists(path)) throw new Exception(); // todo better exceptions
-        
-        var workspace = new Workspace(path, session, handlers);
-        await workspace.Init();
-        return workspace;
-    }
-
-    public async Task Close()
-    {
-        if(_backgroundTaskCts is not null)
-            await _backgroundTaskCts.CancelAsync();
-        
-        if(_backgroundTask is not null)
-            await _backgroundTask;
-
-        if (_fileSystemWatcher is not null)
-            _fileSystemWatcher.EnableRaisingEvents = false;
-    }
-
-    public static async Task<IWorkspace> Create(string path, string session, List<IHandler> handlers)
-    {
-        if (Directory.Exists(path)) throw new Exception(); // todo better exceptions
-        
-        Directory.CreateDirectory(path);
-
-        var workspace = new Workspace(path, session, handlers);
-        await workspace.Init();
-        return workspace;
-    }
-    
-    // todo: implement deletion of document
-    
-    private async Task Init()
-    {
-        // setup file system watcher
-        _fileSystemWatcher = new FileSystemWatcher
+        _watcher = new FileSystemWatcher()
         {
             Path = _path,
-            IncludeSubdirectories = true,
             EnableRaisingEvents = true,
             NotifyFilter = NotifyFilters.LastWrite,
+            IncludeSubdirectories = true,
         };
-        _fileSystemWatcher.Created += (_, e) => _changedFiles.Enqueue(e);
-        _fileSystemWatcher.Changed += (_, e) => _changedFiles.Enqueue(e);
-        
-        // load document metadata
-        await CacheAllDocuments();
-        
-        // start background task
-        _backgroundTaskCts = new CancellationTokenSource();
-        _backgroundTask = Task.Run(async () => await ProcessBackgroundWork(_backgroundTaskCts.Token));
+
+        _watcher.Created += RegisterExternalChange;
+        _watcher.Changed += RegisterExternalChange;
     }
-    
-    private async Task CacheAllDocuments()
+
+    private void RegisterExternalChange(object sender, FileSystemEventArgs args)
     {
-        // load all documents from disk
-        var documentTypeFolders = Directory.EnumerateDirectories(_path);
-        foreach (var documentTypeFolder in documentTypeFolders)
+        if ((File.GetAttributes(args.FullPath) & FileAttributes.Directory) == FileAttributes.Directory) return;
+        
+        var relativePath = Path.GetRelativePath(_path, args.FullPath);
+        var segments = relativePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+
+        var documentId = Guid.Parse(segments[^2]);
+        var typeId = Convert.ToInt32(segments[^3]);
+        var type = _typeMap[typeId];
+        
+        _externalChange.OnNext(new DocumentIdentity()
         {
-            var documentFolders = Directory.EnumerateDirectories(documentTypeFolder);
+            Id = documentId,
+            TypeId = typeId,
+            Type = type
+        });
+    }
+
+
+    public IEnumerable<DocumentIdentity> EnumerateDocuments()
+    {
+        var typeFolders = Directory.EnumerateDirectories(_path);
+
+        foreach (var typeFolder in typeFolders)
+        {
+            var typeId = Convert.ToInt32(Path.GetFileNameWithoutExtension(typeFolder));
+            var type = _typeMap[typeId];
+            var documentFolders = Directory.EnumerateDirectories(typeFolder);
+
             foreach (var documentFolder in documentFolders)
             {
-                await CacheDocument(documentFolder);
+                var documentId = Guid.Parse(Path.GetFileNameWithoutExtension(documentFolder));
+                yield return new DocumentIdentity()
+                {
+                    Id = documentId,
+                    Type = type,
+                    TypeId = typeId,
+                };
             }
         }
     }
 
-    private async Task ProcessBackgroundWork(CancellationToken ct = default)
+    public IEnumerable<DocumentIdentity> EnumerateDocuments<TDocument>()
     {
-        while (!ct.IsCancellationRequested)
+        return EnumerateDocuments().Where(d => d.Type == typeof(TDocument));
+    }
+
+    public DocumentIdentity GetById<TDocument>(Guid id)
+    {
+        return new DocumentIdentity()
         {
-            try
-            {
-                await _semaphore.WaitAsync(ct);
-
-                // process all changed files
-                while (!ct.IsCancellationRequested && _changedFiles.TryDequeue(out var changedFile))
-                    await ProcessChangedFile(changedFile);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
-            
-            await Task.Delay(100, ct);
-        }
-    }
-
-    private async Task ProcessChangedFile(FileSystemEventArgs e)
-    {
-        // do not handle folder changes
-        if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory))
-            return;
-        
-        var separators = new char[] {
-            Path.DirectorySeparatorChar,  
-            Path.AltDirectorySeparatorChar  
+            Id = id,
+            Type = typeof(TDocument),
+            TypeId = _typeMap.Single(t => t.Value == typeof(TDocument)).Key
         };
-        
-        var subpath = Path.GetRelativePath(_path, e.FullPath);
-        var subpathSegments = subpath.Split(separators, StringSplitOptions.RemoveEmptyEntries); // todo implement better path splitting
-
-        // update or index document
-        if (subpathSegments.Length == 3)
-        {
-            var documentFolder = Path.GetDirectoryName(e.FullPath) ?? throw new Exception();
-            await CacheDocument(documentFolder);
-        }
     }
-
-    private async Task CacheDocument(string documentFolder) // todo: do not pass path but type and id
-    {
-        var separators = new[] {
-            Path.DirectorySeparatorChar,  
-            Path.AltDirectorySeparatorChar  
-        };
-        
-        var subpathSegments = documentFolder.Split(separators, StringSplitOptions.RemoveEmptyEntries); // todo implement better path splitting
-
-        var documentId = Guid.Parse(subpathSegments[^1], CultureInfo.InvariantCulture);
-        var documentTypeId = Convert.ToInt32(subpathSegments[^2], CultureInfo.InvariantCulture);
-        var documentReader = GetReaderForTypeId(documentTypeId);
-        
-        var documentValue = await documentReader.Read(documentFolder);
-
-        // if document is not cached already load into cache
-        if(_documents.All(d => d.Id != documentId))
-            _documents.Add(new Document(documentId, documentReader.Handler.DocumentType, documentValue));
-        
-        // update document value
-        var document = _documents.Single(d => d.Id == documentId);
-        document.UpdateValue(documentValue);
-    }
-
-    private DocumentReader GetReaderForType(Type type) =>
-        _documentCollections.Single(d => d.Handler.DocumentType == type);
-
-    private DocumentReader GetReaderForTypeId(int typeId) =>
-        _documentCollections.Single(d => d.Handler.DocumentTypeId == typeId);
     
-    private string BuildPath(Type type, Guid documentId)
+    private string GetDocumentPath(DocumentIdentity identity)
     {
-        var documentReader = GetReaderForType(type);
-        return Path.Join(_path, documentReader.Handler.DocumentTypeId.ToString(CultureInfo.InvariantCulture), documentId.ToString());
+        return Path.Join(_path, identity.TypeId.ToString(), identity.Id.ToString());
+    }
+    
+    public DocumentIdentity Create<TDocument>(Guid? id = default)
+    {
+        var identity = new DocumentIdentity()
+        {
+            Id = id ?? Guid.NewGuid(),
+            Type = typeof(TDocument),
+            TypeId = _typeMap.Single(t => t.Value == typeof(TDocument)).Key
+        };
+        
+        var folder = GetDocumentPath(identity);
+        
+        if (Directory.Exists(folder)) throw new DocumentAlreadyExistsException();
+        
+        Directory.CreateDirectory(folder);
+        File.AppendAllLines(Path.Join(folder, "keep.me"), ["keep.me"]);
+
+        return identity;
     }
 
-    public IEnumerable<IDocument> EnumerateDocuments()
+    public void Delete(DocumentIdentity identity)
     {
-        return _documents;
-    }
+        var folder = GetDocumentPath(identity);
 
-    public async Task Create<TDocument>(Guid? id = default)
-    {
-        try
-        {
-            await _semaphore.WaitAsync();
-
-            var documentId = id ?? Guid.NewGuid();
-            var documentType = typeof(TDocument);
-            
-            var documentReader = GetReaderForType(documentType);
-            var documentPath = BuildPath(typeof(TDocument), documentId);
-            
-            documentReader.Create(documentPath);
-
-            await CacheDocument(documentPath);
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
-
-    public TDocument Load<TDocument>(Guid id)
-    {
-        return (TDocument)_documents.Single(d => d.Id == id).Value;
-    }
-
-    public IObservable<TDocument> Observe<TDocument>(Guid id)
-    {
-        return _documents.Single(d => d.Id == id).ValueObservable.Cast<TDocument>(); // todo: implement working cast
-    }
-
-    public async Task ApplyMutation<TDocument>(Guid documentId, object mutation)
-    {
-        try
-        {
-            await _semaphore.WaitAsync();
-            
-            var documentType = typeof(TDocument);
-
-            var documentReader = GetReaderForType(documentType);
-            var documentPath = BuildPath(documentType, documentId);
-            
-            // update document values in ram
-            var document = _documents.Single(d => d.Id == documentId);
-            documentReader.Handler.ApplyMutation(document.Value, mutation);
-            document.UpdateValue(document.Value);
-            
-            // write to disk
-            await documentReader.Append(documentPath, mutation);
-            
-            // recache
-            await CacheDocument(documentPath);
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
-
-    public async Task Delete<TDocument>(Guid documentId)
-    {
-        try
-        {
-            await _semaphore.WaitAsync();
-            
-            var documentType = typeof(TDocument);
-
-            var documentReader = GetReaderForType(documentType);
-            var documentPath = BuildPath(documentType, documentId);
-            
-            documentReader.Delete(documentPath);
-            _documents.Remove(_documents.Single(d => d.Id == documentId));
-
-            // todo implement deletion log
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
+        if (!Directory.Exists(folder)) throw new DocumentDoesNotExistException();
+        Directory.Delete(folder, recursive: true);
     }
 }

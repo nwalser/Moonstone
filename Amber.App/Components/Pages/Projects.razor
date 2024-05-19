@@ -1,19 +1,31 @@
 ﻿@using Amber.App.Services
 @using Amber.Domain.Documents.Project
-<h3>Projects</h3>
+@using Moonstone
+
+@page "/projects"
 
 @if (Workspaces.Current is not null)
 {
-    var projectDocuments = Workspaces.Current.EnumerateDocuments().Where(d => d.Type == typeof(ProjectAggregate));
+    var projectDocuments = Workspaces.Current.EnumerateDocuments<ProjectAggregate>();
     
     @foreach (var projectDocument in projectDocuments)
     {
-        var project = Workspaces.Current.Load<ProjectAggregate>(projectDocument.Id);
+        var project = Reader.Read(projectDocument);
         
+        <div>
+            <a href="@($"/project/{projectDocument.Id}")">@project.Name</a>
+        </div>
         
+        <MudButton OnClick="CreateProject">Add Project</MudButton>
     }
 }
 
 @code {
     [Inject] public required Workspaces Workspaces { get; set; }
+    [Inject] public required Reader<ProjectAggregate> Reader { get; set; }
+
+    private void CreateProject()
+    {
+        var projectDocument = Workspaces.Current?.Create<ProjectAggregate>();
+    }
 }

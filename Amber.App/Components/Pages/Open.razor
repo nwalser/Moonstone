@@ -1,24 +1,22 @@
 ﻿@page "/"
 @using Amber.App.Services
-@using Amber.Domain.Documents.Todo
+@using Amber.Domain.Documents
 @using CommunityToolkit.Maui.Storage
-@using Moonstone
 
 <h1>Open</h1>
-
-<button @onclick="async () => await OpenTodoList()">Open Todolist</button>
+<button @onclick="async () => await OpenWorkspace()">Open Workspace</button>
 
 @code {
     [Inject] public required IFolderPicker FolderPicker { get; init; }
     [Inject] public required Workspaces Workspaces { get; init; }
     
-    public async Task OpenTodoList()
+    public async Task OpenWorkspace()
     {
         var result = await FolderPicker.PickAsync();
 
         if (result.Folder is null)
             return;
         
-        Workspaces.Current = await Workspace.Open(result.Folder.Path, "session1", [new TodoHandler()]);
+        Workspaces.Current = new AmberWorkspace(result.Folder.Path);
     }
 }

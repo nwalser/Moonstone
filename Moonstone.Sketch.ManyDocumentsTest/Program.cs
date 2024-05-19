@@ -1,30 +1,30 @@
 ﻿using System.Diagnostics;
+using Amber.Domain.Documents.Project;
 using Amber.Domain.Documents.Todo;
 using Moonstone;
-
-// remarks:
-// -- do not use caching of records
-// -- do not use file system watcher to notify for every single document that changed. just notify the application that something has changed :)
-//    application can then refetch everything
-// -- enable better filtering of documents before loading them into memory
-
-// -- return envelope
+using ChangeName = Amber.Domain.Documents.Todo.ChangeName;
 
 
 var tempPath = "C:\\Users\\Nathaniel Walser\\Desktop\\test";
-//Directory.Delete(tempPath, recursive: true);
-var workspace = await Workspace.Open(tempPath, "session1", [new TodoHandler()]);
+if(Directory.Exists(tempPath)) Directory.Delete(tempPath, recursive: true);
+Directory.CreateDirectory(tempPath);
+var workspace = new Workspace(tempPath, new Dictionary<int, Type>
+{
+    { 0, typeof(ProjectAggregate) },
+    { 1, typeof(TodoAggregate) }
+});
+
+var todoReader = new Reader<TodoAggregate>(tempPath, "session1", new TodoHandler());
 
 var sw = Stopwatch.StartNew();
 
 for (var i = 0; i < 100; i++)
 {
-    var id = Guid.NewGuid();
-    await workspace.Create<TodoAggregate>(id);
+    var identity = workspace.Create<TodoAggregate>();
 
-    for (var j = 0; j < 10; j++)
+    for (var j = 0; j < 100; j++)
     {
-        await workspace.ApplyMutation<TodoAggregate>(id, new ChangeName($"Name {j}"));
+        todoReader.AppendMutation(identity, new ChangeName($"Name {j}"));
     }
 }
 
@@ -32,12 +32,12 @@ Console.WriteLine("Create: " + sw.ElapsedMilliseconds);
 sw.Restart();
 
 // read back from fs
-var files = Directory.EnumerateFiles(tempPath, "", SearchOption.AllDirectories);
+var documents = workspace.EnumerateDocuments();
 
-foreach (var file in files)
+foreach (var identity in documents)
 {
-    var stream = File.OpenText(file);
-    while (!stream.EndOfStream) stream.ReadLine();
+    var todoAggregate = todoReader.Read(identity);
+    Console.WriteLine(todoAggregate.Name);
 }
 
 Console.WriteLine("Read: " + sw.ElapsedMilliseconds);

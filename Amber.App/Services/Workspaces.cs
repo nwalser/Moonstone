@@ -4,5 +4,5 @@ namespace Amber.App.Services;
 
 public class Workspaces
 {
-    public IWorkspace? Current { get; set; }
+    public Workspace? Current { get; set; }
 }
