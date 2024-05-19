@@ -1,8 +1,7 @@
-﻿@page "/project/{ProjectId:guid}"
-@using Amber.Domain.Documents.Project
-@using Amber.Domain.Documents.Todo
-@using Moonstone
-@using ChangeName = Amber.Domain.Documents.Todo.ChangeName
+﻿@using ChangeName = Amber.Domain.Documents.Todo.ChangeName
+
+@page "/project/{ProjectId:guid}"
+@layout DashboardLayout
 
 <CurrentWorkspace Context="workspace">
     @{
