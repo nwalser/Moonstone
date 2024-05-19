@@ -1,4 +1,5 @@
-﻿@using Amber.App.Services
+﻿@using System.Reactive.Linq
+@using Amber.App.Services
 @using Amber.Domain.Documents.Project
 @using Moonstone
 
@@ -6,26 +7,36 @@
 
 @if (Workspaces.Current is not null)
 {
-    var workspace = Workspaces.Current;
-    
-    @foreach (var projectDocument in workspace.EnumerateDocuments<ProjectAggregate>())
+    @foreach (var projectDocument in Workspaces.Current.EnumerateDocuments<ProjectAggregate>())
     {
         var project = Reader.Read(projectDocument);
         
-        <div>
-            <a href="@($"/project/{projectDocument.Id}")">@project.Name</a>
-        </div>
-        
-        <MudButton OnClick="CreateProject">Add Project</MudButton>
+        <MudStack Row="true">
+            <MudTextField T="string" Value="@project.Name" ValueChanged="v => Reader.AppendMutation(projectDocument, new ChangeName(v))" Immediate="false" />
+            
+            <a href="@($"/project/{projectDocument.Id}")">View</a>
+        </MudStack>
     }
+    
+    <MudButton OnClick="CreateProject">Add Project</MudButton>
 }
 
 @code {
     [Inject] public required Workspaces Workspaces { get; set; }
     [Inject] public required Reader<ProjectAggregate> Reader { get; set; }
 
+    protected override void OnParametersSet()
+    {
+        Workspaces.Current?.ExternalChange
+            .ObserveOn(new SynchronizationContext())
+            .Do(i => InvokeAsync(StateHasChanged));
+        
+        base.OnParametersSet();
+    }
+
     private void CreateProject()
     {
-        var projectDocument = Workspaces.Current?.Create<ProjectAggregate>();
+        Workspaces.Current?.Create<ProjectAggregate>();
+        InvokeAsync(StateHasChanged);
     }
 }
