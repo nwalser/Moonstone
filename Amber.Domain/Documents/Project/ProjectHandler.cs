@@ -25,6 +25,9 @@ public class ProjectHandler : IHandler<ProjectAggregate>
             case AddTodo addTodo:
                 aggregate.Todos.Add(addTodo.TodoId);
                 break;
+            case RemoveTodo removeTodo:
+                aggregate.Todos.Remove(removeTodo.TodoId);
+                break;
         }
     }
 
@@ -36,3 +39,4 @@ public class ProjectHandler : IHandler<ProjectAggregate>
 
 public record ChangeName(string Name);
 public record AddTodo(Guid TodoId);
+public record RemoveTodo(Guid TodoId);

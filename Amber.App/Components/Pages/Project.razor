@@ -39,8 +39,10 @@
         var newTodo = workspace.Create<TodoAggregate>();
         ProjectReader.AppendMutation(projectDocument, new AddTodo(newTodo.Id));
     }
-}
 
-@code {
-
+    private void DeleteTodoItem(Workspace workspace, DocumentIdentity projectDocument, DocumentIdentity todoDocument)
+    {
+        ProjectReader.AppendMutation(projectDocument, new RemoveTodo(todoDocument.Id));
+        workspace.Delete(todoDocument);
+    }
 }
