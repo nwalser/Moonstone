@@ -1,21 +1,8 @@
 ﻿@page "/"
-
-
-<h1>Open</h1>
-<button @onclick="async () => await OpenWorkspace()">Open Workspace</button>
+@layout ProjectsLayout
 
 
 @code {
     [Inject] public required IFolderPicker FolderPicker { get; init; }
-    [Inject] public required Workspaces Workspaces { get; init; }
-    
-    public async Task OpenWorkspace()
-    {
-        var result = await FolderPicker.PickAsync();
-
-        if (result.Folder is null)
-            return;
-        
-        Workspaces.Current = new AmberWorkspace(result.Folder.Path);
-    }
+    [Inject] public required WorkspaceManager WorkspaceManager { get; init; }
 }

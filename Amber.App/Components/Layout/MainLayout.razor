@@ -24,35 +24,12 @@
         </MudStack>
     </MudStack>
 
-    <MudStack Row="false" Justify="Justify.SpaceBetween" Style="height: 100vh; min-width: 200px; border-right: 1px solid var(--mud-palette-lines-default)" Class="pa-2">
-        <MudStack Row="false" Spacing="1">
-            <MudText Typo="Typo.body2">Workspace 1</MudText>
-            <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="button-left-aligned">Project 1</MudButton>
-            <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="button-left-aligned">Project 2</MudButton>
-            <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="button-left-aligned">Project 3</MudButton>
-
-            <MudText Typo="Typo.body2" Class="mt-4">Workspace 2</MudText>
-            <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="button-left-aligned">Project 1</MudButton>
-            <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="button-left-aligned">Project 2</MudButton>
-            <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="button-left-aligned">Project 3</MudButton>
-        </MudStack>
-        <MudStack Row="false" Spacing="1">
-            <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Outlined.Info" Size="Size.Small">Import Workspace</MudButton>
-            <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Outlined.Info" Size="Size.Small">Create Workspace</MudButton>
-        </MudStack>
-    </MudStack>
-
-
-    <MudContainer MaxWidth="MaxWidth.False" Style="flex-grow: 1">
-        @Body
-    </MudContainer>
+    @Body
 </MudStack>
 
 
 
 @code {
-    [Inject] public required NavigationManager NavigationManager { get; set; }
-
     private static readonly MudColor Lines = new(39, 39, 42, 255);
     private static readonly MudColor White = new(250, 250, 250, 255);
     private static readonly MudColor Black = new(9, 9, 11, 255);

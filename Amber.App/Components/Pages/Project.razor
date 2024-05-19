@@ -1,8 +1,9 @@
 ﻿@using ChangeName = Amber.Domain.Documents.Todo.ChangeName
+@layout ProjectsLayout
 
-@page "/project/{ProjectId:guid}"
+@page "/workspace/{WorkspaceId:int}/project/{ProjectId:guid}"
 
-<CurrentWorkspace Context="workspace">
+<WorkspaceComponent WorkspaceId="WorkspaceId" Context="workspace">
     @{
         var projectIdentity = workspace.GetById<ProjectAggregate>(ProjectId);
 
@@ -28,12 +29,13 @@
             </OnLoad>
         </ReaderComponent>
     }
-</CurrentWorkspace>
+</WorkspaceComponent>
 
 @code {
     [Inject] public required Reader<ProjectAggregate> ProjectReader { get; set; }
     [Inject] public required Reader<TodoAggregate> TodoReader { get; set; }
     
+    [Parameter] public int WorkspaceId { get; init; }
     [Parameter] public Guid ProjectId { get; init; }
 
     private void CreateTodoItem(Workspace workspace, DocumentIdentity projectDocument)

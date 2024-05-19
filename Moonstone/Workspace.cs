@@ -5,24 +5,23 @@ namespace Moonstone;
 
 public class Workspace
 {
-    private readonly string _path;
+    public string Location { get; }
     private readonly Dictionary<int, Type> _typeMap;
     private readonly FileSystemWatcher _watcher;
 
     private readonly Subject<DocumentIdentity> _externalChange;
     public IObservable<DocumentIdentity> ExternalChange => _externalChange;
     
-    
-    public Workspace(string path, Dictionary<int, Type> typeMap)
+    public Workspace(string location, Dictionary<int, Type> typeMap)
     {
-        _path = path;
+        Location = location;
         _typeMap = typeMap;
 
         _externalChange = new Subject<DocumentIdentity>();
         
         _watcher = new FileSystemWatcher()
         {
-            Path = _path,
+            Path = Location,
             EnableRaisingEvents = true,
             NotifyFilter = NotifyFilters.LastWrite,
             IncludeSubdirectories = true,
@@ -36,8 +35,8 @@ public class Workspace
     {
         if (!File.Exists(args.FullPath) || (File.GetAttributes(args.FullPath) & FileAttributes.Directory) == FileAttributes.Directory) return;
         
-        var relativePath = Path.GetRelativePath(_path, args.FullPath);
-        var segments = relativePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+        var relativePath = System.IO.Path.GetRelativePath(Location, args.FullPath);
+        var segments = relativePath.Split(System.IO.Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
 
         var documentId = Guid.Parse(segments[^2]);
         var typeId = Convert.ToInt32(segments[^3]);
@@ -45,7 +44,7 @@ public class Workspace
         
         _externalChange.OnNext(new DocumentIdentity()
         {
-            Workspace = _path,
+            Workspace = Location,
             Id = documentId,
             TypeId = typeId,
             Type = type
@@ -54,20 +53,20 @@ public class Workspace
 
     public IEnumerable<DocumentIdentity> EnumerateDocuments()
     {
-        var typeFolders = Directory.EnumerateDirectories(_path);
+        var typeFolders = Directory.EnumerateDirectories(Location);
 
         foreach (var typeFolder in typeFolders)
         {
-            var typeId = Convert.ToInt32(Path.GetFileNameWithoutExtension(typeFolder));
+            var typeId = Convert.ToInt32(System.IO.Path.GetFileNameWithoutExtension(typeFolder));
             var type = _typeMap[typeId];
             var documentFolders = Directory.EnumerateDirectories(typeFolder);
 
             foreach (var documentFolder in documentFolders)
             {
-                var documentId = Guid.Parse(Path.GetFileNameWithoutExtension(documentFolder));
+                var documentId = Guid.Parse(System.IO.Path.GetFileNameWithoutExtension(documentFolder));
                 yield return new DocumentIdentity()
                 {
-                    Workspace = _path,
+                    Workspace = Location,
                     Id = documentId,
                     Type = type,
                     TypeId = typeId,
@@ -85,7 +84,7 @@ public class Workspace
     {
         return new DocumentIdentity()
         {
-            Workspace = _path,
+            Workspace = Location,
             Id = id,
             Type = typeof(TDocument),
             TypeId = _typeMap.Single(t => t.Value == typeof(TDocument)).Key
@@ -94,14 +93,14 @@ public class Workspace
     
     private string GetDocumentPath(DocumentIdentity identity)
     {
-        return Path.Join(_path, identity.TypeId.ToString(), identity.Id.ToString());
+        return System.IO.Path.Join(Location, identity.TypeId.ToString(), identity.Id.ToString());
     }
     
     public DocumentIdentity Create<TDocument>(Guid? id = default)
     {
         var identity = new DocumentIdentity()
         {
-            Workspace = _path,
+            Workspace = Location,
             Id = id ?? Guid.NewGuid(),
             Type = typeof(TDocument),
             TypeId = _typeMap.Single(t => t.Value == typeof(TDocument)).Key
@@ -112,7 +111,7 @@ public class Workspace
         if (Directory.Exists(folder)) throw new DocumentAlreadyExistsException();
         
         Directory.CreateDirectory(folder);
-        File.AppendAllLines(Path.Join(folder, "keep.me"), ["keep.me"]);
+        File.AppendAllLines(System.IO.Path.Join(folder, "keep.me"), ["keep.me"]);
 
         return identity;
     }

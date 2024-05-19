@@ -25,8 +25,10 @@ namespace Amber.App
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddSingleton(FolderPicker.Default);
             builder.Services.AddMudServices();
+
+            var openWorkspacesFile = Path.Join(FileSystem.Current.AppDataDirectory, "open-workspaces.json");
+            builder.Services.AddSingleton(new WorkspaceManager(openWorkspacesFile));
             
-            builder.Services.AddSingleton(new Workspaces());
             builder.Services.AddSingleton(ProjectHandler.GetReader("session1"));
             builder.Services.AddSingleton(TodoHandler.GetReader("session1"));
             
