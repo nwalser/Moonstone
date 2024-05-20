@@ -2,34 +2,21 @@
 
 namespace Moonstone;
 
-public class Reader<TDocument>
+public static class Store
 {
-    private readonly string _session;
-    private readonly IHandler<TDocument> _handler;
-
-    
-    public Reader(string session, IHandler<TDocument> handler)
+    public static void AppendMutation<TDocument>(string folder, string session, object mutation, IHandler<TDocument> handler)
     {
-        _session = session;
-        _handler = handler;
-    }
-    
-    public void AppendMutation(DocumentIdentity identity, object mutation)
-    {
-        var folder = identity.GetPath();
-        var filePath = Path.Join(folder, $"{_session}.txt");
+        var filePath = Path.Join(folder, $"{session}.txt");
 
         if (!Directory.Exists(folder)) throw new DirectoryNotFoundException();
 
         var stream = File.Open(filePath, FileMode.Append, FileAccess.Write, FileShare.Read);
         using var sw = new StreamWriter(stream);
-        SerializeEntry(sw, DateTime.UtcNow.Ticks, mutation);
+        SerializeEntry(sw, DateTime.UtcNow.Ticks, mutation, handler);
     }
     
-    public TDocument Read(DocumentIdentity identity, CancellationToken ct = default)
+    public static TDocument Read<TDocument>(string folder, IHandler<TDocument> handler, CancellationToken ct = default)
     {
-        var folder = identity.GetPath();
-        
         var mutationLogs = Directory.EnumerateFiles(folder, "*.txt");
         var mutations = new List<(long occurence, object mutation)>();
         
@@ -40,27 +27,27 @@ public class Reader<TDocument>
 
             while (!sr.EndOfStream || ct.IsCancellationRequested)
             {
-                var mutation = DeserializeEntry(sr);
+                var mutation = DeserializeEntry(sr, handler);
                 mutations.Add(mutation);
             }
         }
 
-        var document = _handler.CreateNew();
+        var document = handler.CreateNew();
 
         var orderedMutations = mutations
             .OrderBy(m => m.occurence)
             .Select(m => m.mutation);
         
         foreach (var orderedMutation in orderedMutations)
-            _handler.ApplyMutation(document, orderedMutation);
+            handler.ApplyMutation(document, orderedMutation);
 
         return document;
     }
     
-    private void SerializeEntry(TextWriter sw, long occurence, object mutation)
+    private static void SerializeEntry<TDocument>(TextWriter sw, long occurence, object mutation, IHandler<TDocument> handler)
     {
         {
-            var typeId = _handler.MutationTypes.Single(t => t.Value == mutation.GetType()).Key.ToString();
+            var typeId = handler.MutationTypes.Single(t => t.Value == mutation.GetType()).Key.ToString();
             sw.Write(typeId);
             sw.Write(",");
         }
@@ -81,7 +68,7 @@ public class Reader<TDocument>
         }
     }
 
-    private (long occurence, object mutation) DeserializeEntry(TextReader sr)
+    private static (long occurence, object mutation) DeserializeEntry<TDocument>(TextReader sr, IHandler<TDocument> handler)
     {
         var line = sr.ReadLine() ?? throw new InvalidOperationException();
         var segments = line.Split(',');
@@ -90,7 +77,7 @@ public class Reader<TDocument>
         var occurence = BitConverter.ToInt64(Convert.FromBase64String(segments[1]), 0);
         var json = Convert.FromBase64String(segments[2]);
                 
-        var type = _handler.MutationTypes[typeId];
+        var type = handler.MutationTypes[typeId];
         var mutation = JsonSerializer.Deserialize(json, type) ?? throw new InvalidOperationException();
 
         return (occurence, mutation);

@@ -16,9 +16,9 @@
                     <ReaderComponent TDocument="TodoAggregate" Identity="todoIdentity">
                         <OnLoad Context="todo">
                             <MudStack Row="true">
-                                <MudTextField T="string" Value="@todo.Name" ValueChanged="name => TodoReader.AppendMutation(todoIdentity, new ChangeName(name))" Immediate="false" />
-                                <MudNumericField T="double" Value="@todo.EstimatedEffort.TotalHours" ValueChanged="effort => TodoReader.AppendMutation(todoIdentity, new ChangeEstimatedEffort(TimeSpan.FromHours(effort)))" Immediate="false" />
-                                <MudCheckBox T="bool" Value="@todo.Completed" ValueChanged="completed => TodoReader.AppendMutation(todoIdentity, new ChangeCompletion(completed))" />
+                                <MudTextField T="string" Value="@todo.Name" ValueChanged="name => TodoStore.AppendMutation(todoIdentity, new ChangeName(name))" Immediate="false" />
+                                <MudNumericField T="double" Value="@todo.EstimatedEffort.TotalHours" ValueChanged="effort => TodoStore.AppendMutation(todoIdentity, new ChangeEstimatedEffort(TimeSpan.FromHours(effort)))" Immediate="false" />
+                                <MudCheckBox T="bool" Value="@todo.Completed" ValueChanged="completed => TodoStore.AppendMutation(todoIdentity, new ChangeCompletion(completed))" />
                                 <MudButton OnClick="() => DeleteTodoItem(workspace, projectIdentity, todoIdentity)">Delete</MudButton>
                             </MudStack>
                         </OnLoad>
@@ -32,8 +32,8 @@
 </WorkspaceComponent>
 
 @code {
-    [Inject] public required Reader<ProjectAggregate> ProjectReader { get; set; }
-    [Inject] public required Reader<TodoAggregate> TodoReader { get; set; }
+    [Inject] public required Store<ProjectAggregate> ProjectStore { get; set; }
+    [Inject] public required Store<TodoAggregate> TodoStore { get; set; }
     
     [Parameter] public int WorkspaceId { get; init; }
     [Parameter] public Guid ProjectId { get; init; }
@@ -41,12 +41,12 @@
     private void CreateTodoItem(Workspace workspace, DocumentIdentity projectDocument)
     {
         var newTodo = workspace.Create<TodoAggregate>();
-        ProjectReader.AppendMutation(projectDocument, new AddTodo(newTodo.Id));
+        ProjectStore.AppendMutation(projectDocument, new AddTodo(newTodo.Id));
     }
 
     private void DeleteTodoItem(Workspace workspace, DocumentIdentity projectDocument, DocumentIdentity todoDocument)
     {
-        ProjectReader.AppendMutation(projectDocument, new RemoveTodo(todoDocument.Id));
+        ProjectStore.AppendMutation(projectDocument, new RemoveTodo(todoDocument.Id));
         workspace.Delete(todoDocument);
     }
 }

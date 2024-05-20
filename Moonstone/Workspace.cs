@@ -11,11 +11,14 @@ public class Workspace
 
     private readonly Subject<DocumentIdentity> _externalChange;
     public IObservable<DocumentIdentity> ExternalChange => _externalChange;
+
+    private readonly List<object> _readers;
     
-    public Workspace(string location, Dictionary<int, Type> typeMap)
+    public Workspace(string location, Dictionary<int, Type> typeMap, List<object> readers)
     {
         Location = location;
         _typeMap = typeMap;
+        _readers = readers;
 
         _externalChange = new Subject<DocumentIdentity>();
         
@@ -57,13 +60,13 @@ public class Workspace
 
         foreach (var typeFolder in typeFolders)
         {
-            var typeId = Convert.ToInt32(System.IO.Path.GetFileNameWithoutExtension(typeFolder));
+            var typeId = Convert.ToInt32(Path.GetFileNameWithoutExtension(typeFolder));
             var type = _typeMap[typeId];
             var documentFolders = Directory.EnumerateDirectories(typeFolder);
 
             foreach (var documentFolder in documentFolders)
             {
-                var documentId = Guid.Parse(System.IO.Path.GetFileNameWithoutExtension(documentFolder));
+                var documentId = Guid.Parse(Path.GetFileNameWithoutExtension(documentFolder));
                 yield return new DocumentIdentity()
                 {
                     Workspace = Location,
@@ -93,7 +96,7 @@ public class Workspace
     
     private string GetDocumentPath(DocumentIdentity identity)
     {
-        return System.IO.Path.Join(Location, identity.TypeId.ToString(), identity.Id.ToString());
+        return Path.Join(Location, identity.TypeId.ToString(), identity.Id.ToString());
     }
     
     public DocumentIdentity Create<TDocument>(Guid? id = default)
@@ -111,7 +114,7 @@ public class Workspace
         if (Directory.Exists(folder)) throw new DocumentAlreadyExistsException();
         
         Directory.CreateDirectory(folder);
-        File.AppendAllLines(System.IO.Path.Join(folder, "keep.me"), ["keep.me"]);
+        File.AppendAllLines(Path.Join(folder, "keep.me"), ["keep.me"]);
 
         return identity;
     }
