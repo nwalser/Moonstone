@@ -32,9 +32,9 @@ public class TodoHandler : IHandler<TodoAggregate>
         }
     }
     
-    public static Store<TodoAggregate> GetReader(string session)
+    public static Reader<TodoAggregate> GetReader(string session)
     {
-        return new Store<TodoAggregate>(session, new TodoHandler());
+        return new Reader<TodoAggregate>(session, new TodoHandler());
     }
 }
 

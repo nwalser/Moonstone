@@ -32,9 +32,9 @@ public class ProjectHandler : IHandler<ProjectAggregate>
         }
     }
 
-    public static Store<ProjectAggregate> GetReader(string session)
+    public static Reader<ProjectAggregate> GetReader(string session)
     {
-        return new Store<ProjectAggregate>(session, new ProjectHandler());
+        return new Reader<ProjectAggregate>(session, new ProjectHandler());
     }
 }
 

@@ -3,7 +3,7 @@
 
 @try
 {
-    var document = Store.Read(Identity);
+    var document = Reader.Read(Identity);
     @OnLoad?.Invoke(document)
 }
 catch (Exception ex)
@@ -12,7 +12,7 @@ catch (Exception ex)
 }
 
 @code {
-    [Inject] public required Store<TDocument> Store { get; set; }
+    [Inject] public required Reader<TDocument> Reader { get; set; }
     
     [Parameter] public required DocumentIdentity Identity { get; set; }
     
