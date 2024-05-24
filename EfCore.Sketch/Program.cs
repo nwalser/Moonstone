@@ -45,4 +45,8 @@ todo.Project = project3;
 context.Add(project3);
 await context.SaveChangesAsync();
 
+context.Remove(project);
+context.Remove(project3);
+await context.SaveChangesAsync();
+
 Console.WriteLine("Done");

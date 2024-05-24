@@ -3,39 +3,43 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EfCore.Sketch.Sync;
 
-public class SyncContext(DbContextOptions<SyncContext> options) : DbContext(options)
+public class SyncContext : DbContext
 {
+    public SyncContext(DbContextOptions<SyncContext> options) : base(options)
+    {
+        
+        
+    }
+
+    protected DbSet<LwwEntry> LwwEntries { get; set; }
+
+    
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
     {
         var entries = ChangeTracker.Entries();
 
-        var deltas = new List<object>();
+        var deltas = new List<IDelta>();
 
         foreach (var entry in entries)
         {
+            var ticks = DateTime.UtcNow.Ticks;
+            var table = entry.Metadata.GetTableName() ?? throw new Exception();
+            
             switch (entry.State)
             {
                 case EntityState.Added:
-                    deltas.Add(new Created()
-                    {
-                        Ticks = DateTime.UtcNow.Ticks,
-                        Type = entry.Metadata.ClrType,
-                        Id = (Guid)entry.Property("Id").CurrentValue!,
-                    });
-
                     foreach (var property in entry.Properties)
                     {
                         deltas.Add(new Changed()
                         {
-                            Ticks = DateTime.UtcNow.Ticks,
-
-                            Type = entry.Metadata.ClrType,
-                            Id = (Guid)entry.Property("Id").CurrentValue!,
-                            
-                            Field = property.Metadata.Name,
-                            Value = property.CurrentValue,
+                            Ticks = ticks,
+                            Table = table,
+                            Row = entry.Property("Id").CurrentValue.ToString(),
+                            Column = property.Metadata.GetColumnName(),
+                            Value = property.CurrentValue.ToString()
                         });
                     }
+
                     break;
                 case EntityState.Modified:
                     foreach (var property in entry.Properties)
@@ -44,25 +48,14 @@ public class SyncContext(DbContextOptions<SyncContext> options) : DbContext(opti
                         {
                             deltas.Add(new Changed()
                             {
-                                Ticks = DateTime.UtcNow.Ticks,
-
-                                Type = entry.Metadata.ClrType,
-                                Id = (Guid)entry.Property("Id").CurrentValue!,
-                            
-                                Field = property.Metadata.Name,
-                                Value = property.CurrentValue,
+                                Ticks = ticks,
+                                Table = table,
+                                Row = entry.Property("Id").CurrentValue.ToString(),
+                                Column = property.Metadata.GetColumnName(),
+                                Value = property.CurrentValue.ToString()
                             });
                         }
                     }
-                    break;
-                case EntityState.Deleted:
-                    deltas.Add(new Deleted()
-                    {
-                        Ticks = DateTime.UtcNow.Ticks,
-
-                        Type = entry.Metadata.ClrType,
-                        Id = (Guid)entry.Property("Id").CurrentValue!,
-                    });
                     break;
             }
         }
@@ -71,23 +64,50 @@ public class SyncContext(DbContextOptions<SyncContext> options) : DbContext(opti
         {
             switch (delta)
             {
-                case Created created:
-                    Console.WriteLine($"Created: {created.Ticks} {created.Type} {created.Id}");
-                    break;
-                case Deleted deleted:
-                    Console.WriteLine($"Deleted: {deleted.Ticks} {deleted.Type} {deleted.Id}");
-                    break;
                 case Changed changed:
-                    Console.WriteLine($"Changed: {changed.Ticks} {changed.Type} {changed.Id} {changed.Field} {changed.Value}");
+                    Console.WriteLine($"Changed: {changed.Ticks} {changed.Table} {changed.Row} {changed.Column} {changed.Value}");
                     break;
             }
         }
-
-        var result =  base.SaveChangesAsync(cancellationToken);
         
-        return result;
+        // save to database
+        foreach (var delta in deltas)
+            IngestChange(delta);
+        
+        // save to file
+        
+        // reset change tracker
+        ChangeTracker.AcceptAllChanges();
+        return Task.FromResult(0);
     }
 
+
+    private void IngestChange(IDelta change)
+    {
+        switch (change)
+        {
+            case Changed changed:
+            {
+                var sql1 = $"SELECT CASE WHEN EXISTS (SELECT 1 FROM {changed.Table} WHERE Id = @p0) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END";
+                var exists = Database.SqlQueryRaw<bool>(sql1, changed.Row).AsEnumerable().FirstOrDefault();
+                
+                
+                if (!exists)
+                {
+                    var sql2 = $"INSERT INTO {changed.Table} (Id) " +
+                               $"VALUES (@p0)";
+                    Database.ExecuteSqlRaw(sql2, changed.Row);
+                }
+                
+                var sql3 = $"UPDATE {changed.Table} " +
+                           $"SET {changed.Column} = {changed.Value} " +
+                           $"WHERE Id = @p0";
+                Database.ExecuteSqlRaw(sql3, changed.Row);
+                
+                break;
+            }
+        }
+    }
     
     private void OnSavedChanges(object? sender, SavedChangesEventArgs e)
     {
