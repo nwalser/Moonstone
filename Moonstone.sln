@@ -15,10 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amber.App", "Amber.App\Ambe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Sketch.ManyDocumentsTest", "Moonstone.Sketch.ManyDocumentsTest\Moonstone.Sketch.ManyDocumentsTest.csproj", "{3BC26BE4-81A7-42E6-AD79-8711558CC00C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "20 - Database", "20 - Database", "{E3734A32-0CB2-4E03-9BC3-FE75C9DDE2D0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EfCore.Sketch", "EfCore.Sketch\EfCore.Sketch.csproj", "{C8B1DBE3-52DF-4B09-9EBD-EABB2460992E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,10 +39,6 @@ Global
 		{3BC26BE4-81A7-42E6-AD79-8711558CC00C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BC26BE4-81A7-42E6-AD79-8711558CC00C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BC26BE4-81A7-42E6-AD79-8711558CC00C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8B1DBE3-52DF-4B09-9EBD-EABB2460992E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8B1DBE3-52DF-4B09-9EBD-EABB2460992E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8B1DBE3-52DF-4B09-9EBD-EABB2460992E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8B1DBE3-52DF-4B09-9EBD-EABB2460992E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,7 +48,6 @@ Global
 		{E22E9DEE-43DD-4682-B758-145467EC45ED} = {D57242B0-7D05-408B-B5CA-DC3597D001B5}
 		{C9626699-FFB5-44BC-B82A-1E69E1CBA67C} = {D57242B0-7D05-408B-B5CA-DC3597D001B5}
 		{3BC26BE4-81A7-42E6-AD79-8711558CC00C} = {EBBF66E0-382C-465D-B4AA-AF8AD744E87B}
-		{C8B1DBE3-52DF-4B09-9EBD-EABB2460992E} = {E3734A32-0CB2-4E03-9BC3-FE75C9DDE2D0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9210062-975C-478E-A0DC-60E1E7E319F3}
