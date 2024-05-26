@@ -1,4 +1,6 @@
-﻿namespace Opal.Domain;
+﻿using Opal.Domain;
+
+namespace Opal;
 
 public interface IDatabase
 {
