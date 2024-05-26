@@ -149,7 +149,14 @@ public class Database : IDatabase
         WriteDeltas(deltas);
     }
 
+    public IEnumerable<TType> Enumerate<TType>()
+    {
+        var type = typeof(TType);
+        var typeId = _typeMap.Single(t => t.Value == type).Key;
 
+        return _documents[typeId].Select(v => v.Value).Cast<TType>();
+    }
+    
     public void Remove(IDocument document) => Remove([document]);
 
     public void Remove(IEnumerable<IDocument> documents)

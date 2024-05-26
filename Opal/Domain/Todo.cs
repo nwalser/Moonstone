@@ -1,6 +1,6 @@
 ﻿namespace Opal.Domain;
 
-public record Todo : IDocument
+public class Todo : IDocument
 {
     public required Guid Id { get; init; }
     public required DateTime LastWrite { get; set; }
