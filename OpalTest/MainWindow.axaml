@@ -2,8 +2,46 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dragablzDemo="clr-namespace:OpalTest.ViewModels"
+        xmlns:controls="clr-namespace:Tabalonia.Controls;assembly=Tabalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpalTest.MainWindow"
-        Title="OpalTest">
-    Welcome to Avalonia!
+        Title="Tabalonia Demo"
+        
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="Default"
+        SystemDecorations="BorderOnly"
+        ExtendClientAreaTitleBarHeightHint="40"
+
+        Background="{DynamicResource TabControlWindowActiveBackgroundBrush}"
+        x:DataType="dragablzDemo:MainViewModel">
+   
+    <controls:TabsControl ItemsSource="{Binding TabItems}"
+                          NewItemFactory="{Binding NewItemFactory}"
+                          FixedHeaderCount="0"
+                          ShowDefaultAddButton="True"
+                          ShowDefaultCloseButton="True"
+                          Margin="0 8 0 0">
+        <TabControl.ContentTemplate>
+            <DataTemplate DataType="{x:Type dragablzDemo:TabItemViewModel}">
+                
+                <Grid Background="{DynamicResource SelectedTabItemBackgroundBrush}">
+                    <TextBlock Text="{Binding SimpleContent}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                    <Button>
+                        Hello There
+                    </Button>
+                </Grid>
+
+            </DataTemplate>
+        </TabControl.ContentTemplate>
+
+        <TabControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type dragablzDemo:TabItemViewModel}">
+                <TextBlock Text="{Binding Header}" />
+            </DataTemplate>
+        </TabControl.ItemTemplate>
+        
+    </controls:TabsControl>
 </Window>
