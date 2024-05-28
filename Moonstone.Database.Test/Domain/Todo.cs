@@ -1,4 +1,4 @@
-﻿namespace Moonstone.FileFormat.Domain;
+﻿namespace Moonstone.Database.Test.Domain;
 
 public class Todo : IDocument
 {

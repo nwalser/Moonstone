@@ -1,6 +1,4 @@
-﻿using Moonstone.FileFormat.Domain;
-
-namespace Moonstone.FileFormat;
+﻿namespace Moonstone.Database;
 
 public interface IDatabase
 {

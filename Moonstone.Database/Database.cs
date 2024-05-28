@@ -1,10 +1,9 @@
 ﻿using System.Text.Json;
 using System.Threading.Channels;
 using Moonstone.FileFormat.Deltas;
-using Moonstone.FileFormat.Domain;
 using ProtoBuf;
 
-namespace Moonstone.FileFormat;
+namespace Moonstone.Database;
 
 public class Database : IDatabase
 {

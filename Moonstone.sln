@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.FileFormat", "Moonstone.FileFormat\Moonstone.FileFormat.csproj", "{96E84A43-9B1A-4A4E-8939-F341E8E03352}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.FileFormat.Test", "Moonstone.FileFormat.Test\Moonstone.FileFormat.Test.csproj", "{646EC38E-9F9B-4A59-97AF-473CE89E1D8F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Database.Test", "Moonstone.Database.Test\Moonstone.Database.Test.csproj", "{96E84A43-9B1A-4A4E-8939-F341E8E03352}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaTest", "AvaloniaTest\AvaloniaTest.csproj", "{B6D21190-8207-4FA8-8CA3-6446C9D1772B}"
 EndProject
@@ -17,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.Domain", "Sapphire
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.App", "Sapphire.App\Sapphire.App.csproj", "{FEBE8EBA-5E1A-4F89-80EC-353FAEB045E8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Database", "Moonstone.Database\Moonstone.Database.csproj", "{C62A9FD0-6717-4017-8B6D-2D78F3949DAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,10 +27,6 @@ Global
 		{96E84A43-9B1A-4A4E-8939-F341E8E03352}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96E84A43-9B1A-4A4E-8939-F341E8E03352}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96E84A43-9B1A-4A4E-8939-F341E8E03352}.Release|Any CPU.Build.0 = Release|Any CPU
-		{646EC38E-9F9B-4A59-97AF-473CE89E1D8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{646EC38E-9F9B-4A59-97AF-473CE89E1D8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{646EC38E-9F9B-4A59-97AF-473CE89E1D8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{646EC38E-9F9B-4A59-97AF-473CE89E1D8F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B6D21190-8207-4FA8-8CA3-6446C9D1772B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B6D21190-8207-4FA8-8CA3-6446C9D1772B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6D21190-8207-4FA8-8CA3-6446C9D1772B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -43,15 +39,19 @@ Global
 		{FEBE8EBA-5E1A-4F89-80EC-353FAEB045E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEBE8EBA-5E1A-4F89-80EC-353FAEB045E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEBE8EBA-5E1A-4F89-80EC-353FAEB045E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C62A9FD0-6717-4017-8B6D-2D78F3949DAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C62A9FD0-6717-4017-8B6D-2D78F3949DAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C62A9FD0-6717-4017-8B6D-2D78F3949DAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C62A9FD0-6717-4017-8B6D-2D78F3949DAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{96E84A43-9B1A-4A4E-8939-F341E8E03352} = {D1FF6F9C-9A20-4206-96B8-EBEFCC5D7F12}
-		{646EC38E-9F9B-4A59-97AF-473CE89E1D8F} = {D1FF6F9C-9A20-4206-96B8-EBEFCC5D7F12}
 		{EE062EF6-8442-4256-8AEF-42609C0B29F2} = {EE6C6F49-856B-423E-ABB0-CE1E8CC9DE57}
 		{FEBE8EBA-5E1A-4F89-80EC-353FAEB045E8} = {EE6C6F49-856B-423E-ABB0-CE1E8CC9DE57}
+		{C62A9FD0-6717-4017-8B6D-2D78F3949DAA} = {D1FF6F9C-9A20-4206-96B8-EBEFCC5D7F12}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9210062-975C-478E-A0DC-60E1E7E319F3}

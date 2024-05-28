@@ -1,15 +1,20 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
              x:Class="Sapphire.App.App"
              xmlns:local="using:Sapphire.App"
+             xmlns:generation="clr-namespace:ActiproSoftware.UI.Avalonia.Themes.Generation;assembly=ActiproSoftware.Avalonia.Shared"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
   
     <Application.Styles>
-        <FluentTheme />
+        <actipro:ModernTheme>
+            <actipro:ModernTheme.Definition>
+                <generation:ThemeDefinition UserInterfaceDensity="Compact" />
+            </actipro:ModernTheme.Definition>
+        </actipro:ModernTheme>
     </Application.Styles>
 </Application>
