@@ -3,7 +3,7 @@
         xmlns:vm="using:AvaloniaTest.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="550"
         x:Class="AvaloniaTest.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
@@ -15,12 +15,12 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid ShowGridLines="True" Margin="5"
+    <Grid Margin="5" 
           ColumnDefinitions="120, 100" 
           RowDefinitions="Auto, Auto, Auto">
-        <Label Grid.Row="0" Grid.Column="0">Celsius</Label>
-        <TextBox Grid.Row="0" Grid.Column="1"/>
-        <Label Grid.Row="1" Grid.Column="0">Fahrenheit</Label>
-        <TextBox Grid.Row="1"  Grid.Column="1"/>
+        <Label Grid.Row="0" Grid.Column="0" Margin="10">Celsius</Label>
+        <NumericUpDown Grid.Row="0" Grid.Column="1" Value="{Binding Degrees}" />
+        <Label Grid.Row="1" Grid.Column="0" Margin="10">Fahrenheit</Label>
+        <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding Fahrenheit}" IsReadOnly="True" />
     </Grid>
 </Window>

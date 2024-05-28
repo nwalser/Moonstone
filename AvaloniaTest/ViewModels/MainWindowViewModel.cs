@@ -2,7 +2,6 @@
 
 public class MainWindowViewModel : ViewModelBase
 {
-#pragma warning disable CA1822 // Mark members as static
-    public string Greeting => "Hello World";
-#pragma warning restore CA1822 // Mark members as static
+    public double Degrees { get; set; } = 0;
+    public double Fahrenheit => Degrees * (9d / 5d) + 32;
 }
