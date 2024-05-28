@@ -36,13 +36,13 @@ sw.Restart();
 
 // query
 {
-    var projects = database.Enumerate<Project>().Where(p => p.Id > Guid.NewGuid());
+    var projects = database.Enumerate<Project>();
     Console.WriteLine(projects.Count());
+    
+    database.Remove(projects);
 }
 
 Console.WriteLine($"Query: {sw.ElapsedMilliseconds}ms");
 sw.Restart();
 
 await Task.Delay(1000);
-
-

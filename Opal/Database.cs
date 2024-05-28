@@ -15,7 +15,8 @@ public class Database : IDatabase
     private readonly Dictionary<int, Type> _typeMap;
     private FileInfo _currentLogFile;
 
-    private readonly Dictionary<int, Dictionary<Guid, IDocument>> _documents = new();
+    private readonly Dictionary<Guid, IDocument> _documents = new();
+    private readonly HashSet<Guid> _deleted = [];
     private readonly Dictionary<string, long> _filePointers = new();
     private readonly FileSystemWatcher _watcher;
 
@@ -101,24 +102,23 @@ public class Database : IDatabase
             {
                 case Update update:
                 {
-                    if (!_documents.ContainsKey(delta.TypeId))
-                        _documents[delta.TypeId] = new Dictionary<Guid, IDocument>();
+                    if (_deleted.Contains(update.RowId))
+                        break;
 
-                    var table = _documents[delta.TypeId];
-                        
-                    // do not replace if item exists and is newer as the new delta
-                    if (!(table.TryGetValue(delta.RowId, out var existingDocument) && existingDocument.LastWrite >= delta.Timestamp))
-                    {
-                        var document = (IDocument)JsonSerializer.Deserialize(update.Json, type)!;
-                        document.LastWrite = update.Timestamp;
-                        table[delta.RowId] = document;
-                    }
-                            
+                    if (_documents.TryGetValue(delta.RowId, out var existingDocument) && existingDocument.LastWrite >= delta.Timestamp)
+                        break;
+                    
+                    var document = (IDocument)JsonSerializer.Deserialize(update.Json, type)!;
+                    document.LastWrite = update.Timestamp;
+                    _documents[delta.RowId] = document;
+                    
                     break;
                 }
                 case Delete delete:
                 {
-                    throw new NotImplementedException();
+                    _deleted.Add(delete.RowId);
+                    _documents.Remove(delete.RowId);
+
                     break;
                 }
             }
@@ -149,12 +149,16 @@ public class Database : IDatabase
         WriteDeltas(deltas);
     }
 
+    public IEnumerable<IDocument> Enumerate()
+    {
+        return _documents.Select(d => d.Value);
+    }
+    
     public IEnumerable<TType> Enumerate<TType>()
     {
-        var type = typeof(TType);
-        var typeId = _typeMap.Single(t => t.Value == type).Key;
-
-        return _documents[typeId].Select(v => v.Value).Cast<TType>();
+        return _documents.Select(v => v.Value)
+            .Where(t => t.GetType() == typeof(TType))
+            .Cast<TType>();
     }
     
     public void Remove(IDocument document) => Remove([document]);
