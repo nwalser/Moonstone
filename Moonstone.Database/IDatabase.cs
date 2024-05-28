@@ -2,8 +2,8 @@
 
 public interface IDatabase
 {
-    public void Update(IDocument document);
-    public void Remove(IDocument document);
+    public void Update(Document document);
+    public void Remove(Document document);
 
     public IEnumerable<TType> Enumerate<TType>();
 }

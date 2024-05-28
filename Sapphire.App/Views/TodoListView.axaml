@@ -18,8 +18,8 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <CheckBox Margin="4"
-                              IsChecked="{Binding IsChecked}"
-                              Content="{Binding Description}"/>
+                              IsChecked="{Binding Splittable}"
+                              Content="{Binding Name}"/>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

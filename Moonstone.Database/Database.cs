@@ -14,7 +14,7 @@ public class Database : IDatabase
     private readonly Dictionary<int, Type> _typeMap;
     private FileInfo _currentLogFile;
 
-    private readonly Dictionary<Guid, IDocument> _documents = new();
+    private readonly Dictionary<Guid, Document> _documents = new();
     private readonly HashSet<Guid> _deleted = [];
     private readonly Dictionary<string, long> _filePointers = new();
     private readonly FileSystemWatcher _watcher;
@@ -107,7 +107,7 @@ public class Database : IDatabase
                     if (_documents.TryGetValue(delta.RowId, out var existingDocument) && existingDocument.LastWrite >= delta.Timestamp)
                         break;
                     
-                    var document = (IDocument)JsonSerializer.Deserialize(update.Json, type)!;
+                    var document = (Document)JsonSerializer.Deserialize(update.Json, type)!;
                     document.LastWrite = update.Timestamp;
                     _documents[delta.RowId] = document;
                     
@@ -130,9 +130,9 @@ public class Database : IDatabase
         return new FileInfo(path);
     }
 
-    public void Update(IDocument document) => Update([document]);
+    public void Update(Document document) => Update([document]);
     
-    public void Update(IEnumerable<IDocument> documents)
+    public void Update(IEnumerable<Document> documents)
     {
         var deltas = documents.Select(document =>
         {
@@ -148,7 +148,7 @@ public class Database : IDatabase
         WriteDeltas(deltas);
     }
 
-    public IEnumerable<IDocument> Enumerate()
+    public IEnumerable<Document> Enumerate()
     {
         return _documents.Select(d => d.Value);
     }
@@ -160,9 +160,9 @@ public class Database : IDatabase
             .Cast<TType>();
     }
     
-    public void Remove(IDocument document) => Remove([document]);
+    public void Remove(Document document) => Remove([document]);
 
-    public void Remove(IEnumerable<IDocument> documents)
+    public void Remove(IEnumerable<Document> documents)
     {
         var deltas = documents.Select(document =>
         {

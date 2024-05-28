@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reactive;
+﻿using System.Reactive;
 using ReactiveUI;
 using Sapphire.Domain;
 
@@ -25,10 +24,8 @@ public class AddItemViewModel : ViewModelBase
 
         OkCommand = ReactiveCommand.Create(() => new Todo()
         {
-            Id = Guid.NewGuid(),
-            LastWrite = DateTime.UtcNow,
-            IsChecked = false,
-            Description = Description,
+            Name = Description,
+            Splittable = false,
         }, isValidObservable);
         CancelCommand = ReactiveCommand.Create(() => { });
     }

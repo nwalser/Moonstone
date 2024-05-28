@@ -1,6 +1,6 @@
 ﻿namespace Moonstone.Database.Test.Domain;
 
-public class Project : IDocument
+public class Project : Document
 {
     public required Guid Id { get; init; }
     public DateTime LastWrite { get; set; } = DateTime.MinValue;
