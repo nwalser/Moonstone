@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace OpalTest.ViewModels
+namespace Moonstone.FileFormat.Test.ViewModels
 {
     public class TabItemViewModel : ObservableObject
     {

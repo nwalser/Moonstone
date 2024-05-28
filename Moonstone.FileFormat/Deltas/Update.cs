@@ -1,6 +1,6 @@
 ﻿using ProtoBuf;
 
-namespace Opal.Deltas;
+namespace Moonstone.FileFormat.Deltas;
 
 [ProtoContract]
 public class Update : IDelta

@@ -1,4 +1,4 @@
-﻿namespace Opal.Domain;
+﻿namespace Moonstone.FileFormat.Domain;
 
 public class Project : IDocument
 {

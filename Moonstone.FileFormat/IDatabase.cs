@@ -1,6 +1,6 @@
-﻿using Opal.Domain;
+﻿using Moonstone.FileFormat.Domain;
 
-namespace Opal;
+namespace Moonstone.FileFormat;
 
 public interface IDatabase
 {

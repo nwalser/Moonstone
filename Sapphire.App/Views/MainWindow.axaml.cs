@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace OpalTest;
+namespace Sapphire.App.Views;
 
 public partial class MainWindow : Window
 {

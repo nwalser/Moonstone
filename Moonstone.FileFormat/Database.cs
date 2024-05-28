@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using System.Threading.Channels;
-using Opal.Deltas;
-using Opal.Domain;
+using Moonstone.FileFormat.Deltas;
+using Moonstone.FileFormat.Domain;
 using ProtoBuf;
 
-namespace Opal;
+namespace Moonstone.FileFormat;
 
 public class Database : IDatabase
 {

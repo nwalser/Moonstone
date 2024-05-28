@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using System;
 
-namespace OpalTest;
+namespace Moonstone.FileFormat.Test;
 
 class Program
 {

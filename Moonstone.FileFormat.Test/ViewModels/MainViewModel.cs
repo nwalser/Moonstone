@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace OpalTest.ViewModels;
+namespace Moonstone.FileFormat.Test.ViewModels;
 
 
 public class MainViewModel : ObservableObject
