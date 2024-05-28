@@ -3,17 +3,10 @@
         xmlns:vm="using:Sapphire.App.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
-        xmlns:views="clr-namespace:Sapphire.App.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Sapphire.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Avalonia Todo List">
-
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
-
-    <views:TodoListView />
+        Title="Avalonia Todo List"
+        Content="{Binding ContentViewModel}">
 </Window>

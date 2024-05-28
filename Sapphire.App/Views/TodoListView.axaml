@@ -3,16 +3,25 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="450"
-             x:Class="Sapphire.App.Views.TodoListView">
+             x:Class="Sapphire.App.Views.TodoListView"
+             xmlns:vm="using:Sapphire.App.ViewModels"
+             x:DataType="vm:TodoListViewModel">
     <DockPanel>
         <Button DockPanel.Dock="Bottom"
                 HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center">
+                HorizontalContentAlignment="Center"
+                x:CompileBindings="False"
+                Command="{Binding $parent[Window].DataContext.AddItem}">
             Add Item
         </Button>
-        <StackPanel>
-            <CheckBox Margin="4">Walk the dog</CheckBox>
-            <CheckBox Margin="4">Buy some milk</CheckBox>
-        </StackPanel>
+        <ItemsControl ItemsSource="{Binding ListItems}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox Margin="4"
+                              IsChecked="{Binding IsChecked}"
+                              Content="{Binding Description}"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </DockPanel>
 </UserControl>

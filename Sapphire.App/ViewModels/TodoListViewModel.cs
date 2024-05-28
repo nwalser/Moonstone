@@ -4,7 +4,7 @@ using Sapphire.Domain;
 
 namespace Sapphire.App.ViewModels;
 
-public class TodoListViewModel
+public class TodoListViewModel : ViewModelBase
 {
     public TodoListViewModel(IEnumerable<Todo> items)
     {
