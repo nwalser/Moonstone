@@ -1,3 +1,47 @@
-﻿@inherits LayoutComponentBase
+﻿@using ElectronNET.API
+@inherits LayoutComponentBase
 
-<main> @Body </main>
+<div style="-webkit-app-region: drag; display: flex; width: 100%; background-color: gray">
+    <p>Sapphire</p>
+
+    <button @onclick="() => _window?.Minimize()">Minimize</button>
+    
+    @if(_window?.IsMaximizedAsync().Result ?? false)
+    {
+        <button @onclick="() => _window?.Restore()">Restore</button>
+    }
+    else
+    {
+        <button @onclick="() => _window?.Maximize()">Maximize</button>
+    }
+    
+    <button @onclick="() => _window?.Close()">Close</button>
+</div>
+
+<main>
+    @Body
+</main>
+
+<style>
+    button{
+        -webkit-app-region: no-drag;
+    }
+    
+    body{
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+@code{
+
+    [Inject] public required WindowManager WindowManager { get; set; }
+
+    private BrowserWindow? _window;
+
+    protected override void OnInitialized()
+    {
+        _window = WindowManager.BrowserWindows.Single();
+        base.OnInitialized();
+    }
+}

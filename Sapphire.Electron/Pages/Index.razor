@@ -1,14 +1,13 @@
 ﻿@page "/"
+@using ElectronNET.API
 
 <h1>Hello, world! 22</h1>
 
+<p>Dark theme: @Theme.ShouldUseDarkColorsAsync().Result</p>
+<p>High contrast theme: @Theme.ShouldUseHighContrastColorsAsync().Result</p>
+<p>Inverted: @Theme.ShouldUseInvertedColorSchemeAsync().Result</p>
+
 @code {
-
-    protected override void OnInitialized()
-    {
-        Console.WriteLine("Hello");
-        
-        base.OnInitialized();
-    }
-
+    [Inject] public required Dialog Dialog { get; set; }
+    [Inject] public required NativeTheme Theme { get; set; }
 }

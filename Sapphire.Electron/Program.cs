@@ -34,8 +34,11 @@ await app.StartAsync();
 
 var options = new BrowserWindowOptions()
 {
-    MinHeight = 600
+    MinHeight = 400,
+    MinWidth = 800,
+    Frame = false
 };
 
-var mainWindow = await Electron.WindowManager.CreateWindowAsync(options);
+await Electron.WindowManager.CreateWindowAsync(options);
+
 app.WaitForShutdown();
