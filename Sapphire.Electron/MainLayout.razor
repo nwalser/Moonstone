@@ -1,37 +1,49 @@
 ﻿@using ElectronNET.API
 @inherits LayoutComponentBase
 
-<div style="-webkit-app-region: drag; display: flex; width: 100%; background-color: gray">
-    <p>Sapphire</p>
+<div class="flex flex-col h-full">
+    <div class="flex w-full flex-shrink text-primary-50 bg-background-950" style="-webkit-app-region: drag;">
+        <div class="flex-grow flex flex-row align-middle">
+            <p class="text-primary-50 m-2">Sapphire</p>
+        </div>
+        <div class="flex-shrink flex" style="-webkit-app-region: no-drag;">
+            <button
+                class="rounded-none px-4 py-2 hover:bg-background-800 select-none"
+                @onclick="() => _window?.Minimize()">
+                <MinusIcon class="h-5 w-5" />
+            </button>
 
-    <button @onclick="() => _window?.Minimize()">Minimize</button>
-    
-    @if(_window?.IsMaximizedAsync().Result ?? false)
-    {
-        <button @onclick="() => _window?.Restore()">Restore</button>
-    }
-    else
-    {
-        <button @onclick="() => _window?.Maximize()">Maximize</button>
-    }
-    
-    <button @onclick="() => _window?.Close()">Close</button>
+            @if(_window?.IsMaximizedAsync().Result ?? false)
+            {
+                <button
+                    class="rounded-none px-4 py-2 hover:bg-background-800 select-none"
+                    @onclick="() => _window?.Restore()">
+                    <Square2StackIcon class="h-5 w-5" />
+                </button>
+            }
+            else
+            {
+                <button
+                    class="rounded-none px-4 py-2 hover:bg-background-800 select-none"
+                    @onclick="() => _window?.Maximize()">
+                    <ArrowsPointingOutIcon class="h-5 w-5" />
+                </button>
+            }
+
+            <button
+                class="rounded-none px-4 py-2 hover:bg-background-800 select-none"
+                @onclick="() => _window?.Close()">
+                <XMarkIcon class="h-5 w-5" />
+            </button>
+        </div>
+    </div>
+    <main class="bg-background-900 text-primary-50 flex-grow">
+        @Body
+    </main>
 </div>
 
-<main>
-    @Body
-</main>
 
-<style>
-    button{
-        -webkit-app-region: no-drag;
-    }
-    
-    body{
-        margin: 0;
-        padding: 0;
-    }
-</style>
+
 
 @code{
 
