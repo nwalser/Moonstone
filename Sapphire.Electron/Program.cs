@@ -1,5 +1,6 @@
 using ElectronNET.API;
 using ElectronNET.API.Entities;
+using Toolbelt.Blazor.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +9,7 @@ builder.Services.AddElectron();
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-
+builder.Services.AddHotKeys2();
 
 var app = builder.Build();
 
@@ -36,7 +37,6 @@ var options = new BrowserWindowOptions()
     MinWidth = 800,
     Frame = false
 };
-
 await Electron.WindowManager.CreateWindowAsync(options);
 
 app.WaitForShutdown();
