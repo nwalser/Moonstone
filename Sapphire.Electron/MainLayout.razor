@@ -42,6 +42,7 @@
     protected override void OnInitialized()
     {
         _window = WindowManager.BrowserWindows.Single();
+        _window.OnResize += async () => await InvokeAsync(StateHasChanged);
         base.OnInitialized();
     }
 }

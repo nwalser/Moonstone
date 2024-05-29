@@ -1,11 +1,20 @@
 ﻿@page "/"
 @using ElectronNET.API
 
-<h1>Hello, world! 22</h1>
+<Validation Validator="ValidationRule.IsNotEmpty">
+    <Addons>
+        <Addon AddonType="AddonType.Body">
+            <TextEdit Placeholder="Enter name" />
+        </Addon>
+        <Addon AddonType="AddonType.End">
+            <AddonLabel>This is a label</AddonLabel>
+        </Addon>
+        <ValidationNone></ValidationNone>
+        <ValidationSuccess></ValidationSuccess>
+        <ValidationError>Enter valid name!</ValidationError>
+    </Addons>
+</Validation>
 
-<p>Dark theme: @Theme.ShouldUseDarkColorsAsync().Result</p>
-<p>High contrast theme: @Theme.ShouldUseHighContrastColorsAsync().Result</p>
-<p>Inverted: @Theme.ShouldUseInvertedColorSchemeAsync().Result</p>
 
 @code {
     [Inject] public required Dialog Dialog { get; set; }
