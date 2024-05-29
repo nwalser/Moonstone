@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-namespace Sapphire.App.ViewModels;
+namespace Sapphire.Avalonia.ViewModels;
 
 public class ViewModelBase : ReactiveObject
 {

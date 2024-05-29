@@ -23,10 +23,28 @@
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+        <PackageReference Include="Projektanker.Icons.Avalonia" Version="9.3.0" />
+        <PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.3.0" />
     </ItemGroup>
 
 
     <ItemGroup>
       <ProjectReference Include="..\Sapphire.Domain\Sapphire.Domain.csproj" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Styles\DragTabItem.axaml" />
+      <UpToDateCheckInput Remove="Styles\MyTheme.axaml" />
+      <UpToDateCheckInput Remove="Styles\TabsControl.axaml" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Compile Update="Windows\ProjectWindow.axaml.cs">
+        <DependentUpon>MainWindow.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 </Project>

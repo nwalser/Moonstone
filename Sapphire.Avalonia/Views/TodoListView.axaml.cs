@@ -2,11 +2,11 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace Sapphire.App.Views;
+namespace Sapphire.Avalonia.Views;
 
-public partial class AddItemView : UserControl
+public partial class TodoListView : UserControl
 {
-    public AddItemView()
+    public TodoListView()
     {
         InitializeComponent();
     }

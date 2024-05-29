@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using Sapphire.Domain;
 
-namespace Sapphire.App.ViewModels;
+namespace Sapphire.Avalonia.ViewModels;
 
 public class TodoListViewModel : ViewModelBase
 {

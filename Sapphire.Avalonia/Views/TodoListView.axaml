@@ -3,8 +3,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="450"
-             x:Class="Sapphire.App.Views.TodoListView"
-             xmlns:vm="using:Sapphire.App.ViewModels"
+             x:Class="Sapphire.Avalonia.Views.TodoListView"
+             xmlns:vm="using:Sapphire.Avalonia.ViewModels"
              x:DataType="vm:TodoListViewModel">
     <DockPanel>
         <Button DockPanel.Dock="Bottom"

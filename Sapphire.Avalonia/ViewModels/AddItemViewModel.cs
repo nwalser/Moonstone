@@ -2,7 +2,7 @@
 using ReactiveUI;
 using Sapphire.Domain;
 
-namespace Sapphire.App.ViewModels;
+namespace Sapphire.Avalonia.ViewModels;
 
 public class AddItemViewModel : ViewModelBase
 {

@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Sapphire.App.ViewModels;
-using Sapphire.App.Views;
+using Sapphire.Avalonia.ViewModels;
+using Sapphire.Avalonia.Views;
 
-namespace Sapphire.App;
+namespace Sapphire.Avalonia;
 
 public partial class App : Application
 {
@@ -17,7 +17,7 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
+            desktop.MainWindow = new ProjectWindow
             {
                 DataContext = new MainWindowViewModel(),
             };

@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using Moonstone.Database;
 using ReactiveUI;
 using Sapphire.Domain;
 
-namespace Sapphire.App.ViewModels;
+namespace Sapphire.Avalonia.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
     private ViewModelBase _contentViewModel;
     public IDatabase Database { get; }
     public TodoListViewModel TodoListViewModel { get; }
+    
+    public ObservableCollection<TabItemViewModel> TabItems { get; } = new();
+    public Func<object> NewItemFactory => AddTab;
+
     
     public ViewModelBase ContentViewModel
     {
@@ -56,5 +61,14 @@ public class MainWindowViewModel : ViewModelBase
             });
         
         ContentViewModel = addItemViewModel;
+    }
+    
+    private object AddTab()
+    {
+        return new TabItemViewModel
+        {
+            Header = $"Tab",
+            SimpleContent = $"Tab content"
+        };
     }
 }

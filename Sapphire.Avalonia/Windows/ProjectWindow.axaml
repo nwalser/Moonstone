@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Sapphire.Avalonia.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
+        xmlns:i="https://github.com/projektanker/icons.avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Sapphire.Avalonia.Views.ProjectWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico">
+        
+        <DockPanel>
+                <actipro:ChromedTitleBar DockPanel.Dock="Top">
+                        <actipro:ChromedTitleBar.LeftContent>
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock>Sapphire</TextBlock>
+                                </StackPanel>
+                        </actipro:ChromedTitleBar.LeftContent>
+                        <actipro:ChromedTitleBar.Content>
+                                
+                        </actipro:ChromedTitleBar.Content>
+                        <actipro:ChromedTitleBar.RightContent>
+                                <StackPanel Orientation="Horizontal">
+                                        <TextBox MinWidth="300" Watermark="Search" Margin="4">
+                                                <TextBox.InnerLeftContent>
+                                                        <i:Icon Margin="4, 0, 0, 0" Value="fa-solid fa-search"></i:Icon>
+                                                </TextBox.InnerLeftContent>
+                                        </TextBox>
+                                        
+                                        <Button ContentTemplate="{actipro:GlyphTemplate Previous16}"
+                                                Theme="{actipro:ControlTheme TitleBarButton}"
+                                                ToolTip.Tip="Previous" />
+                                        
+                                </StackPanel>
+                        </actipro:ChromedTitleBar.RightContent>
+                </actipro:ChromedTitleBar>
+                
+                <TabControl Margin="0">
+                        <TabItem Margin="0" Padding="0">
+                                <TabItem.Header>
+                                        <TextBlock Padding="10, 5, 10, 5">Hello</TextBlock>
+                                </TabItem.Header>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <StackPanel Orientation="Vertical">
+                                                <Grid RowDefinitions="30,30" ColumnDefinitions="10,10,10">
+                                                        <Button Grid.Column="0" Grid.Row="0">
+                                                                <Button.Content>
+                                                                        <TextBlock>Hello</TextBlock>
+                                                                </Button.Content>
+                                                        </Button>
+                                                        
+                                                        
+                                                </Grid>
+                                                <TextBlock>Clipboard</TextBlock>
+                                        </StackPanel>
+                                        
+                                </StackPanel>
+                        </TabItem>
+                        <TabItem Margin="0" Padding="0">
+                                <TabItem.Header>
+                                        <TextBlock Padding="10, 5, 10, 5">Hello</TextBlock>
+                                </TabItem.Header>
+                        </TabItem>
+                        <TabItem Margin="0" Padding="0">
+                                <TabItem.Header>
+                                        <TextBlock Padding="10, 5, 10, 5">Hello</TextBlock>
+                                </TabItem.Header>
+                        </TabItem>
+                </TabControl>
+        </DockPanel>
+</Window>

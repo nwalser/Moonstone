@@ -1,9 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Sapphire.App.ViewModels;
+using Sapphire.Avalonia.ViewModels;
 
-namespace Sapphire.App;
+namespace Sapphire.Avalonia;
 
 public class ViewLocator : IDataTemplate
 {

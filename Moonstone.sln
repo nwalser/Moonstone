@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "20 - Sapphire", "20 - Sapph
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.Domain", "Sapphire.Domain\Sapphire.Domain.csproj", "{EE062EF6-8442-4256-8AEF-42609C0B29F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.App", "Sapphire.App\Sapphire.App.csproj", "{FEBE8EBA-5E1A-4F89-80EC-353FAEB045E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.Avalonia", "Sapphire.Avalonia\Sapphire.Avalonia.csproj", "{FEBE8EBA-5E1A-4F89-80EC-353FAEB045E8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Database", "Moonstone.Database\Moonstone.Database.csproj", "{C62A9FD0-6717-4017-8B6D-2D78F3949DAA}"
 EndProject

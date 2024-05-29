@@ -1,8 +1,8 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
-             x:Class="Sapphire.App.App"
-             xmlns:local="using:Sapphire.App"
+             x:Class="Sapphire.Avalonia.App"
+             xmlns:local="using:Sapphire.Avalonia"
              xmlns:generation="clr-namespace:ActiproSoftware.UI.Avalonia.Themes.Generation;assembly=ActiproSoftware.Avalonia.Shared"
              RequestedThemeVariant="Default">
 
