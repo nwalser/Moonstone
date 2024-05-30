@@ -8,7 +8,9 @@ namespace Sapphire.Electron.Services;
 public class DatabaseManager<TType> where TType : Database, new()
 { 
     private readonly string _session;
+    private readonly string _openDatabasesFile;
     private readonly List<TType> _databases = [];
+    public List<string> CouldNotOpen { get; } = [];
     
     private readonly BehaviorSubject<DateTime> _lastUpdate = new(DateTime.MinValue);
     public BehaviorSubject<DateTime> LastUpdate => _lastUpdate;
@@ -16,16 +18,27 @@ public class DatabaseManager<TType> where TType : Database, new()
     public DatabaseManager(string openDatabasesFile, string deviceId)
     {
         _session = Math.Abs(deviceId.GetHashCode()).ToString();
-
+        _openDatabasesFile = openDatabasesFile;
+        
         // open existing databases
-        if (!File.Exists(openDatabasesFile)) 
+        if (!File.Exists(_openDatabasesFile)) 
             return;
         
-        var json = File.ReadAllText(openDatabasesFile);
+        var json = File.ReadAllText(_openDatabasesFile);
         var openDatabases = JsonSerializer.Deserialize<string[]>(json) ?? [];
 
         foreach (var openDatabase in openDatabases)
-            Open(openDatabase);
+        {
+            Console.WriteLine(openDatabase);
+            try
+            {
+                Open(openDatabase);
+            }
+            catch (Exception)
+            {
+                CouldNotOpen.Add(openDatabase);
+            }
+        }
     }
 
     public TType Find(long id)
@@ -62,6 +75,7 @@ public class DatabaseManager<TType> where TType : Database, new()
             throw new DatabaseAlreadyOpenedException();
 
         _databases.Add(database);
+        UpdateFile();
         _lastUpdate.OnNext(DateTime.UtcNow);
     }
 
@@ -70,7 +84,14 @@ public class DatabaseManager<TType> where TType : Database, new()
         var database = Find(id);
         database.Close();
         _databases.Remove(database);
+        UpdateFile();
         
         _lastUpdate.OnNext(DateTime.UtcNow);
+    }
+
+    private void UpdateFile()
+    {
+        var json = JsonSerializer.Serialize(_databases.Select(d => d.RootFolder).ToArray());
+        File.WriteAllText(_openDatabasesFile, json);
     }
 }

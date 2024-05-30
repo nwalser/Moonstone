@@ -12,6 +12,15 @@
     <WorkerCard DatabaseId="@database.Id" />
 }
 
+@WorkerDatabases.CouldNotOpen.Count
+
+@foreach (var database in WorkerDatabases.CouldNotOpen)
+{
+    <p>
+        @database
+    </p>
+}
+
 <button @onclick="() => OpenProject(true)">Create Project</button>
 <button @onclick="() => OpenProject()">Open Project</button>
 
