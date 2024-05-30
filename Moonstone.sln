@@ -9,13 +9,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "10 - FileFormat", "10 - Fil
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "20 - Sapphire", "20 - Sapphire", "{EE6C6F49-856B-423E-ABB0-CE1E8CC9DE57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.Data.Project", "Sapphire.Data.Project\Sapphire.Data.Project.csproj", "{EE062EF6-8442-4256-8AEF-42609C0B29F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.Data.ProjectData", "Sapphire.Data.ProjectData\Sapphire.Data.ProjectData.csproj", "{EE062EF6-8442-4256-8AEF-42609C0B29F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Database", "Moonstone.Database\Moonstone.Database.csproj", "{C62A9FD0-6717-4017-8B6D-2D78F3949DAA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.Electron", "Sapphire.Electron\Sapphire.Electron.csproj", "{178AB36F-F170-48B9-B599-738F6EEA3FFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.Data.Worker", "Sapphire.Data.Worker\Sapphire.Data.Worker.csproj", "{AD66DE49-80B3-4241-8DD4-378D78FB4ED5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.Data.WorkerData", "Sapphire.Data.WorkerData\Sapphire.Data.WorkerData.csproj", "{AD66DE49-80B3-4241-8DD4-378D78FB4ED5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

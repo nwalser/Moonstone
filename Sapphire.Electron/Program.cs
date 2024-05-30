@@ -1,7 +1,7 @@
 using DeviceId;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
-using Sapphire.Data.Project;
+using Sapphire.Data.ProjectData;
 using Sapphire.Electron.Services;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
 

@@ -1,0 +1,33 @@
+﻿@page "/"
+@implements IDisposable
+
+@foreach (var database in ProjectDatabases.Enumerate())
+{
+    <ProjectCard DatabaseId="@database.Id" />
+}
+
+@foreach (var database in WorkerDatabases.Enumerate())
+{
+    <WorkerCard DatabaseId="@database.Id" />
+}
+
+@code {
+    [Inject] public required DatabaseManager<ProjectDatabase> ProjectDatabases { get; set; }
+    [Inject] public required DatabaseManager<WorkerDatabase> WorkerDatabases { get; set; }
+
+    private readonly List<IDisposable> _subscriptions = [];
+
+    protected override Task OnParametersSetAsync()
+    {
+        _subscriptions.Add(ProjectDatabases.LastUpdate.Subscribe(_ => InvokeAsync(StateHasChanged)));
+        foreach (var database in ProjectDatabases.Enumerate())
+            _subscriptions.Add(database.LastUpdate.Subscribe(_ => InvokeAsync(StateHasChanged)));
+    
+        return base.OnParametersSetAsync();
+    }
+
+    public void Dispose()
+    {
+        _subscriptions.ForEach(s => s.Dispose());
+    }
+}

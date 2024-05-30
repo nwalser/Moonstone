@@ -1,4 +1,5 @@
-﻿using Moonstone.Database;
+﻿using System.Reactive.Subjects;
+using Moonstone.Database;
 
 namespace Sapphire.Electron.Services;
 
@@ -6,6 +7,9 @@ public class DatabaseManager<TType> where TType : Database, new()
 { 
     private readonly string _session;
     private readonly List<TType> _databases = [];
+    
+    private readonly BehaviorSubject<DateTime> _lastUpdate = new(DateTime.MinValue);
+    public BehaviorSubject<DateTime> LastUpdate => _lastUpdate;
     
     public DatabaseManager(string storagePath, string deviceId)
     {

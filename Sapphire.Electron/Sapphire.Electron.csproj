@@ -16,9 +16,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Components\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Sapphire.Data.Project\Sapphire.Data.Project.csproj" />
+    <ProjectReference Include="..\Sapphire.Data.ProjectData\Sapphire.Data.ProjectData.csproj" />
+    <ProjectReference Include="..\Sapphire.Data.WorkerData\Sapphire.Data.WorkerData.csproj" />
   </ItemGroup>
 </Project>

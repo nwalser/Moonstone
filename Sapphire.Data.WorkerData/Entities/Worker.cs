@@ -1,6 +1,6 @@
 ﻿using Moonstone.Database;
 
-namespace Sapphire.Data.Worker.Entities;
+namespace Sapphire.Data.WorkerData.Entities;
 
 public class Worker : Document
 {

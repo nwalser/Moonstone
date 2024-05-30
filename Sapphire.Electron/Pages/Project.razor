@@ -1,0 +1,28 @@
+﻿@page "/project/{DatabaseId}"
+@implements IDisposable
+
+
+
+
+
+@code {
+    [Inject] public required DatabaseManager<ProjectDatabase> ProjectDatabases { get; set; }
+    
+    [Parameter] public required long DatabaseId { get; set; }
+    
+    private ProjectDatabase? _database;
+    private IDisposable? _subscription;
+
+    protected override Task OnParametersSetAsync()
+    {
+        _database = ProjectDatabases.Find(DatabaseId);
+        _subscription = _database.LastUpdate.Subscribe(_ => InvokeAsync(StateHasChanged));
+        
+        return base.OnParametersSetAsync();
+    }
+
+    public void Dispose()
+    {
+        _subscription?.Dispose();
+    }
+}

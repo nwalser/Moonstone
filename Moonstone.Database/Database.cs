@@ -1,6 +1,9 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reactive.Subjects;
+using System.Text.Json;
 using System.Threading.Channels;
 using Moonstone.Database.Deltas;
+using Moonstone.Database.Exceptions;
 using ProtoBuf;
 
 namespace Moonstone.Database;
@@ -9,8 +12,9 @@ public abstract class Database : IDatabase
 {
     private const long MaxSize = 10 * 1024 * 1024;
     
-    public long? Id { get; private set; }
-    public string? Folder { get; private set; }
+    public long Id { get; private set; }
+    public string? RootFolder { get; private set; }
+    public string? LogFolder { get; private set; }
     public string? Session { get; private set; }
     
     protected abstract Dictionary<int, Type> TypeMap { get; }
@@ -25,7 +29,20 @@ public abstract class Database : IDatabase
     private Task? _backgroundTask;
     private CancellationTokenSource _cts = new();
 
+    private readonly BehaviorSubject<DateTime> _lastUpdate = new(DateTime.MinValue);
+    public BehaviorSubject<DateTime> LastUpdate => _lastUpdate;
+    
+    public virtual void Create(string path, string session, DatabaseMetadata metadata)
+    {
+        if (Directory.EnumerateFileSystemEntries(path).Any())
+            throw new DirectoryNotEmptyException();
 
+        var json = JsonSerializer.Serialize(metadata);
+        File.WriteAllText(Path.Join(path, "metadata.json"), json);
+        
+        Open(path, session);
+    }
+    
     public void Close()
     {
         throw new NotImplementedException();
@@ -33,12 +50,13 @@ public abstract class Database : IDatabase
     
     public void Open(string path, string session)
     {
-        Folder = path;
+        RootFolder = path;
         Session = session;
-
+        LogFolder = Path.Join(RootFolder, "logs");
+        
         _watcher = new FileSystemWatcher()
         {
-            Path = Folder,
+            Path = LogFolder,
             NotifyFilter = NotifyFilters.LastWrite,
             IncludeSubdirectories = true,
             EnableRaisingEvents = false,
@@ -48,7 +66,7 @@ public abstract class Database : IDatabase
         
         // get last log file
         _currentLogFile = Directory
-            .EnumerateFiles(Folder, $"{Session}_*.bin")
+            .EnumerateFiles(LogFolder, $"{Session}_*.bin")
             .Select(p => new FileInfo(p))
             .Where(p => p.Length < MaxSize)
             .MinBy(f => f.Length) ?? NewLogFile();
@@ -58,7 +76,7 @@ public abstract class Database : IDatabase
         _watcher.EnableRaisingEvents = true;
 
         // rebuild current state
-        var logFiles = Directory.EnumerateFiles(Folder)
+        var logFiles = Directory.EnumerateFiles(LogFolder)
             .Select(f => new FileInfo(f));
 
         foreach (var logFile in logFiles)
@@ -101,38 +119,46 @@ public abstract class Database : IDatabase
     {
         lock (_documents)
         {
-            var type = TypeMap[delta.TypeId];
-
             switch (delta)
             {
                 case Update update:
-                {
-                    if (_deleted.Contains(update.RowId))
-                        break;
-
-                    if (_documents.TryGetValue(delta.RowId, out var existingDocument) && existingDocument.LastWrite >= delta.Timestamp)
-                        break;
-                    
-                    var document = (Document)JsonSerializer.Deserialize(update.Json, type)!;
-                    document.LastWrite = update.Timestamp;
-                    _documents[delta.RowId] = document;
-                    
+                    ApplyUpdate(update);
                     break;
-                }
                 case Delete delete:
-                {
-                    _deleted.Add(delete.RowId);
-                    _documents.Remove(delete.RowId);
-
+                    ApplyDelete(delete);
                     break;
-                }
             }
         }
     }
 
+    private void ApplyDelete(Delete delete)
+    {
+        _deleted.Add(delete.RowId);
+        _documents.Remove(delete.RowId);
+
+        _lastUpdate.OnNext(DateTime.UtcNow);
+    }
+    
+    private void ApplyUpdate(Update update)
+    {
+        var type = TypeMap[update.TypeId];
+
+        if (_deleted.Contains(update.RowId))
+            return;
+        
+        if (_documents.TryGetValue(update.RowId, out var existingDocument) && existingDocument.LastWrite >= update.Timestamp)
+            return;
+                    
+        var document = (Document)JsonSerializer.Deserialize(update.Json, type)!;
+        document.LastWrite = update.Timestamp;
+        _documents[update.RowId] = document;
+                    
+        _lastUpdate.OnNext(DateTime.UtcNow);
+    }
+
     private FileInfo NewLogFile()
     {
-        var path = Path.Join(Folder, $"{Session}_{Guid.NewGuid()}.bin");
+        var path = Path.Join(LogFolder, $"{Session}_{Guid.NewGuid()}.bin");
         return new FileInfo(path);
     }
 

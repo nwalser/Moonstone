@@ -1,6 +1,6 @@
 ﻿using Moonstone.Database;
 
-namespace Sapphire.Data.Project.Entities;
+namespace Sapphire.Data.ProjectData.Entities;
 
 public class Todo : Document
 {
