@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Reactive.Subjects;
+﻿using System.Reactive.Subjects;
 using System.Text.Json;
 using System.Threading.Channels;
 using Moonstone.Database.Deltas;
@@ -11,11 +10,12 @@ namespace Moonstone.Database;
 public abstract class Database : IDatabase
 {
     private const long MaxSize = 10 * 1024 * 1024;
-    
+
     public long Id { get; private set; }
     public string? RootFolder { get; private set; }
     public string? LogFolder { get; private set; }
     public string? Session { get; private set; }
+    public DatabaseMetadata? Metadata { get; private set; }
     
     protected abstract Dictionary<int, Type> TypeMap { get; }
     private FileInfo? _currentLogFile;
@@ -31,28 +31,50 @@ public abstract class Database : IDatabase
 
     private readonly BehaviorSubject<DateTime> _lastUpdate = new(DateTime.MinValue);
     public BehaviorSubject<DateTime> LastUpdate => _lastUpdate;
-    
-    public virtual void Create(string path, string session, DatabaseMetadata metadata)
+
+    public virtual void Create(string path, string session)
     {
         if (Directory.EnumerateFileSystemEntries(path).Any())
             throw new DirectoryNotEmptyException();
 
+        // create initial files
+        Directory.CreateDirectory(Path.Join(path, "logs"));
+
+        var metadata = new DatabaseMetadata()
+        {
+            Type = GetType().FullName ?? throw new InvalidOperationException(),
+            Created = DateTime.UtcNow,
+        };
+
         var json = JsonSerializer.Serialize(metadata);
         File.WriteAllText(Path.Join(path, "metadata.json"), json);
+
+        Console.WriteLine("Hello");
         
         Open(path, session);
     }
-    
+
     public void Close()
     {
-        throw new NotImplementedException();
+        if (_watcher is not null)
+            _watcher.EnableRaisingEvents = false;
     }
-    
+
     public void Open(string path, string session)
     {
         RootFolder = path;
         Session = session;
         LogFolder = Path.Join(RootFolder, "logs");
+        Id = path.GetHashCode();
+
+        // check metadata
+        var metadataFile = Path.Join(path, "metadata.json");
+        if (!File.Exists(metadataFile)) throw new DatabaseNotFoundException();
+        var json = File.ReadAllText(metadataFile);
+        var metadata = JsonSerializer.Deserialize<DatabaseMetadata>(json) ?? throw new DatabaseNotFoundException();
+        if (metadata.Type != GetType().FullName)
+            throw new WrongDatabaseTypeException();
+        Metadata = metadata;
         
         _watcher = new FileSystemWatcher()
         {
@@ -62,8 +84,6 @@ public abstract class Database : IDatabase
             EnableRaisingEvents = false,
         };
 
-        Id = path.GetHashCode();
-        
         // get last log file
         _currentLogFile = Directory
             .EnumerateFiles(LogFolder, $"{Session}_*.bin")
@@ -81,7 +101,7 @@ public abstract class Database : IDatabase
 
         foreach (var logFile in logFiles)
             RescanFile(logFile);
-        
+
         // init background worker
         _cts = new CancellationTokenSource();
         _backgroundTask = Task.Run(() => BackgroundTask(_cts.Token));
@@ -102,7 +122,7 @@ public abstract class Database : IDatabase
         // test if file is already known
         if (_filePointers.TryGetValue(file.FullName, out var filePointer) && filePointer >= file.Length)
             return;
-            
+
         using var fs = file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
         while (fs.Position < fs.Length)
@@ -110,7 +130,7 @@ public abstract class Database : IDatabase
             var delta = Serializer.DeserializeWithLengthPrefix<IDelta>(fs, PrefixStyle.Base128);
             ApplyDelta(delta);
         }
-        
+
         _filePointers[file.FullName] = fs.Position;
         Console.WriteLine($"Rescanned: {file.FullName}");
     }
@@ -138,21 +158,22 @@ public abstract class Database : IDatabase
 
         _lastUpdate.OnNext(DateTime.UtcNow);
     }
-    
+
     private void ApplyUpdate(Update update)
     {
         var type = TypeMap[update.TypeId];
 
         if (_deleted.Contains(update.RowId))
             return;
-        
-        if (_documents.TryGetValue(update.RowId, out var existingDocument) && existingDocument.LastWrite >= update.Timestamp)
+
+        if (_documents.TryGetValue(update.RowId, out var existingDocument) &&
+            existingDocument.LastWrite >= update.Timestamp)
             return;
-                    
+
         var document = (Document)JsonSerializer.Deserialize(update.Json, type)!;
         document.LastWrite = update.Timestamp;
         _documents[update.RowId] = document;
-                    
+
         _lastUpdate.OnNext(DateTime.UtcNow);
     }
 
@@ -163,7 +184,7 @@ public abstract class Database : IDatabase
     }
 
     public void Update(Document document) => Update([document]);
-    
+
     public void Update(IEnumerable<Document> documents)
     {
         var deltas = documents.Select(document =>
@@ -184,14 +205,14 @@ public abstract class Database : IDatabase
     {
         return _documents.Select(d => d.Value);
     }
-    
+
     public IEnumerable<TType> Enumerate<TType>()
     {
         return _documents.Select(v => v.Value)
             .Where(t => t.GetType() == typeof(TType))
             .Cast<TType>();
     }
-    
+
     public void Remove(Document document) => Remove([document]);
 
     public void Remove(IEnumerable<Document> documents)
@@ -212,7 +233,7 @@ public abstract class Database : IDatabase
     private void WriteDeltas(IEnumerable<IDelta> deltas)
     {
         if (_currentLogFile is null) throw new InvalidOperationException();
-        
+
         var fs = _currentLogFile.Open(FileMode.Append, FileAccess.Write, FileShare.Read);
 
         foreach (var delta in deltas)
@@ -224,11 +245,11 @@ public abstract class Database : IDatabase
                 _currentLogFile = NewLogFile();
                 fs = _currentLogFile.Open(FileMode.Append, FileAccess.Write, FileShare.Read);
             }
-        
+
             Serializer.SerializeWithLengthPrefix(fs, delta, PrefixStyle.Base128);
             ApplyDelta(delta);
         }
-        
+
         fs.Dispose();
     }
 }

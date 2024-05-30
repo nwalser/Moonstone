@@ -1,5 +1,32 @@
-﻿<h3>ProjectCard</h3>
+﻿@implements IDisposable
+
+@if (_project is not null)
+{
+    <p>@_project.Name</p>
+    <p>@_project.LastWrite</p>
+    <p>@_project.Deadline</p>
+}
 
 @code {
+    [Inject] public required DatabaseManager<ProjectDatabase> ProjectDatabases { get; set; }
+
     [Parameter] public required long DatabaseId { get; set; }
+
+    private ProjectDatabase? _database;
+    private Data.ProjectData.Entities.Project? _project;
+    private IDisposable? _subscription;
+
+    protected override Task OnParametersSetAsync()
+    {
+        _database = ProjectDatabases.Find(DatabaseId);
+        _subscription = _database.LastUpdate.Subscribe(_ => InvokeAsync(StateHasChanged));
+        _project = _database.GetProject();
+
+        return base.OnParametersSetAsync();
+    }
+
+    public void Dispose()
+    {
+        _subscription?.Dispose();
+    }
 }

@@ -2,6 +2,6 @@
 
 public record DatabaseMetadata
 {
-    public required string Type { get; set; }
-    public required DateTime Created { get; set; }
+    public required string Type { get; init; }
+    public required DateTime Created { get; init; }
 }

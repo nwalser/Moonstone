@@ -12,14 +12,22 @@ public class ProjectDatabase : Database
         { 2, typeof(PossibleWorkerAssignment) },
     };
 
-    public override void Create(string path, string session, DatabaseMetadata metadata)
+    public override void Create(string path, string session)
     {
-        base.Create(path, session, metadata);
+        base.Create(path, session);
         
         // create initial objects
-        Update(new Project
+        Update(new Project()
         {
-            Name = "Project Name",
+            Name = "Project Name"
+        });
+        Update(new Todo()
+        {
+            Name = "Todo 1"
+        });
+        Update(new Todo()
+        {
+            Name = "Todo 2"
         });
     }
 

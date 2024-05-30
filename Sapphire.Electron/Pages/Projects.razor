@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using ElectronNET.API.Entities
 @implements IDisposable
 
 @foreach (var database in ProjectDatabases.Enumerate())
@@ -11,10 +12,15 @@
     <WorkerCard DatabaseId="@database.Id" />
 }
 
+<button @onclick="() => OpenProject(true)">Create Project</button>
+<button @onclick="() => OpenProject()">Open Project</button>
+
 @code {
     [Inject] public required DatabaseManager<ProjectDatabase> ProjectDatabases { get; set; }
     [Inject] public required DatabaseManager<WorkerDatabase> WorkerDatabases { get; set; }
-
+    [Inject] public required WindowManager WindowManager { get; set; }
+    [Inject] public required Dialog Dialog { get; set; }
+    
     private readonly List<IDisposable> _subscriptions = [];
 
     protected override Task OnParametersSetAsync()
@@ -25,7 +31,40 @@
     
         return base.OnParametersSetAsync();
     }
+    
+    private async Task OpenProject(bool create = false)
+    {
+        var window = WindowManager.BrowserWindows.Single();
+        var path = await Dialog.ShowOpenDialogAsync(window, new OpenDialogOptions()
+        {
+            Properties =
+            [
+                OpenDialogProperty.openDirectory
+            ]
+        });
 
+        var selection = path.SingleOrDefault();
+
+        if (selection is null)
+            return;
+
+        try
+        {
+            if (create)
+            {
+                ProjectDatabases.Create(selection);
+            }
+            else
+            {
+                ProjectDatabases.Open(selection);
+            }
+        }
+        catch (Exception ex)
+        {
+            Dialog.ShowErrorBox("An error occured", ex.Message);
+        }
+    }
+    
     public void Dispose()
     {
         _subscriptions.ForEach(s => s.Dispose());
