@@ -2,9 +2,11 @@
 
 @if (_project is not null)
 {
-    <p>@_project.Name</p>
-    <p>@_project.LastWrite</p>
-    <p>@_project.Deadline</p>
+    <a href="@($"/project/{DatabaseId}")">
+        <p>@_project.Name</p>
+        <p>@_project.LastWrite</p>
+        <p>@_project.Deadline</p>
+    </a>
 }
 
 @code {
