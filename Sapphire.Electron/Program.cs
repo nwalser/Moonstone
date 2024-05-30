@@ -48,6 +48,7 @@ var options = new BrowserWindowOptions()
     MinWidth = 800,
     Frame = false
 };
-await Electron.WindowManager.CreateWindowAsync(options);
+var window = await Electron.WindowManager.CreateWindowAsync(options);
+await window.WebContents.Session.ClearCacheAsync();
 
 app.WaitForShutdown();
