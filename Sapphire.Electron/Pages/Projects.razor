@@ -12,12 +12,15 @@
     <WorkerCard DatabaseId="@database.Id" />
 }
 
-@WorkerDatabases.CouldNotOpen.Count
+@ProjectDatabases.CouldNotOpen.Count
 
-@foreach (var database in WorkerDatabases.CouldNotOpen)
+@foreach (var database in ProjectDatabases.CouldNotOpen)
 {
     <p>
-        @database
+        @database.Item1
+    </p>
+    <p>
+        @database.Item2.Message
     </p>
 }
 

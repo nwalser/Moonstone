@@ -10,7 +10,7 @@ public class DatabaseManager<TType> where TType : Database, new()
     private readonly string _session;
     private readonly string _openDatabasesFile;
     private readonly List<TType> _databases = [];
-    public List<string> CouldNotOpen { get; } = [];
+    public List<(string, Exception)> CouldNotOpen { get; } = [];
     
     private readonly BehaviorSubject<DateTime> _lastUpdate = new(DateTime.MinValue);
     public BehaviorSubject<DateTime> LastUpdate => _lastUpdate;
@@ -32,11 +32,15 @@ public class DatabaseManager<TType> where TType : Database, new()
             Console.WriteLine(openDatabase);
             try
             {
-                Open(openDatabase);
+                var database = new TType();
+                database.Open(openDatabase, _session);
+
+                Add(database);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                CouldNotOpen.Add(openDatabase);
+                CouldNotOpen.Add((openDatabase, ex));
+                UpdateFile();
             }
         }
     }
@@ -91,7 +95,13 @@ public class DatabaseManager<TType> where TType : Database, new()
 
     private void UpdateFile()
     {
-        var json = JsonSerializer.Serialize(_databases.Select(d => d.RootFolder).ToArray());
+        var databasePaths = _databases
+            .Select(d => d.RootFolder)
+            .Concat(CouldNotOpen.Select(c => c.Item1))
+            .ToArray();
+        
+        var json = JsonSerializer.Serialize(databasePaths);
         File.WriteAllText(_openDatabasesFile, json);
+        Console.WriteLine(json);
     }
 }

@@ -24,8 +24,6 @@ var deviceId = new DeviceIdBuilder()
     .AddUserName()
     .ToString();
 
-File.WriteAllText(@"C:\Users\Nathaniel Walser\Downloads\project1\test.json", "hello");
-
 var userDataPath = await Electron.App.GetPathAsync(PathName.UserData);
 
 // register project databases
