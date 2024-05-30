@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Blazor.Heroicons" Version="2.1.2.2" />
+    <PackageReference Include="DeviceId" Version="6.6.0" />
     <PackageReference Include="ElectronNET.API" Version="23.6.2" />
     <PackageReference Include="Toolbelt.Blazor.HotKeys2" Version="4.1.0.1" />
   </ItemGroup>
@@ -16,5 +17,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Components\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sapphire.Data.Project\Sapphire.Data.Project.csproj" />
   </ItemGroup>
 </Project>

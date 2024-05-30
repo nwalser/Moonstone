@@ -7,11 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Moonstone.Database.Test\Moonstone.Database.Test.csproj" />
+      <Folder Include="ValueObjects\" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="ValueObjects\" />
+      <ProjectReference Include="..\Moonstone.Database\Moonstone.Database.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Moonstone.Database\Moonstone.Database.csproj" />
     </ItemGroup>
 
 </Project>

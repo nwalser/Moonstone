@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Moonstone.Database;
 using Moonstone.Database.Test.Domain;
 
 var sw = Stopwatch.StartNew();
@@ -7,14 +6,8 @@ var sw = Stopwatch.StartNew();
 var path = @"C:\Users\Nathaniel Walser\OneDrive - esp-engineering gmbh\Moonstone\workspace16";
 var session = "session1";
 
-var typeMap = new Dictionary<int, Type>
-{
-    { 0, typeof(Project) },
-    { 1, typeof(Todo) }
-};
-
-var database = new Database(typeMap, session, path);
-database.Open();
+var database = new TestDatabase();
+database.Open(session, path);
 
 Console.WriteLine($"Startup: {sw.ElapsedMilliseconds}ms");
 sw.Restart();

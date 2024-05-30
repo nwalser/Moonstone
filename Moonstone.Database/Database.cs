@@ -5,48 +5,50 @@ using ProtoBuf;
 
 namespace Moonstone.Database;
 
-public class Database : IDatabase
+public abstract class Database : IDatabase
 {
     private const long MaxSize = 10 * 1024 * 1024;
     
-    public long Id { get; init; }
+    public long? Id { get; private set; }
+    public string? Folder { get; private set; }
+    public string? Session { get; private set; }
     
-    private readonly string _path;
-    private readonly string _session;
-    private readonly Dictionary<int, Type> _typeMap;
+    protected abstract Dictionary<int, Type> TypeMap { get; }
     private FileInfo? _currentLogFile;
 
     private readonly Dictionary<Guid, Document> _documents = new();
     private readonly HashSet<Guid> _deleted = [];
     private readonly Dictionary<string, long> _filePointers = new();
-    private readonly FileSystemWatcher _watcher;
+    private FileSystemWatcher? _watcher;
 
     private readonly Channel<FileSystemEventArgs> _changedFiles = Channel.CreateUnbounded<FileSystemEventArgs>();
     private Task? _backgroundTask;
     private CancellationTokenSource _cts = new();
-    
-    public Database(Dictionary<int, Type> typeMap, string session, string path)
+
+
+    public void Close()
     {
-        _typeMap = typeMap;
-        _session = session;
-        _path = path;
+        throw new NotImplementedException();
+    }
+    
+    public void Open(string path, string session)
+    {
+        Folder = path;
+        Session = session;
 
         _watcher = new FileSystemWatcher()
         {
-            Path = _path,
+            Path = Folder,
             NotifyFilter = NotifyFilters.LastWrite,
             IncludeSubdirectories = true,
             EnableRaisingEvents = false,
         };
 
         Id = path.GetHashCode();
-    }
-
-    public void Open()
-    {
+        
         // get last log file
         _currentLogFile = Directory
-            .EnumerateFiles(_path, $"{_session}_*.bin")
+            .EnumerateFiles(Folder, $"{Session}_*.bin")
             .Select(p => new FileInfo(p))
             .Where(p => p.Length < MaxSize)
             .MinBy(f => f.Length) ?? NewLogFile();
@@ -56,7 +58,7 @@ public class Database : IDatabase
         _watcher.EnableRaisingEvents = true;
 
         // rebuild current state
-        var logFiles = Directory.EnumerateFiles(_path)
+        var logFiles = Directory.EnumerateFiles(Folder)
             .Select(f => new FileInfo(f));
 
         foreach (var logFile in logFiles)
@@ -99,7 +101,7 @@ public class Database : IDatabase
     {
         lock (_documents)
         {
-            var type = _typeMap[delta.TypeId];
+            var type = TypeMap[delta.TypeId];
 
             switch (delta)
             {
@@ -130,7 +132,7 @@ public class Database : IDatabase
 
     private FileInfo NewLogFile()
     {
-        var path = Path.Join(_path, $"{_session}_{Guid.NewGuid()}.bin");
+        var path = Path.Join(Folder, $"{Session}_{Guid.NewGuid()}.bin");
         return new FileInfo(path);
     }
 
@@ -143,7 +145,7 @@ public class Database : IDatabase
             return new Update
             {
                 Timestamp = DateTime.UtcNow,
-                TypeId = _typeMap.Single(t => t.Value == document.GetType()).Key,
+                TypeId = TypeMap.Single(t => t.Value == document.GetType()).Key,
                 RowId = document.Id,
                 Json = JsonSerializer.Serialize(document, document.GetType()),
             };
@@ -173,7 +175,7 @@ public class Database : IDatabase
             return new Delete
             {
                 Timestamp = DateTime.UtcNow,
-                TypeId = _typeMap.Single(t => t.Value == document.GetType()).Key,
+                TypeId = TypeMap.Single(t => t.Value == document.GetType()).Key,
                 RowId = document.Id,
             };
         });

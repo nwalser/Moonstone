@@ -1,5 +1,8 @@
+using DeviceId;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
+using Sapphire.Data.Project;
+using Sapphire.Electron.Services;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,15 +14,23 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHotKeys2();
 
+
+var deviceId = new DeviceIdBuilder()
+    .AddMachineName()
+    .AddMacAddress()
+    .AddUserName()
+    .ToString();
+
+var userDataPath = await Electron.App.GetPathAsync(PathName.UserData);
+
+builder.Services.AddSingleton(new DatabaseManager<ProjectDatabase>(userDataPath, deviceId));
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
