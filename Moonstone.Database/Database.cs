@@ -9,10 +9,12 @@ public class Database : IDatabase
 {
     private const long MaxSize = 10 * 1024 * 1024;
     
+    public long Id { get; init; }
+    
     private readonly string _path;
     private readonly string _session;
     private readonly Dictionary<int, Type> _typeMap;
-    private FileInfo _currentLogFile;
+    private FileInfo? _currentLogFile;
 
     private readonly Dictionary<Guid, Document> _documents = new();
     private readonly HashSet<Guid> _deleted = [];
@@ -28,7 +30,7 @@ public class Database : IDatabase
         _typeMap = typeMap;
         _session = session;
         _path = path;
-        
+
         _watcher = new FileSystemWatcher()
         {
             Path = _path,
@@ -36,6 +38,8 @@ public class Database : IDatabase
             IncludeSubdirectories = true,
             EnableRaisingEvents = false,
         };
+
+        Id = path.GetHashCode();
     }
 
     public void Open()
@@ -179,6 +183,8 @@ public class Database : IDatabase
 
     private void WriteDeltas(IEnumerable<IDelta> deltas)
     {
+        if (_currentLogFile is null) throw new InvalidOperationException();
+        
         var fs = _currentLogFile.Open(FileMode.Append, FileAccess.Write, FileShare.Read);
 
         foreach (var delta in deltas)

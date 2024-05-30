@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using System.Net.NetworkInformation
 
 <div>
     <label for="search" class="block text-sm font-medium leading-6 text-gray-900">Quick search</label>
@@ -12,10 +13,18 @@
 
 <InputNumber @bind-Value="_value2" />
 
+@_mac
+
 @_value
 @_value2
 
 @code {
     private string _value = string.Empty;
     private int _value2 = 0;
+
+    private string? _mac = NetworkInterface
+        .GetAllNetworkInterfaces()
+        .Where(nic => nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+        .Select(nic => nic.GetPhysicalAddress().ToString())
+        .FirstOrDefault();
 }
