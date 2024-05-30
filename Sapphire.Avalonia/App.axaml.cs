@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Sapphire.Avalonia.ViewModels;
 using Sapphire.Avalonia.Views;
+using ProjectWindow = Sapphire.Avalonia.Windows.ProjectWindow;
 
 namespace Sapphire.Avalonia;
 

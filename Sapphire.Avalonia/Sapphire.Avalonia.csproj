@@ -30,7 +30,7 @@
 
 
     <ItemGroup>
-      <ProjectReference Include="..\Sapphire.Domain\Sapphire.Domain.csproj" />
+      <ProjectReference Include="..\Sapphire.Data.Project\Sapphire.Data.Project.csproj" />
     </ItemGroup>
 
 

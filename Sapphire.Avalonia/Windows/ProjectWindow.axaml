@@ -6,7 +6,7 @@
         xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="Sapphire.Avalonia.Views.ProjectWindow"
+        x:Class="Sapphire.Avalonia.Windows.ProjectWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico">
         

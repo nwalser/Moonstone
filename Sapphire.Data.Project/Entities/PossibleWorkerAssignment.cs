@@ -1,6 +1,6 @@
 ﻿using Moonstone.Database;
 
-namespace Sapphire.Domain;
+namespace Sapphire.Data.Project.Entities;
 
 public class PossibleWorkerAssignment : Document
 {

@@ -4,7 +4,8 @@ using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using Moonstone.Database;
 using ReactiveUI;
-using Sapphire.Domain;
+using Sapphire.Data.Project;
+using Sapphire.Data.Project.Entities;
 
 namespace Sapphire.Avalonia.ViewModels;
 

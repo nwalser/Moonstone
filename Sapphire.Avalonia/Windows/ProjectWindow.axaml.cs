@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace Sapphire.Avalonia.Views;
+namespace Sapphire.Avalonia.Windows;
 
 public partial class ProjectWindow : Window
 {

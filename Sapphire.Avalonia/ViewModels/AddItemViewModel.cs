@@ -1,6 +1,7 @@
 ﻿using System.Reactive;
 using ReactiveUI;
-using Sapphire.Domain;
+using Sapphire.Data.Project;
+using Sapphire.Data.Project.Entities;
 
 namespace Sapphire.Avalonia.ViewModels;
 

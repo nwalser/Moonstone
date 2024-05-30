@@ -1,6 +1,6 @@
 ﻿using ProtoBuf;
 
-namespace Moonstone.FileFormat.Deltas;
+namespace Moonstone.Database.Deltas;
 
 [ProtoContract]
 public class Delete : IDelta

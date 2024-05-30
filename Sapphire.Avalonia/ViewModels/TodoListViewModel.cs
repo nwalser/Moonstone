@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Sapphire.Domain;
+using Sapphire.Data.Project;
+using Sapphire.Data.Project.Entities;
 
 namespace Sapphire.Avalonia.ViewModels;
 

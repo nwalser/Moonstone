@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using System.Threading.Channels;
-using Moonstone.FileFormat.Deltas;
+using Moonstone.Database.Deltas;
 using ProtoBuf;
 
 namespace Moonstone.Database;
