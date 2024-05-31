@@ -17,22 +17,20 @@ public class ProjectDatabase : Database
         base.Create(path, session);
         
         // create initial objects
-        Update(new Project()
+        var project = new Project()
         {
             Name = "Project Name"
+        };
+        Update(project);
+        Update(new Todo()
+        {
+            Name = "Todo 1",
+            ProjectId = project.Id,
         });
         Update(new Todo()
         {
-            Name = "Todo 1"
+            Name = "Todo 2",
+            ProjectId = project.Id,
         });
-        Update(new Todo()
-        {
-            Name = "Todo 2"
-        });
-    }
-
-    public Project GetProject()
-    {
-        return Enumerate<Project>().Single();
     }
 }

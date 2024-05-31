@@ -1,12 +1,8 @@
-using DeviceId;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
-using Newtonsoft.Json;
 using Sapphire.Data.ProjectData;
-using Sapphire.Data.WorkerData;
 using Sapphire.Electron.Services;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,27 +13,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHotKeys2();
 
-// register databases
-var deviceId = new DeviceIdBuilder()
-    .AddMachineName()
-    .AddMacAddress()
-    .AddUserName()
-    .ToString();
-
-var userDataPath = await Electron.App.GetPathAsync(PathName.UserData);
-
-// register project databases
-{
-    var openDatabasesPath = Path.Join(userDataPath, "open_project_databases.json");
-    builder.Services.AddSingleton(new DatabaseManager<ProjectDatabase>(openDatabasesPath, deviceId));
-}
-
-// register worker databases
-{
-    var openDatabasesPath = Path.Join(userDataPath, "open_worker_databases.json");
-    builder.Services.AddSingleton(new DatabaseManager<WorkerDatabase>(openDatabasesPath, deviceId));
-}
-
+builder.Services.AddSingleton(new DatabaseManager<ProjectDatabase>());
 
 var app = builder.Build();
 

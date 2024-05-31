@@ -53,7 +53,7 @@ public abstract class Database : IDatabase
         
         Open(path, session);
     }
-
+    
     public void Close()
     {
         if (_watcher is not null)

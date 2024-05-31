@@ -1,107 +1,49 @@
-﻿using System.Reactive.Subjects;
-using System.Text.Json;
+﻿using DeviceId;
 using Moonstone.Database;
-using Moonstone.Database.Exceptions;
+using Sapphire.Data.ProjectData;
 
 namespace Sapphire.Electron.Services;
 
 public class DatabaseManager<TType> where TType : Database, new()
-{ 
-    private readonly string _session;
-    private readonly string _openDatabasesFile;
-    private readonly List<TType> _databases = [];
-    public List<(string, Exception)> CouldNotOpen { get; } = [];
-    
-    private readonly BehaviorSubject<DateTime> _lastUpdate = new(DateTime.MinValue);
-    public BehaviorSubject<DateTime> LastUpdate => _lastUpdate;
-    
-    public DatabaseManager(string openDatabasesFile, string deviceId)
+{
+    public TType? Database { get; private set; }
+
+
+    public void Create(string path)
     {
-        _session = Math.Abs(deviceId.GetHashCode()).ToString();
-        _openDatabasesFile = openDatabasesFile;
+        if (Database is not null) throw new InvalidOperationException();
         
-        // open existing databases
-        if (!File.Exists(_openDatabasesFile)) 
-            return;
-        
-        var json = File.ReadAllText(_openDatabasesFile);
-        var openDatabases = JsonSerializer.Deserialize<string[]>(json) ?? [];
+        var deviceId = new DeviceIdBuilder()
+            .AddMachineName()
+            .AddMacAddress()
+            .AddUserName()
+            .ToString();
+        var db = new TType();
+        db.Create(path, deviceId);
 
-        foreach (var openDatabase in openDatabases)
-        {
-            Console.WriteLine(openDatabase);
-            try
-            {
-                var database = new TType();
-                database.Open(openDatabase, _session);
-
-                Add(database);
-            }
-            catch (Exception ex)
-            {
-                CouldNotOpen.Add((openDatabase, ex));
-                UpdateFile();
-            }
-        }
+        Database = db;
     }
 
-    public TType Find(long id)
+    public void Open(string path)
     {
-        return _databases.Single(d => d.Id == id);
+        if (Database is not null) throw new InvalidOperationException();
+
+        var deviceId = new DeviceIdBuilder()
+            .AddMachineName()
+            .AddMacAddress()
+            .AddUserName()
+            .ToString();
+        var db = new TType();
+        db.Open(path, deviceId);
+
+        Database = db;
     }
 
-    public IEnumerable<TType> Enumerate()
+    public void Close(string path)
     {
-        return _databases;
-    }
+        if (Database is null) throw new InvalidOperationException();
 
-    public TType Create(string path)
-    {
-        var database = new TType();
-        database.Create(path, _session);
-
-        Add(database);
-        return database;
-    }
-    
-    public TType Open(string path)
-    {
-        var database = new TType();
-        database.Open(path, _session);
-
-        Add(database);
-        return database;
-    }
-
-    private void Add(TType database)
-    {
-        if (_databases.Any(d => d.Id == database.Id)) 
-            throw new DatabaseAlreadyOpenedException();
-
-        _databases.Add(database);
-        UpdateFile();
-        _lastUpdate.OnNext(DateTime.UtcNow);
-    }
-
-    public void Close(long id)
-    {
-        var database = Find(id);
-        database.Close();
-        _databases.Remove(database);
-        UpdateFile();
-        
-        _lastUpdate.OnNext(DateTime.UtcNow);
-    }
-
-    private void UpdateFile()
-    {
-        var databasePaths = _databases
-            .Select(d => d.RootFolder)
-            .Concat(CouldNotOpen.Select(c => c.Item1))
-            .ToArray();
-        
-        var json = JsonSerializer.Serialize(databasePaths);
-        File.WriteAllText(_openDatabasesFile, json);
-        Console.WriteLine(json);
+        Database.Close();
+        Database = null;
     }
 }

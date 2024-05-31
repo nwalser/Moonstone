@@ -1,19 +1,17 @@
-﻿@implements IDisposable
+﻿@page "/project/{ProjectId:guid}"
+@implements IDisposable
 
 @if (_project is not null)
 {
-    <a href="@($"/project/{ProjectId}")">
-        <p>@_project.Name</p>
-        <p>@_project.LastWrite</p>
-        <p>@_project.Deadline</p>
-    </a>
+    <p>@_project.Name</p>
+    <p>@_project.LastWrite</p>
+    <p>@_project.Deadline</p>
 }
 
 @code {
     [CascadingParameter] public required ProjectDatabase ProjectDatabase { get; set; }
-
     [Parameter] public required Guid ProjectId { get; set; }
-
+    
     private Project? _project;
     private IDisposable? _subscription;
 
@@ -21,7 +19,7 @@
     {
         _subscription = ProjectDatabase.LastUpdate.Subscribe(_ => InvokeAsync(StateHasChanged));
         _project = ProjectDatabase.Enumerate<Project>().Single(p => p.Id == ProjectId);
-
+        
         return base.OnParametersSetAsync();
     }
 

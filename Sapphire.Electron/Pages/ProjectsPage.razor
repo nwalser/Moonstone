@@ -1,26 +1,23 @@
-﻿@implements IDisposable
+﻿@page "/project"
+@implements IDisposable
 
-@if (_project is not null)
+@foreach (var project in ProjectDatabase.Enumerate<Project>())
 {
-    <a href="@($"/project/{ProjectId}")">
-        <p>@_project.Name</p>
-        <p>@_project.LastWrite</p>
-        <p>@_project.Deadline</p>
+    <a href="@($"/project/{project.Id}")">
+        <p>@project.Name</p>
+        <p>@project.LastWrite</p>
+        <p>@project.Deadline</p>
     </a>
 }
 
 @code {
     [CascadingParameter] public required ProjectDatabase ProjectDatabase { get; set; }
 
-    [Parameter] public required Guid ProjectId { get; set; }
-
-    private Project? _project;
     private IDisposable? _subscription;
 
     protected override Task OnParametersSetAsync()
     {
         _subscription = ProjectDatabase.LastUpdate.Subscribe(_ => InvokeAsync(StateHasChanged));
-        _project = ProjectDatabase.Enumerate<Project>().Single(p => p.Id == ProjectId);
 
         return base.OnParametersSetAsync();
     }
