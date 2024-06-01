@@ -1,0 +1,50 @@
+﻿<div class="flex w-full flex-shrink h-10" style="-webkit-app-region: drag;">
+    <div class="flex-grow flex flex-row align-middle">
+
+    </div>
+    <div class="flex-shrink flex" style="-webkit-app-region: no-drag;">
+        <button
+            class="rounded-none px-3 py-2 hover:bg-[var(--neutral-fill-layer-hover)] select-none border-none"
+            @onclick="() => _window?.Minimize()">
+            <MinusIcon class="h-4 w-4"/>
+        </button>
+
+        @if (_window?.IsMaximizedAsync().Result ?? false)
+        {
+            <button
+                class="rounded-none px-3 py-2 hover:bg-[var(--neutral-fill-layer-hover)] select-none border-none"
+                @onclick="() => _window?.Restore()">
+                <Square2StackIcon class="h-4 w-4"/>
+            </button>
+        }
+        else
+        {
+            <button
+                class="rounded-none px-3 py-2 hover:bg-[var(--neutral-fill-layer-hover)] select-none border-none"
+                @onclick="() => _window?.Maximize()">
+                <ArrowsPointingOutIcon class="h-4 w-4"/>
+            </button>
+        }
+
+        <button
+            class="rounded-none px-3 py-2 hover:bg-[var(--neutral-fill-layer-hover)] select-none border-none"
+            @onclick="() => _window?.Close()">
+            <XMarkIcon class="h-4 w-4"/>
+        </button>
+    </div>
+</div>
+
+@code {
+    [Inject] public required WindowManager WindowManager { get; set; }
+
+    private BrowserWindow? _window;
+
+    protected override void OnInitialized()
+    {
+        _window = WindowManager.BrowserWindows.SingleOrDefault();
+        if (_window is not null)
+            _window.OnResize += async () => await InvokeAsync(StateHasChanged);
+
+        base.OnInitialized();
+    }
+}

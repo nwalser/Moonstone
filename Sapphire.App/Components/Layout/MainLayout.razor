@@ -1,51 +1,13 @@
-﻿@using ElectronNET.API
-@using Sapphire.App.Services
-@using Sapphire.Data
-@using Blazor.Heroicons.Outline
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 
 <FluentToastProvider/>
 <FluentDialogProvider/>
 <FluentTooltipProvider/>
 <FluentMessageBarProvider/>
-<FluentDesignTheme StorageName="light" Mode="DesignThemeModes.Dark"/>
+<FluentDesignTheme StorageName="light" Mode="DesignThemeModes.Dark" OfficeColor="OfficeColor.Outlook"/>
 
 <div class="flex flex-col h-full">
-    <div class="flex w-full flex-shrink h-10" style="-webkit-app-region: drag;">
-        <div class="flex-grow flex flex-row align-middle">
-            
-        </div>
-        <div class="flex-shrink flex" style="-webkit-app-region: no-drag;">
-            <button
-                class="rounded-none px-3 py-2 hover:bg-slate-800 select-none border-none"
-                @onclick="() => _window?.Minimize()">
-                <MinusIcon class="h-4 w-4"/>
-            </button>
-
-            @if (_window?.IsMaximizedAsync().Result ?? false)
-            {
-                <button
-                    class="rounded-none px-3 py-2 hover:bg-slate-800 select-none border-none"
-                    @onclick="() => _window?.Restore()">
-                    <Square2StackIcon class="h-4 w-4"/>
-                </button>
-            }
-            else
-            {
-                <button
-                    class="rounded-none px-3 py-2 hover:bg-slate-800 select-none border-none"
-                    @onclick="() => _window?.Maximize()">
-                    <ArrowsPointingOutIcon class="h-4 w-4"/>
-                </button>
-            }
-
-            <button
-                class="rounded-none px-3 py-2 hover:bg-slate-800 select-none border-none"
-                @onclick="() => _window?.Close()">
-                <XMarkIcon class="h-4 w-4"/>
-            </button>
-        </div>
-    </div>
+    <Toolbar />
     <main class="flex-grow overflow-auto">
         <CascadingValue TValue="ProjectDatabase?" IsFixed="true" Value="DatabaseManager.Database">
             <ErrorBoundary>
@@ -62,18 +24,5 @@
 
 
 @code{
-    [Inject] public required WindowManager WindowManager { get; set; }
     [Inject] public required DatabaseManager<ProjectDatabase> DatabaseManager { get; set; }
-
-    private BrowserWindow? _window;
-
-    protected override void OnInitialized()
-    {
-        _window = WindowManager.BrowserWindows.SingleOrDefault();
-        if (_window is not null)
-            _window.OnResize += async () => await InvokeAsync(StateHasChanged);
-
-        base.OnInitialized();
-    }
-
 }
