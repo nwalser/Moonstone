@@ -1,7 +1,7 @@
 ﻿using Moonstone.Database;
-using Sapphire.Data.ProjectData.Entities;
+using Sapphire.Data.Entities;
 
-namespace Sapphire.Data.ProjectData;
+namespace Sapphire.Data;
 
 public class ProjectDatabase : Database
 {

@@ -16,6 +16,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sapphire.Data.ProjectData\Sapphire.Data.ProjectData.csproj" />
+    <ProjectReference Include="..\Sapphire.Data\Sapphire.Data.csproj" />
   </ItemGroup>
 </Project>

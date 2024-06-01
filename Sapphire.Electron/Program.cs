@@ -1,6 +1,6 @@
 using ElectronNET.API;
 using ElectronNET.API.Entities;
-using Sapphire.Data.ProjectData;
+using Sapphire.Data;
 using Sapphire.Electron.Services;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
 

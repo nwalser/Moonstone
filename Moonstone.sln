@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "10 - FileFormat", "10 - Fil
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "20 - Sapphire", "20 - Sapphire", "{EE6C6F49-856B-423E-ABB0-CE1E8CC9DE57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.Data.ProjectData", "Sapphire.Data.ProjectData\Sapphire.Data.ProjectData.csproj", "{EE062EF6-8442-4256-8AEF-42609C0B29F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sapphire.Data", "Sapphire.Data\Sapphire.Data.csproj", "{EE062EF6-8442-4256-8AEF-42609C0B29F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moonstone.Database", "Moonstone.Database\Moonstone.Database.csproj", "{C62A9FD0-6717-4017-8B6D-2D78F3949DAA}"
 EndProject

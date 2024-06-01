@@ -1,6 +1,6 @@
 ﻿using DeviceId;
 using Moonstone.Database;
-using Sapphire.Data.ProjectData;
+using Sapphire.Data;
 
 namespace Sapphire.Electron.Services;
 
