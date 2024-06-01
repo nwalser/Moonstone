@@ -5,17 +5,21 @@
 
 <!DOCTYPE html>
 <html lang="en" class="h-full">
-<head>
-    <meta charset="utf-8"/>
-    <base href="~/"/>
-    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered"/>
+    <head>
+        <meta charset="utf-8"/>
+        <base href="~/"/>
+        <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered"/>
 
-    <link href="~/css/app.min.css" rel="stylesheet" />
-</head>
-<body class="p-0 m-0 h-full w-full">
-    <component type="typeof(App)" render-mode="ServerPrerendered"/>
+        @*Tailwind*@
+        <link href="~/css/app.min.css" rel="stylesheet" />
 
-    <script>process = undefined;</script> @*Workaround for issue https://github.com/ElectronNET/Electron.NET/issues/823*@
-    <script src="_framework/blazor.server.js"></script>
-</body>
+        <link href="_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css" rel="stylesheet" />
+    </head>
+    <body class="p-0 m-0 h-full w-full">
+        <component type="typeof(App)" render-mode="ServerPrerendered"/>
+        <script src="_content/Microsoft.FluentUI.AspNetCore.Components/Microsoft.FluentUI.AspNetCore.Components.lib.module.js" type="module" async></script>
+
+        <script>process = undefined;</script> @*Workaround for issue https://github.com/ElectronNET/Electron.NET/issues/823*@
+        <script src="_framework/blazor.server.js"></script>
+        </body>
 </html>

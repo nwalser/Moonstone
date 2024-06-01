@@ -11,3 +11,5 @@ Sapphire.Electron/wwwroot/css/app.min.css
 Sapphire.Electron/wwwroot/css/app.min.css
 Sapphire.Electron/package-lock.json
 Sapphire.Electron/wwwroot/css/app.min.css
+/Sapphire.App/node_modules
+/BlazorApp1

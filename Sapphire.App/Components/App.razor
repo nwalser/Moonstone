@@ -1,0 +1,21 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <base href="/"/>
+        <link href="tailwind.min.css" rel="stylesheet" />
+
+        <link rel="stylesheet" href="app.css"/>
+        <link rel="stylesheet" href="Sapphire.App.styles.css"/>
+        <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+        <HeadOutlet />
+    </head>
+
+    <body>
+        <Routes @rendermode="InteractiveServer" />
+    
+        <script>process = undefined;</script> @*Workaround for issue https://github.com/ElectronNET/Electron.NET/issues/823*@
+        <script src="_framework/blazor.web.js"></script>
+    </body>
+</html>

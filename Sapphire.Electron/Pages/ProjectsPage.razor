@@ -1,6 +1,12 @@
 ﻿@page "/project"
 @implements IDisposable
 
+<FluentCard>
+    <h2>Hello World!</h2>
+    <FluentButton Appearance="@Appearance.Accent">Click Me</FluentButton>
+</FluentCard>
+
+
 @foreach (var project in ProjectDatabase.Enumerate<Project>())
 {
     <a href="@($"/project/{project.Id}")">
@@ -9,6 +15,8 @@
         <p>@project.Deadline</p>
     </a>
 }
+
+<button></button>
 
 @code {
     [CascadingParameter] public required ProjectDatabase ProjectDatabase { get; set; }
