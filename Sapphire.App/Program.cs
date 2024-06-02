@@ -14,8 +14,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
 
-builder.Services.AddSingleton(new DatabaseManager<ProjectDatabase>());
-
+var userData = await Electron.App.GetPathAsync(PathName.UserData);
+var recentDatabaseStoragePath = Path.Join(userData, "recent_database_storage_path.json");
+builder.Services.AddSingleton(new DatabaseService<ProjectDatabase>(recentDatabaseStoragePath));
 
 var app = builder.Build();
 

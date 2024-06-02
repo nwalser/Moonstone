@@ -4,15 +4,22 @@
 <FluentDialogProvider/>
 <FluentTooltipProvider/>
 <FluentMessageBarProvider/>
-<FluentDesignTheme StorageName="light" Mode="DesignThemeModes.Dark" OfficeColor="OfficeColor.Outlook"/>
+<FluentDesignTheme StorageName="light" Mode="DesignThemeModes.Dark" OfficeColor="OfficeColor.Outlook" />
 
 <div class="flex flex-col h-full">
     <Toolbar />
     <main class="flex-grow overflow-auto">
-        <CascadingValue TValue="ProjectDatabase?" IsFixed="true" Value="DatabaseManager.Database">
+        <CascadingValue TValue="ProjectDatabase" IsFixed="true" Value="DatabaseService.Database">
             <ErrorBoundary>
                 <ChildContent>
-                    @Body
+                    @if (DatabaseService.Database is not null)
+                    {
+                        @Body
+                    }
+                    else
+                    {
+                        <WorkspaceSelectorPage />
+                    }
                 </ChildContent>
                 <ErrorContent>
                     <p class="errorUI">There was an error</p>
@@ -24,5 +31,5 @@
 
 
 @code{
-    [Inject] public required DatabaseManager<ProjectDatabase> DatabaseManager { get; set; }
+    [Inject] public required DatabaseService<ProjectDatabase> DatabaseService { get; set; }
 }
