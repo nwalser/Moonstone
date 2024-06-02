@@ -753,6 +753,10 @@ video {
   background-color: var(--neutral-fill-layer-hover);
 }
 
+.bg-\[var\(--neutral-fill-layer-rest\)\] {
+  background-color: var(--neutral-fill-layer-rest);
+}
+
 .p-8 {
   padding: 2rem;
 }
@@ -815,4 +819,8 @@ video {
 
 .hover\:bg-\[var\(--neutral-fill-layer-hover\)\]:hover {
   background-color: var(--neutral-fill-layer-hover);
+}
+
+.hover\:bg-\[var\(--neutral-fill-layer-rest\)\]:hover {
+  background-color: var(--neutral-fill-layer-rest);
 }

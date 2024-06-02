@@ -1,51 +1,48 @@
 ﻿@page "/"
+@using Sapphire.Data.Entities
 
 <PageTitle>Projects</PageTitle>
 
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Top" Class="h-full p-8">
+    <FluentStack Width="800px" Orientation="Orientation.Vertical">
+        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+            <FluentLabel Typo="Typography.PaneHeader" Class="flex-shrink-0">Projects</FluentLabel>
+            <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
+                <FluentButton OnClick="() => CreateProject()">Create</FluentButton>
+            </FluentStack>
+        </FluentStack>
 
-<FluentGrid Justify="JustifyContent.FlexStart" Spacing="3">
-    <FluentGridItem xs="12" sm="6">
-        <FluentSortableList Items="items" OnUpdate="@SortList">
-            <ItemTemplate>@context.Name</ItemTemplate>
-        </FluentSortableList>
-    </FluentGridItem>
-</FluentGrid>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+            @foreach (var project in Database.Enumerate<Project>())
+            {
+                <FluentCard MinimalStyle="true">
+                    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                        <FluentStack Orientation="Orientation.Vertical" VerticalGap="0">
+                            <FluentLabel Typo="Typography.Subject" Class="truncate">@project.Name</FluentLabel>
+                            <FluentLabel Typo="Typography.Body" Class="truncate">@project.Description @project.Deadline</FluentLabel>
+                        </FluentStack>
+                        <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
+                            <FluentButton OnClick="() => ViewProject(project.Id)">View</FluentButton>
+                        </FluentStack>
+                    </FluentStack>
+                </FluentCard>
+            }
+        </FluentStack>
+    </FluentStack>
+</FluentStack>
 
 @code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    
+    [Inject] public required NavigationManager NavigationManager { get; set; }
 
-    public class Item
+    private void CreateProject()
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = "";
-
-        public bool Disabled { get; set; } = false;
+        
     }
 
-    public List<Item> items = Enumerable.Range(1, 10).Select(i => new Item { Id = i, Name = $"Item {i}" }).ToList();
-
-
-    private void SortList(FluentSortableListEventArgs args)
+    private void ViewProject(Guid id)
     {
-        if (args is null || args.OldIndex == args.NewIndex)
-        {
-            return;
-        }
-
-        var oldIndex = args.OldIndex;
-        var newIndex = args.NewIndex;
-
-        var items = this.items;
-        var itemToMove = items[oldIndex];
-        items.RemoveAt(oldIndex);
-
-        if (newIndex < items.Count)
-        {
-            items.Insert(newIndex, itemToMove);
-        }
-        else
-        {
-            items.Add(itemToMove);
-        }
+        
     }
-
 }
