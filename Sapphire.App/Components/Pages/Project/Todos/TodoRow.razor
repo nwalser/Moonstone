@@ -1,40 +1,20 @@
-﻿<tr @onclick="ToggleEditing" class="hover:bg-[var(--neutral-fill-layer-rest)]">
-    <td class="rounded-l-md">
-        <FluentDropZone Draggable="true" Droppable="true" Item="Todo">
-            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-                @for (var i = 0; i < Depth; i++)
-                {
-                    <div style="margin-left: 6px; border-left: 1px solid black; height: 30px"></div>
-                }
-                <FluentIcon Value="@(new Icons.Regular.Size20.Drag())"/>
-                <FluentLabel>@Todo.Name</FluentLabel>
-            </FluentStack>
+﻿<FluentDropZone Draggable="false" Droppable="true" Item="Todo">
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+        @for (var i = 0; i < Depth; i++)
+        {
+            <div style="margin-left: 6px; border-left: 1px solid black; height: 30px"></div>
+        }
+        <FluentDropZone Draggable="true" Item="Todo">
+            <FluentIcon Value="@(new Icons.Regular.Size20.Drag())"/>
         </FluentDropZone>
-    </td>
-    <td class="text-center">
-        <p>10h</p>
-    </td>
-    <td class="text-center">
-        <p>10h</p>
-    </td>
-
-    <td class="text-left truncate overflow-hidden">
-        <p>Flo, Reto, Fritz, Flo, Reto, Fritz, Flo, Reto, Fritz</p>
-    </td>
-    <td>
-        <FluentCheckbox Value="true" ReadOnly="true" />
-    </td>
-    <td>
-        <p>Timeline</p>
-    </td>
-    <td class="rounded-r-md">
+        <FluentLabel>@Todo.Name</FluentLabel>
         <FluentStack Orientation="Orientation.Horizontal">
             <FluentButton OnClick="AddSubTodo">
                 <FluentIcon Value="@(new Icons.Regular.Size16.Add())"/>
             </FluentButton>
         </FluentStack>
-    </td>
-</tr>
+    </FluentStack>
+</FluentDropZone>
 
 @if (OpenTodo == Todo.Id)
 {

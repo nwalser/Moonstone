@@ -1,9 +1,13 @@
-﻿<TodoRow Todo="Todo" Depth="Depth" />
+﻿@using Sapphire.App.Components.Components.FluentUnstyledSortableList
+<TodoRow Todo="Todo" Depth="Depth" />
 
-@foreach (var childTodo in _childTodos)
-{
-    <TodoGroup Todo="@childTodo" Todos="Todos" Depth="Depth+1"/>
-}
+
+<FluentUnstyledSortableList Items="_childTodos">
+    <ItemTemplate>
+        <TodoGroup Todo="@context" Todos="Todos" Depth="Depth+1"/>
+    </ItemTemplate>
+</FluentUnstyledSortableList>
+
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
