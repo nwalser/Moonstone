@@ -859,3 +859,7 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(252 211 77 / var(--tw-bg-opacity));
 }
+
+.hover\:bg-\[var\(--neutral-fill-layer-rest\)\]:hover {
+  background-color: var(--neutral-fill-layer-rest);
+}
