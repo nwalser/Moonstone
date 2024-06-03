@@ -1,8 +1,8 @@
 ﻿using Moonstone.Database;
 
-namespace Sapphire.Data.WorkerData.Entities;
+namespace Sapphire.Data.Entities;
 
-public class Worker : Document
+public class WorkerAggregate : Document
 {
     public required string Name { get; set; }
 }

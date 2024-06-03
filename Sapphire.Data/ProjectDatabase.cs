@@ -7,8 +7,8 @@ public class ProjectDatabase : Database
 {
     protected override Dictionary<int, Type> TypeMap { get; } = new()
     {
-        { 0, typeof(Project) },
-        { 1, typeof(Todo) },
+        { 0, typeof(ProjectAggregate) },
+        { 1, typeof(TodoAggregate) },
         { 2, typeof(PossibleWorkerAssignment) },
     };
 
@@ -17,17 +17,17 @@ public class ProjectDatabase : Database
         base.Create(path, session);
         
         // create initial objects
-        var project = new Project()
+        var project = new ProjectAggregate()
         {
             Name = "Project Name"
         };
         Update(project);
-        Update(new Todo()
+        Update(new TodoAggregate()
         {
             Name = "Todo 1",
             ProjectId = project.Id,
         });
-        Update(new Todo()
+        Update(new TodoAggregate()
         {
             Name = "Todo 2",
             ProjectId = project.Id,

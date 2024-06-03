@@ -7,7 +7,7 @@
 </FluentCard>
 
 
-@foreach (var project in ProjectDatabase.Enumerate<Project>())
+@foreach (var project in ProjectDatabase.Enumerate<ProjectAggregate>())
 {
     <a href="@($"/project/{project.Id}")">
         <p>@project.Name</p>

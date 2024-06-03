@@ -1,5 +1,4 @@
 ﻿@page "/"
-@using Sapphire.Data.Entities
 
 <PageTitle>Projects</PageTitle>
 
@@ -13,7 +12,7 @@
         </FluentStack>
 
         <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
-            @foreach (var project in Database.Enumerate<Project>())
+            @foreach (var project in Database.Enumerate<ProjectAggregate>())
             {
                 <FluentCard MinimalStyle="true">
                     <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
@@ -43,6 +42,6 @@
 
     private void ViewProject(Guid id)
     {
-        
+        NavigationManager.NavigateTo($"/project/{id}");
     }
 }

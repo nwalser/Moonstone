@@ -14,13 +14,13 @@
 
     [Parameter] public required Guid ProjectId { get; set; }
 
-    private Project? _project;
+    private ProjectAggregate? _project;
     private IDisposable? _subscription;
 
     protected override Task OnParametersSetAsync()
     {
         _subscription = ProjectDatabase.LastUpdate.Subscribe(_ => InvokeAsync(StateHasChanged));
-        _project = ProjectDatabase.Enumerate<Project>().Single(p => p.Id == ProjectId);
+        _project = ProjectDatabase.Enumerate<ProjectAggregate>().Single(p => p.Id == ProjectId);
 
         return base.OnParametersSetAsync();
     }
