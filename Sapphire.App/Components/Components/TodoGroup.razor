@@ -5,12 +5,12 @@
 
 @foreach (var childTodo in _childTodos)
 {
-    <TodoGroup Depth="@(Depth+1)" Todo="@childTodo" />
+    <TodoGroup Depth="@(Depth+1)" Todo="@childTodo" Todos="Todos" />
 }
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
-    [CascadingParameter] public required List<TodoAggregate> Todos { get; set; }
+    [Parameter] public required List<TodoAggregate> Todos { get; set; }
     [Parameter] public required TodoAggregate Todo { get; set; }
     [Parameter] public required int Depth { get; set; }
 
@@ -27,12 +27,13 @@
     {
         var todo = new TodoAggregate()
         {
-            Name = "New Todo",
+            Name = "New Todo 1",
             ProjectId = Todo.ProjectId,
-            ParentId = Todo.ParentId
+            ParentId = Todo.Id
         };
         
         Database.Update(todo);
+        InvokeAsync(StateHasChanged);
     }
 
 }

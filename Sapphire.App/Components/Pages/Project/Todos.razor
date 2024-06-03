@@ -1,36 +1,27 @@
-﻿@page "/project/{ProjectId:guid}"
-
-<CascadingValue Value="_todos">
-    <FluentSortableList Items="items" OnUpdate="@SortList">
-        <ItemTemplate>@context.Name</ItemTemplate>
-    </FluentSortableList>
-</CascadingValue>
+﻿@inherits DatabaseRefresh
+@page "/project/{ProjectId:guid}"
 
 <button @onclick="AddRootTodo">Add Todo</button>
 <FluentStack Orientation="Orientation.Vertical">
     @foreach (var rootTodo in _rootTodo)
     {
-        <TodoGroup Depth="0" Todo="@rootTodo" />
+        <TodoGroup Depth="0" Todo="@rootTodo" Todos="_todos" />
     }
 </FluentStack>
 
-
 @code {
-    [CascadingParameter] public required ProjectDatabase Database { get; set; }
     [Parameter] public required Guid ProjectId { get; set; }
 
     private List<TodoAggregate> _todos = [];
     private List<TodoAggregate> _rootTodo = [];
     
-    protected override async Task OnParametersSetAsync()
+    protected override void OnLoadData()
     {
         _todos = Database.Enumerate<TodoAggregate>()
             .Where(t => t.ProjectId == ProjectId)
             .ToList();
-
-        _rootTodo = _todos.Where(t => t.ParentId is null).ToList();
         
-        await base.OnParametersSetAsync();
+        _rootTodo = _todos.Where(t => t.ParentId is null).ToList();
     }
 
     private void AddRootTodo()
@@ -39,43 +30,10 @@
         {
             Name = "New Todo",
             ProjectId = ProjectId,
+            ParentId = null
         };
         
         Database.Update(todo);    
-    }
-    
-    public class Item
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = "";
-
-        public bool Disabled { get; set; } = false;
-    }
-
-    public List<Item> items = Enumerable.Range(1, 10).Select(i => new Item { Id = i, Name = $"Item {i}" }).ToList();
-
-
-    private void SortList(FluentSortableListEventArgs args)
-    {
-        if (args is null || args.OldIndex == args.NewIndex)
-        {
-            return;
-        }
-
-        var oldIndex = args.OldIndex;
-        var newIndex = args.NewIndex;
-
-        var items = this.items;
-        var itemToMove = items[oldIndex];
-        items.RemoveAt(oldIndex);
-
-        if (newIndex < items.Count)
-        {
-            items.Insert(newIndex, itemToMove);
-        }
-        else
-        {
-            items.Add(itemToMove);
-        }
+        InvokeAsync(StateHasChanged);
     }
 }
