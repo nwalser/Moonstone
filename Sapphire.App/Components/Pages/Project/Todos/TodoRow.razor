@@ -1,5 +1,5 @@
 ﻿<div class="flex flex-col content-center rounded-md bg-[var(--fill-color)] my-1">
-    <div class="flex content-center" @onclick="() => _editing = !_editing">
+    <div class="flex content-center">
         <div class="flex items-center">
             <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--neutral-fill-layer-hover)]">
                 <FluentIcon Value="@(new Icons.Regular.Size16.MoreVertical())"/>
@@ -10,7 +10,7 @@
             </div>
         </div>
 
-        <div class="flex items-center w-96">
+        <div class="flex items-center w-96" @onclick="() => _editing = !_editing">
             @for (var i = 0; i < Depth; i++)
             {
             <div style="margin-left: 12px; height: 30px"></div>
@@ -18,11 +18,11 @@
             <p>@Todo.Name</p>
         </div>
 
-        <div class="flex items-center w-12">
+        <div class="flex items-center w-12" @onclick="() => _editing = !_editing">
             <p>@Todo.CurrentEstimatedEffort.TotalHours / @Todo.InitialEstimatedEffort.TotalHours</p>
         </div>
 
-        <div class="flex items-center flex-grow">
+        <div class="flex items-center flex-grow" @onclick="() => _editing = !_editing">
             <p>Timeline</p>
         </div>
         <div class="flex items-center">
