@@ -3,7 +3,7 @@
         @if (DatabaseService.Database is not null)
         {
             <div class="bg-[var(--neutral-fill-layer-rest)] rounded-t-lg min-w-72 flex justify-between flex-row overflow-hidden items-center pl-2 pr-2 h-full">
-                <p class="text-base">@Path.GetFileName(DatabaseService.Database.RootFolder)</p>
+                <p class="text-base select-none">@Path.GetFileName(DatabaseService.Database.RootFolder)</p>
                 <button
                     class="rounded-full bg-[var(--fill-color)] hover:bg-[var(--neutral-fill-layer-hover)] select-none border-none h-5 w-5 justify-center items-center flex"
                     style="-webkit-app-region: no-drag;"
