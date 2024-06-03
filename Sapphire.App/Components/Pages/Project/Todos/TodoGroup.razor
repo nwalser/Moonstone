@@ -1,18 +1,15 @@
-﻿<FluentStack Orientation="Orientation.Horizontal" Style="@($"padding-left: {Depth*4}px")">
-    <p>@Todo.Name</p>
-    <button @onclick="AddSubTodo">Add Subtask</button>
-</FluentStack>
+﻿<TodoRow Todo="Todo" Depth="Depth" />
 
 @foreach (var childTodo in _childTodos)
 {
-    <TodoGroup Depth="@(Depth+1)" Todo="@childTodo" Todos="Todos" />
+    <TodoGroup Todo="@childTodo" Todos="Todos" Depth="Depth+1"/>
 }
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
     [Parameter] public required List<TodoAggregate> Todos { get; set; }
     [Parameter] public required TodoAggregate Todo { get; set; }
-    [Parameter] public required int Depth { get; set; }
+    [Parameter] public required uint Depth { get; set; }
 
     private List<TodoAggregate> _childTodos = [];
 
@@ -25,15 +22,14 @@
 
     private void AddSubTodo()
     {
-        var todo = new TodoAggregate()
+        var todo = new TodoAggregate
         {
             Name = "New Todo 1",
             ProjectId = Todo.ProjectId,
             ParentId = Todo.Id
         };
-        
+
         Database.Update(todo);
         InvokeAsync(StateHasChanged);
     }
-
 }

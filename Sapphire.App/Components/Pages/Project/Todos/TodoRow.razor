@@ -1,0 +1,78 @@
+﻿<tr @onclick="ToggleEditing" class="hover:bg-amber-300">
+    <td class="rounded-l-md">
+        <FluentDropZone Draggable="true" Droppable="true" Item="Todo">
+            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                @for (var i = 0; i < Depth; i++)
+                {
+                    <div style="margin-left: 6px; border-left: 1px solid black; height: 30px"></div>
+                }
+                <FluentIcon Value="@(new Icons.Regular.Size20.Drag())"/>
+                <FluentLabel>@Todo.Name</FluentLabel>
+            </FluentStack>
+        </FluentDropZone>
+    </td>
+    <td class="text-center">
+        <p>10h</p>
+    </td>
+    <td class="text-center">
+        <p>10h</p>
+    </td>
+
+    <td class="text-left truncate overflow-hidden">
+        <p>Flo, Reto, Fritz, Flo, Reto, Fritz, Flo, Reto, Fritz</p>
+    </td>
+    <td>
+        <FluentCheckbox Value="true" ReadOnly="true" />
+    </td>
+    <td>
+        <p>Timeline</p>
+    </td>
+    <td class="rounded-r-md">
+        <FluentStack Orientation="Orientation.Horizontal">
+            <FluentButton OnClick="AddSubTodo">
+                <FluentIcon Value="@(new Icons.Regular.Size16.Add())"/>
+            </FluentButton>
+        </FluentStack>
+    </td>
+</tr>
+
+@if (OpenTodo == Todo.Id)
+{
+    <tr>
+        <td colspan="6">
+            @Todo.Name
+        </td>
+    </tr>
+}
+
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [CascadingParameter(Name = "OpenTodo")] public required Guid? OpenTodo { get; set; }
+    [Parameter] public required TodoAggregate Todo { get; set; }
+    [Parameter] public required uint Depth { get; set; }
+    
+    private void AddSubTodo()
+    {
+        var todo = new TodoAggregate
+        {
+            Name = "New Todo 1",
+            ProjectId = Todo.ProjectId,
+            ParentId = Todo.Id
+        };
+
+        Database.Update(todo);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleEditing()
+    {
+        if (OpenTodo == Todo.Id)
+        {
+            OpenTodo = default;
+            return;
+        }
+
+        OpenTodo = Todo.Id;
+    }
+}
