@@ -7,9 +7,9 @@ public class TodoAggregate : Document
     public required string Name { get; set; }
     
     public required Guid ProjectId { get; init; }
-    
-    public Guid? ParentId { get; set; }
-    public uint Order { get; set; }
+
+    public Guid? ParentId { get; set; } = Guid.Empty;
+    public uint Order { get; set; } = 0;
     
     public TimeSpan InitialEstimatedEffort { get; set; } = TimeSpan.Zero;
     public TimeSpan CurrentEstimatedEffort { get; set; } = TimeSpan.Zero;

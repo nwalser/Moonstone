@@ -4,42 +4,7 @@
 <FluentStack VerticalAlignment="VerticalAlignment.Top" Orientation="Orientation.Vertical" Class="h-full p-8">
     <FluentButton @onclick="AddRootTodo">Add Todo</FluentButton>
     <FluentDragContainer TItem="TodoAggregate" OnDropEnd="OnDropEnd" Class="w-full">
-        <FluentCard MinimalStyle="true">
-            <CascadingValue Value="_openTodo" Name="OpenTodo">
-                <table class="table-auto w-full">
-                    <thead>
-                    <tr>
-                        <th class="min-w-96">
-                            <FluentLabel Typo="Typography.Body">Task Name</FluentLabel>
-                        </th>
-                        <th class="min-w-12 text-center">
-                            <FluentLabel Typo="Typography.Body">IEE</FluentLabel>
-                        </th>
-                        <th class="min-w-12 text-center">
-                            <FluentLabel Typo="Typography.Body">CEE</FluentLabel>
-                        </th>
-                        <th class="min-w-36 text-left">
-                            <FluentLabel Typo="Typography.Body">Possible Assignees</FluentLabel>
-                        </th>
-                        <th>
-                        </th>
-                        <th class="w-full">
-                            <FluentLabel Typo="Typography.Body">Timeline</FluentLabel>
-                        </th>
-                        <th>
-                            <FluentLabel Typo="Typography.Body"></FluentLabel>
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var rootTodo in _rootTodo)
-                    {
-                    <TodoGroup Todo="@rootTodo" Todos="_todos" Depth="0"/>
-                    }
-                    </tbody>
-                </table>
-            </CascadingValue>
-        </FluentCard>
+        <TodoGroup Depth="0" Todos="_todos" ProjectId="ProjectId" TodoId="null" />
     </FluentDragContainer>
 </FluentStack>
 
@@ -48,7 +13,6 @@
 
     private List<TodoAggregate> _todos = [];
     private List<TodoAggregate> _rootTodo = [];
-    private Guid? _openTodo;
     
     protected override void OnLoadData()
     {

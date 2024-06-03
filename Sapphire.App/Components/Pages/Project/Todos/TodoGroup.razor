@@ -1,10 +1,13 @@
 ﻿@using Sapphire.App.Components.Components.FluentUnstyledSortableList
-<TodoRow Todo="Todo" Depth="Depth" />
 
+@if (_todo is not null)
+{
+    <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" />
+}
 
-<FluentUnstyledSortableList Items="_childTodos">
+<FluentUnstyledSortableList Items="_childTodos" OnUpdate="OnUpdate" Handle="true">
     <ItemTemplate>
-        <TodoGroup Todo="@context" Todos="Todos" Depth="Depth+1"/>
+        <TodoGroup TodoId="context.Id" Todos="Todos" Depth="Depth+1" ProjectId="ProjectId" @key="context.Id" />
     </ItemTemplate>
 </FluentUnstyledSortableList>
 
@@ -12,14 +15,17 @@
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
     [Parameter] public required List<TodoAggregate> Todos { get; set; }
-    [Parameter] public required TodoAggregate Todo { get; set; }
+    [Parameter] public required Guid? TodoId { get; set; }
+    [Parameter] public required Guid ProjectId { get; set; }
     [Parameter] public required uint Depth { get; set; }
 
+    private TodoAggregate?  _todo;
     private List<TodoAggregate> _childTodos = [];
 
     protected override Task OnParametersSetAsync()
     {
-        _childTodos = Todos.Where(t => t.ParentId == Todo.Id).ToList();
+        _todo = Todos.SingleOrDefault(t => t.Id == TodoId);
+        _childTodos = Todos.Where(t => t.ParentId == TodoId).OrderBy(c => c.Order).ToList();
 
         return base.OnParametersSetAsync();
     }
@@ -29,11 +35,34 @@
         var todo = new TodoAggregate
         {
             Name = "New Todo 1",
-            ProjectId = Todo.ProjectId,
-            ParentId = Todo.Id
+            ProjectId = ProjectId,
+            ParentId = TodoId
         };
 
         Database.Update(todo);
         InvokeAsync(StateHasChanged);
     }
+
+    private void OnUpdate(FluentUnstyledSortableListEventArgs args)
+    {
+        if (args.OldIndex == args.NewIndex)
+            return;
+
+        // reorder locally
+        var itemToMove = _childTodos[args.OldIndex];
+        _childTodos.RemoveAt(args.OldIndex);
+        _childTodos.Insert(args.NewIndex, itemToMove);
+
+        // update database
+        uint index = 0;
+        foreach (var childTodo in _childTodos)
+        {
+            childTodo.Order = index;
+            index++;
+        }
+        
+        Database.Update(_childTodos);
+        InvokeAsync(StateHasChanged);
+    }
+
 }

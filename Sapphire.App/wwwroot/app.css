@@ -11,3 +11,18 @@ body {
     color:       var(--neutral-foreground-rest);
     background:  var(--neutral-fill-layer-rest);
 }
+
+/* width */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: var(--fill-color);
+}

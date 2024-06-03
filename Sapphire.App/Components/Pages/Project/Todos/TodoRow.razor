@@ -1,36 +1,52 @@
-﻿<FluentDropZone Draggable="false" Droppable="true" Item="Todo">
-    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-        @for (var i = 0; i < Depth; i++)
-        {
-            <div style="margin-left: 6px; border-left: 1px solid black; height: 30px"></div>
-        }
-        <FluentDropZone Draggable="true" Item="Todo">
-            <FluentIcon Value="@(new Icons.Regular.Size20.Drag())"/>
-        </FluentDropZone>
-        <FluentLabel>@Todo.Name</FluentLabel>
-        <FluentStack Orientation="Orientation.Horizontal">
-            <FluentButton OnClick="AddSubTodo">
+﻿<div class="flex flex-col content-center rounded-md bg-[var(--fill-color)] my-1">
+    <div class="flex content-center" @onclick="() => _editing = !_editing">
+        <div class="flex items-center">
+            <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--neutral-fill-layer-hover)]">
+                <FluentIcon Value="@(new Icons.Regular.Size16.MoreVertical())"/>
+            </FluentDropZone>
+
+            <div class="sortable-grab h-full w-8 flex items-center justify-center hover:bg-[var(--neutral-fill-layer-hover)]">
+                <FluentIcon Value="@(new Icons.Regular.Size16.ArrowSort())"/>
+            </div>
+        </div>
+
+        <div class="flex items-center w-96">
+            @for (var i = 0; i < Depth; i++)
+            {
+            <div style="margin-left: 12px; height: 30px"></div>
+            }
+            <p>@Todo.Name</p>
+        </div>
+
+        <div class="flex items-center w-12">
+            <p>@Todo.CurrentEstimatedEffort.TotalHours / @Todo.InitialEstimatedEffort.TotalHours</p>
+        </div>
+
+        <div class="flex items-center flex-grow">
+            <p>Timeline</p>
+        </div>
+        <div class="flex items-center">
+            <div class="h-full w-8 flex items-center justify-center hover:bg-[var(--neutral-fill-layer-hover)]" @onclick="AddSubTodo">
                 <FluentIcon Value="@(new Icons.Regular.Size16.Add())"/>
-            </FluentButton>
-        </FluentStack>
-    </FluentStack>
-</FluentDropZone>
+            </div>
+        </div>
+    </div>
 
-@if (OpenTodo == Todo.Id)
-{
-    <tr>
-        <td colspan="6">
-            @Todo.Name
-        </td>
-    </tr>
-}
-
+    @if (_editing)
+    {
+        <div class="grid grid-cols-4 p-4 gap-2">
+            <FluentTextField ValueChanged="UpdateName" Value="@Todo.Name" Class="col-span-1 outline-none"/>
+        </div>
+    }
+</div>
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
-    [CascadingParameter(Name = "OpenTodo")] public required Guid? OpenTodo { get; set; }
     [Parameter] public required TodoAggregate Todo { get; set; }
     [Parameter] public required uint Depth { get; set; }
+    [Parameter] public required List<TodoAggregate> ChildTodos { get; set; }
+
+    private bool _editing = false;
     
     private void AddSubTodo()
     {
@@ -45,14 +61,11 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private void ToggleEditing()
+    private void UpdateName(string? name)
     {
-        if (OpenTodo == Todo.Id)
-        {
-            OpenTodo = default;
-            return;
-        }
+        if (name is null) return;
 
-        OpenTodo = Todo.Id;
+        Todo.Name = name;
+        Database.Update(Todo);
     }
 }
