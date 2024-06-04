@@ -777,6 +777,14 @@ video {
   padding: 1rem;
 }
 
+.p-12 {
+  padding: 3rem;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
 .outline-none {
   outline: 2px solid transparent;
   outline-offset: 2px;

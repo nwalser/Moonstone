@@ -2,7 +2,7 @@
 @using Icons = MudBlazor.Icons
 
 <MudCard Elevation="0" Outlined="true" Class="my-1">
-    <MudStack Row="false">
+    <MudStack Row="false" Spacing="0">
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
                 <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
@@ -26,11 +26,21 @@
         
         @if (_editing)
         {
-            <MudStack>
-                <div class="grid grid-cols-4 p-4 gap-2">
-                    <FluentTextField ValueChanged="UpdateName" Label="Name" Value="@Todo.Name" Class="col-span-1 outline-none"/>
-                </div>
-            </MudStack>
+            <MudGrid Spacing="0">
+                <MudItem sm="4">
+                    <MudGrid Spacing="1" Class="p-2">
+                        <MudItem sm="12">
+                            <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" />
+                        </MudItem>
+                        <MudItem sm="6">
+                            <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" />
+                        </MudItem>
+                        <MudItem sm="6">
+                            <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" />
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
         }
     </MudStack>
 </MudCard>
