@@ -2,7 +2,7 @@
 
 @if (_todo is not null)
 {
-    <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" />
+    <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" @key="_todo.Id" />
 }
 
 <FluentUnstyledSortableList Items="_childTodos" OnUpdate="OnUpdate" Handle="true">
