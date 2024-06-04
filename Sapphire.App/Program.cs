@@ -1,6 +1,7 @@
 using ElectronNET.API;
 using ElectronNET.API.Entities;
 using Microsoft.FluentUI.AspNetCore.Components;
+using MudBlazor.Services;
 using Sapphire.App.Services;
 using Sapphire.Data;
 using App = Sapphire.App.Components.App;
@@ -9,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseElectron(args);
 builder.Services.AddElectron();
+
+builder.Services.AddMudServices();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

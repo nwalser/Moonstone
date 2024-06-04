@@ -1,4 +1,5 @@
-﻿<div class="flex flex-col content-center rounded-md bg-[var(--fill-color)] my-1">
+﻿@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
+<div class="flex flex-col content-center rounded-md bg-[var(--fill-color)] my-1">
     <div class="flex content-center">
         <div class="flex items-center">
             <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--neutral-fill-layer-hover)]">
@@ -35,7 +36,7 @@
     @if (_editing)
     {
         <div class="grid grid-cols-4 p-4 gap-2">
-            <FluentTextField ValueChanged="UpdateName" Value="@Todo.Name" Class="col-span-1 outline-none"/>
+            <FluentTextField ValueChanged="UpdateName" Label="Name" Value="@Todo.Name" Class="col-span-1 outline-none"/>
         </div>
     }
 </div>

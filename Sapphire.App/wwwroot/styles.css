@@ -1,0 +1,31 @@
+﻿.mud-button-outlined {
+    border-color: var(--mud-palette-lines-default);
+}
+
+.mud-chip-outlined {
+    border-color: var(--mud-palette-lines-default) !important;
+}
+
+.mud-button-group-outlined.mud-button-group-override-styles .mud-button-root {
+    border-color: var(--mud-palette-lines-default);
+}
+
+.mud-picker-datepicker-toolbar {
+    background-color: var(--mud-palette-background) !important;
+}
+
+.mud-picker-container {
+    border: 1px solid var(--mud-palette-lines-default);
+}
+
+.mud-input {
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    font-size: inherit !important;
+    color: inherit !important;
+}
+
+.mud-chip.mud-chip-size-small{
+    height: 18px !important;
+    padding: 0 5px;
+}

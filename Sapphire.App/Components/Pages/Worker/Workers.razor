@@ -1,0 +1,60 @@
+﻿@using HorizontalAlignment = Microsoft.FluentUI.AspNetCore.Components.HorizontalAlignment
+@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
+@using Typography = Microsoft.FluentUI.AspNetCore.Components.Typography
+@inherits DatabaseRefresh
+@page "/worker"
+
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Top" Class="h-full p-8">
+    <FluentStack Width="800px" Orientation="Orientation.Vertical">
+        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+            <FluentLabel Typo="Typography.PaneHeader" Class="flex-shrink-0">Workers</FluentLabel>
+            <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
+                <FluentButton OnClick="() => CreateWorker()">Create</FluentButton>
+            </FluentStack>
+        </FluentStack>
+
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+            @foreach (var worker in _workers)
+            {
+                <FluentCard MinimalStyle="true">
+                    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                        <FluentStack Orientation="Orientation.Vertical" VerticalGap="0">
+                            <FluentLabel Typo="Typography.Subject" Class="truncate">@worker.Name</FluentLabel>
+                            <FluentLabel Typo="Typography.Body" Class="truncate">@worker.Id</FluentLabel>
+                        </FluentStack>
+                        <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
+                            <FluentButton OnClick="() => ViewWorker(worker.Id)">View</FluentButton>
+                        </FluentStack>
+                    </FluentStack>
+                </FluentCard>
+            }
+        </FluentStack>
+    </FluentStack>
+</FluentStack>
+
+@code {
+    [Inject] public required NavigationManager NavigationManager { get; set; }
+
+    private List<WorkerAggregate> _workers = [];
+
+    protected override void OnLoadData()
+    {
+        _workers = Database.Enumerate<WorkerAggregate>().ToList();
+    }
+
+    private void CreateWorker()
+    {
+        var worker = new WorkerAggregate()
+        {
+            Name = $"Worker {_workers.Count}"
+        };
+
+        Database.Update(worker);
+    }
+
+    private void ViewWorker(Guid id)
+    {
+        NavigationManager.NavigateTo($"/worker/{id}");
+    }
+
+}

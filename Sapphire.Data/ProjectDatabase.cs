@@ -10,6 +10,7 @@ public class ProjectDatabase : Database
         { 0, typeof(ProjectAggregate) },
         { 1, typeof(TodoAggregate) },
         { 2, typeof(PossibleWorkerAssignment) },
+        { 3, typeof(WorkerAggregate) },
     };
 
     public override void Create(string path, string session)

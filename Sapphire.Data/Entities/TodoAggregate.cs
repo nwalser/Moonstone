@@ -15,5 +15,4 @@ public class TodoAggregate : Document
     public TimeSpan CurrentEstimatedEffort { get; set; } = TimeSpan.Zero;
 
     public bool Splittable { get; set; } = false;
-    public int Priority { get; set; } = 0;
 }

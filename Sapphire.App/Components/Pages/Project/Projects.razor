@@ -1,5 +1,9 @@
-﻿@inherits DatabaseRefresh
+﻿@using HorizontalAlignment = Microsoft.FluentUI.AspNetCore.Components.HorizontalAlignment
+@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
+@using Typography = Microsoft.FluentUI.AspNetCore.Components.Typography
+@inherits DatabaseRefresh
 @page "/"
+@page "/project"
 
 <PageTitle>Projects</PageTitle>
 
@@ -8,6 +12,7 @@
         <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
             <FluentLabel Typo="Typography.PaneHeader" Class="flex-shrink-0">Projects</FluentLabel>
             <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
+                <FluentButton OnClick="() => ViewWorkers()">View Workers</FluentButton>
                 <FluentButton OnClick="() => CreateProject()">Create</FluentButton>
             </FluentStack>
         </FluentStack>
@@ -54,5 +59,10 @@
     private void ViewProject(Guid id)
     {
         NavigationManager.NavigateTo($"/project/{id}");
+    }
+    
+    private void ViewWorkers()
+    {
+        NavigationManager.NavigateTo($"/worker");
     }
 }

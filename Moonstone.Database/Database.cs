@@ -7,6 +7,7 @@ using ProtoBuf;
 
 namespace Moonstone.Database;
 
+// todo: improve error handling
 public abstract class Database : IDatabase
 {
     private const long MaxSize = 10 * 1024 * 1024;
