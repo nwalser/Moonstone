@@ -1,40 +1,48 @@
-﻿@using HorizontalAlignment = Microsoft.FluentUI.AspNetCore.Components.HorizontalAlignment
-@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
-@using Typography = Microsoft.FluentUI.AspNetCore.Components.Typography
+﻿@using Size = MudBlazor.Size
 @inherits DatabaseRefresh
 @page "/"
 @page "/project"
 
-<PageTitle>Projects</PageTitle>
+<WindowLayout>
+    <ToolbarLeftContent>
+        <CurrentDatabase />
+    </ToolbarLeftContent>
+    <ToolbarRightContent>
+        <WindowControls/>
+    </ToolbarRightContent>
+    <ChildContent>
+        <MudContainer Class="my-10">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
+                <MudText Typo="Typo.h3">Projects</MudText>
 
-<FluentStack HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Top" Class="h-full p-8">
-    <FluentStack Width="800px" Orientation="Orientation.Vertical">
-        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-            <FluentLabel Typo="Typography.PaneHeader" Class="flex-shrink-0">Projects</FluentLabel>
-            <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
-                <FluentButton OnClick="() => ViewWorkers()">View Workers</FluentButton>
-                <FluentButton OnClick="() => CreateProject()">Create</FluentButton>
-            </FluentStack>
-        </FluentStack>
+                <MudStack Row="true" Spacing="1">
+                    <MudButton OnClick="() => ViewWorkers()" Variant="Variant.Outlined" Size="Size.Small">View Workers</MudButton>
+                    <MudButton OnClick="() => CreateProject()" Variant="Variant.Outlined" Size="Size.Small">Create Project</MudButton>
+                </MudStack>
+            </MudStack>
 
-        <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
-            @foreach (var project in _projects)
-            {
-                <FluentCard MinimalStyle="true">
-                    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-                        <FluentStack Orientation="Orientation.Vertical" VerticalGap="0">
-                            <FluentLabel Typo="Typography.Subject" Class="truncate">@project.Name</FluentLabel>
-                            <FluentLabel Typo="Typography.Body" Class="truncate">@project.Description @project.Deadline @project.Id</FluentLabel>
-                        </FluentStack>
-                        <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
-                            <FluentButton OnClick="() => ViewProject(project.Id)">View</FluentButton>
-                        </FluentStack>
-                    </FluentStack>
-                </FluentCard>
-            }
-        </FluentStack>
-    </FluentStack>
-</FluentStack>
+            <MudGrid Spacing="1">
+                @foreach (var project in _projects)
+                {
+                    <MudItem sm="12">
+                        <MudPaper Outlined="true" Class="p-3">
+                            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                <MudStack Row="false" Spacing="1">
+                                    <MudText Typo="Typo.h4">@project.Name</MudText>
+                                    <MudText Typo="Typo.subtitle1">@project.Description @project.Deadline @project.Id</MudText>
+                                </MudStack>
+
+                                <MudStack Row="true" Spacing="1">
+                                    <MudButton Size="Size.Small" OnClick="() => ViewProject(project.Id)" Variant="Variant.Outlined">View</MudButton>
+                                </MudStack>
+                            </MudStack>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudContainer>
+    </ChildContent>
+</WindowLayout>
 
 @code {
     [Inject] public required NavigationManager NavigationManager { get; set; }
@@ -48,9 +56,9 @@
 
     private void CreateProject()
     {
-        var project = new ProjectAggregate()
+        var project = new ProjectAggregate
         {
-            Name = "Project 1",
+            Name = "Project 1"
         };
 
         Database.Update(project);
@@ -60,9 +68,10 @@
     {
         NavigationManager.NavigateTo($"/project/{id}");
     }
-    
+
     private void ViewWorkers()
     {
-        NavigationManager.NavigateTo($"/worker");
+        NavigationManager.NavigateTo("/worker");
     }
+
 }

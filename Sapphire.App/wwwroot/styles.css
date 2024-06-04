@@ -1,5 +1,5 @@
 ﻿.mud-button-outlined {
-    border-color: var(--mud-palette-lines-default);
+    border-color: var(--mud-palette-lines-default) !important;
 }
 
 .mud-chip-outlined {

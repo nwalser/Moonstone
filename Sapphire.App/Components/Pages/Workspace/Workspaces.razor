@@ -1,41 +1,42 @@
-﻿@using HorizontalAlignment = Microsoft.FluentUI.AspNetCore.Components.HorizontalAlignment
-@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
-@using Typography = Microsoft.FluentUI.AspNetCore.Components.Typography
+﻿@using Icons = MudBlazor.Icons
+@using Size = MudBlazor.Size
 
 <WindowLayout>
     <ToolbarRightContent>
         <WindowControls />
     </ToolbarRightContent>
     <ChildContent>
-        <FluentStack HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Top" Class="h-full p-8">
-            <FluentStack Width="800px" Orientation="Orientation.Vertical">
-                <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-                    <FluentLabel Typo="Typography.PaneHeader" Class="flex-shrink-0">Recent Workspaces</FluentLabel>
-                    <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
-                        <FluentButton OnClick="() => OpenWorkspace(create: true)">Create</FluentButton>
-                        <FluentButton OnClick="() => OpenWorkspace()">Open</FluentButton>
-                    </FluentStack>
-                </FluentStack>
+        <MudContainer Class="my-10">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
+                <MudText Typo="Typo.h3">Recent Workspaces</MudText>
 
-                <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
-                    @foreach (var recent in DatabaseService.RecentDatabases.Reverse().Take(10))
-                    {
-                    <FluentCard MinimalStyle="true">
-                        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-                            <FluentStack Orientation="Orientation.Vertical" VerticalGap="0">
-                                <FluentLabel Typo="Typography.Subject" Class="truncate">@Path.GetFileName(recent)</FluentLabel>
-                                <FluentLabel Typo="Typography.Body" Class="truncate">@recent</FluentLabel>
-                            </FluentStack>
-                            <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
-                                <FluentButton OnClick="() => DatabaseService.RemoveRecent(path: recent)" Disabled="@(!Path.Exists(recent))">Remove</FluentButton>
-                                <FluentButton OnClick="() => OpenWorkspace(path: recent)" Disabled="@(!Path.Exists(recent))">Open</FluentButton>
-                            </FluentStack>
-                        </FluentStack>
-                    </FluentCard>
-                    }
-                </FluentStack>
-            </FluentStack>
-        </FluentStack>
+                <MudStack Row="true" Spacing="1">
+                    <MudButton OnClick="() => OpenWorkspace(create: true)" Variant="Variant.Outlined" Size="Size.Small">Create</MudButton>
+                    <MudButton OnClick="() => OpenWorkspace()" Variant="Variant.Outlined" Size="Size.Small">Open</MudButton>
+                </MudStack>
+            </MudStack>
+            
+            <MudGrid Spacing="1">
+                @foreach (var recent in DatabaseService.RecentDatabases.Reverse().Take(10))
+                {
+                    <MudItem sm="12">
+                        <MudPaper Outlined="true" Class="p-3">
+                            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                <MudStack Row="false" Spacing="1">
+                                    <MudText Typo="Typo.h4">@Path.GetFileName(recent)</MudText>
+                                    <MudText Typo="Typo.subtitle1">@recent</MudText>
+                                </MudStack>
+
+                                <MudStack Row="true" Spacing="1">
+                                    <MudIconButton Size="Size.Small" OnClick="() => DatabaseService.RemoveRecent(path: recent)" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Close"/>
+                                    <MudButton Size="Size.Small" OnClick="() => OpenWorkspace(path: recent)" Variant="Variant.Outlined" Disabled="@(!Path.Exists(recent))">Open</MudButton>
+                                </MudStack>
+                            </MudStack>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudContainer>
     </ChildContent>
 </WindowLayout>
 

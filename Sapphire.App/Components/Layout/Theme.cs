@@ -13,7 +13,7 @@ public class Theme
     {
         LayoutProperties = new LayoutProperties
         {
-            DefaultBorderRadius = "3px"
+            DefaultBorderRadius = "3px",
         },
         PaletteDark = new PaletteDark
         {
