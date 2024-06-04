@@ -5,7 +5,8 @@ namespace Sapphire.App.Components.Layout;
 
 public class Theme
 {
-    private static readonly MudColor Lines = new(39, 39, 42, 255);
+    private static readonly MudColor LinesDark = new(39, 39, 42, 255);
+    private static readonly MudColor LinesLight = new(39, 39, 42, 60);
     private static readonly MudColor White = new(250, 250, 250, 255);
     private static readonly MudColor Black = new(9, 9, 11, 255);
 
@@ -14,6 +15,19 @@ public class Theme
         LayoutProperties = new LayoutProperties
         {
             DefaultBorderRadius = "3px",
+        },
+        Palette = new PaletteLight()
+        {
+            Background = White,
+            Surface = White,
+            AppbarBackground = White,
+            TextPrimary = Black,
+            Primary = Black,
+            AppbarText = Black,
+            ActionDefault = Black,
+            LinesDefault = LinesLight,
+            LinesInputs = LinesLight,
+            TableLines = LinesLight
         },
         PaletteDark = new PaletteDark
         {
@@ -24,9 +38,9 @@ public class Theme
             Primary = White,
             AppbarText = White,
             ActionDefault = White,
-            LinesDefault = Lines,
-            LinesInputs = Lines,
-            TableLines = Lines
+            LinesDefault = LinesDark,
+            LinesInputs = LinesDark,
+            TableLines = LinesDark
         },
         Typography = new Typography
         {

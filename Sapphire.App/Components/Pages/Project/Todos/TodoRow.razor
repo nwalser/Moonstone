@@ -1,45 +1,39 @@
-﻿@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
-<div class="flex flex-col content-center rounded-md bg-[var(--fill-color)] my-1">
-    <div class="flex content-center">
-        <div class="flex items-center">
-            <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--neutral-fill-layer-hover)]">
-                <FluentIcon Value="@(new Icons.Regular.Size16.MoreVertical())"/>
-            </FluentDropZone>
+﻿@using Size = MudBlazor.Size
+@using Icons = MudBlazor.Icons
 
-            <div class="sortable-grab h-full w-8 flex items-center justify-center hover:bg-[var(--neutral-fill-layer-hover)]">
-                <FluentIcon Value="@(new Icons.Regular.Size16.ArrowSort())"/>
-            </div>
-        </div>
+<MudCard Elevation="0" Outlined="true" Class="my-1">
+    <MudStack Row="false">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
+                <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
+                    <MudIcon Icon="@Icons.Material.Filled.Sort" Size="Size.Small"/>
+                </FluentDropZone>
 
-        <div class="flex items-center w-96" @onclick="() => _editing = !_editing">
-            @for (var i = 0; i < Depth; i++)
-            {
-            <div style="margin-left: 12px; height: 30px"></div>
-            }
-            <p>@Todo.Name</p>
-        </div>
+                <div class="sortable-grab h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
+                    <MudIcon Icon="@Icons.Material.Filled.DoubleArrow" Size="Size.Small"/>
+                </div>
+            </MudStack>
+            
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="flex-grow h-full" @onclick="() => _editing = !_editing">
+                <p class="w-96" style="@($"padding-left: {Depth * 12}px")">@Todo.Name</p>
+                <p class="w-12">@Todo.CurrentEstimatedEffort.TotalHours / @Todo.InitialEstimatedEffort.TotalHours</p>
+            </MudStack>
 
-        <div class="flex items-center w-12" @onclick="() => _editing = !_editing">
-            <p>@Todo.CurrentEstimatedEffort.TotalHours / @Todo.InitialEstimatedEffort.TotalHours</p>
-        </div>
-
-        <div class="flex items-center flex-grow" @onclick="() => _editing = !_editing">
-            <p>Timeline</p>
-        </div>
-        <div class="flex items-center">
-            <div class="h-full w-8 flex items-center justify-center hover:bg-[var(--neutral-fill-layer-hover)]" @onclick="AddSubTodo">
-                <FluentIcon Value="@(new Icons.Regular.Size16.Add())"/>
-            </div>
-        </div>
-    </div>
-
-    @if (_editing)
-    {
-        <div class="grid grid-cols-4 p-4 gap-2">
-            <FluentTextField ValueChanged="UpdateName" Label="Name" Value="@Todo.Name" Class="col-span-1 outline-none"/>
-        </div>
-    }
-</div>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
+                <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="AddSubTodo" />
+            </MudStack>
+        </MudStack>
+        
+        @if (_editing)
+        {
+            <MudStack>
+                <div class="grid grid-cols-4 p-4 gap-2">
+                    <FluentTextField ValueChanged="UpdateName" Label="Name" Value="@Todo.Name" Class="col-span-1 outline-none"/>
+                </div>
+            </MudStack>
+        }
+    </MudStack>
+</MudCard>
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }

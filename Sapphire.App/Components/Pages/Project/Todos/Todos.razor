@@ -1,27 +1,36 @@
-﻿@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
+﻿@using Size = MudBlazor.Size
 @inherits DatabaseRefresh
 @page "/project/{ProjectId:guid}"
 
-<FluentStack VerticalAlignment="VerticalAlignment.Top" Orientation="Orientation.Vertical" Class="h-full p-8">
-    <FluentButton @onclick="AddRootTodo">Add Todo</FluentButton>
-    <FluentDragContainer TItem="TodoAggregate" OnDropEnd="OnDropEnd" Class="w-full">
-        <TodoGroup Depth="0" Todos="_todos" ProjectId="ProjectId" TodoId="null" />
-    </FluentDragContainer>
-</FluentStack>
+<DefaultWindowLayout>
+    <MudContainer Class="my-10">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
+            <MudText Typo="Typo.h3">Tasks</MudText>
+
+            <MudStack Row="true" Spacing="1">
+                <MudButton OnClick="() => AddRootTodo()" Variant="Variant.Outlined" Size="Size.Small">Add Todo</MudButton>
+            </MudStack>
+        </MudStack>
+
+        <MudGrid Spacing="1">
+            <FluentDragContainer TItem="TodoAggregate" OnDropEnd="OnDropEnd" Class="w-full">
+                <TodoGroup Depth="0" Todos="_todos" ProjectId="ProjectId" TodoId="null"/>
+            </FluentDragContainer>
+        </MudGrid>
+    </MudContainer>
+</DefaultWindowLayout>
+
 
 @code {
     [Parameter] public required Guid ProjectId { get; set; }
 
     private List<TodoAggregate> _todos = [];
-    private List<TodoAggregate> _rootTodo = [];
 
     protected override void OnLoadData()
     {
         _todos = Database.Enumerate<TodoAggregate>()
             .Where(t => t.ProjectId == ProjectId)
             .ToList();
-
-        _rootTodo = _todos.Where(t => t.ParentId is null).ToList();
     }
 
     private void AddRootTodo()
