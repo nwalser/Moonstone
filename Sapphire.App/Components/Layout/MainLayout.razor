@@ -2,7 +2,7 @@
 
 <MudDialogProvider/>
 <MudSnackbarProvider/>
-<MudThemeProvider IsDarkMode="false" Theme="Theme.Default"/>
+<MudThemeProvider @ref="_mudThemeProvider" @bind-IsDarkMode="_isDarkMode" Theme="Theme.Default"/>
 
 <CascadingValue TValue="BrowserWindow?" IsFixed="true" Value="WindowManager.BrowserWindows.SingleOrDefault()">
     @if (DatabaseService.Database is not null)
@@ -34,4 +34,24 @@
 @code{
     [Inject] public required DatabaseService<ProjectDatabase> DatabaseService { get; set; }
     [Inject] public required WindowManager WindowManager { get; set; }
+    
+    private bool _isDarkMode = true;
+    private MudThemeProvider _mudThemeProvider = null!;
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isDarkMode = await _mudThemeProvider.GetSystemPreference();
+            await _mudThemeProvider.WatchSystemPreference(OnSystemPreferenceChanged);
+            StateHasChanged();
+        }
+    }
+    
+    private Task OnSystemPreferenceChanged(bool newValue)
+    {
+        _isDarkMode = newValue;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
 }
