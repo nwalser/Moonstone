@@ -1,15 +1,7 @@
-/*@import '/_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css';*/
-
 body {
     margin: 0;
     padding: 0;
     height: 100vh;
-    font-family: var(--body-font);
-    font-size:   var(--type-ramp-base-font-size);
-    line-height: var(--type-ramp-base-line-height);
-    font-weight: var(--font-weight);
-    color:       var(--neutral-foreground-rest);
-    background:  var(--neutral-fill-layer-rest);
 }
 
 /* width */
@@ -24,5 +16,5 @@ body {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: var(--fill-color);
+    background: var(--mud-palette-lines-default);
 }

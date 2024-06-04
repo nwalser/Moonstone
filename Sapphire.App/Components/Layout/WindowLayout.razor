@@ -1,0 +1,20 @@
+﻿<div class="flex flex-col h-full overflow-hidden">
+    <div class="flex flex-row h-8 justify-between" style="-webkit-app-region: drag; border-bottom: 1px var(--mud-palette-lines-default) solid">
+        <div>@ToolbarLeftContent</div>
+        <div>@ToolbarCenterContent</div>
+        <div>@ToolbarRightContent</div>
+    </div>
+
+    <main class="flex-grow overflow-x-hidden overflow-y-scroll">
+        @ChildContent
+    </main>
+</div>
+
+
+@code {
+    [Parameter] public RenderFragment? ToolbarLeftContent { get; set; }
+    [Parameter] public RenderFragment? ToolbarCenterContent { get; set; }
+    [Parameter] public RenderFragment? ToolbarRightContent { get; set; }
+    
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,28 @@
+﻿<div class="flex w-full flex-shrink h-8 bg-[var(--mud-palette-background)]" style="-webkit-app-region: drag; border-bottom: 1px var(--mud-palette-lines-default) solid;">
+    <div class="flex flex-row h-full items-center px-4">
+        @if (DatabaseService.Database is not null)
+        {
+            <p class="text-base select-none">@Path.GetFileName(DatabaseService.Database.RootFolder)</p>
+            <button
+                class="rounded-full select-none border-none h-5 w-5 justify-center items-center flex"
+                style="-webkit-app-region: no-drag;"
+                @onclick="CloseDatabase">
+                <XMarkIcon class="h-3 w-3" />
+            </button>
+        }
+    </div>
+    <MudSpacer />
+
+</div>
+
+
+@code {
+    [Inject] public required DatabaseService<ProjectDatabase> DatabaseService { get; set; }
+    [Inject] public required NavigationManager NavigationManager { get; set; }
+
+    private void CloseDatabase()
+    {
+        DatabaseService.Close();
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+}
