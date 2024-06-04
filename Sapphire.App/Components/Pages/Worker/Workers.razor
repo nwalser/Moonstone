@@ -1,36 +1,38 @@
-﻿@using HorizontalAlignment = Microsoft.FluentUI.AspNetCore.Components.HorizontalAlignment
-@using Orientation = Microsoft.FluentUI.AspNetCore.Components.Orientation
-@using Typography = Microsoft.FluentUI.AspNetCore.Components.Typography
+﻿@using Size = MudBlazor.Size
 @inherits DatabaseRefresh
 @page "/worker"
 
-<FluentStack HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Top" Class="h-full p-8">
-    <FluentStack Width="800px" Orientation="Orientation.Vertical">
-        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-            <FluentLabel Typo="Typography.PaneHeader" Class="flex-shrink-0">Workers</FluentLabel>
-            <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
-                <FluentButton OnClick="() => CreateWorker()">Create</FluentButton>
-            </FluentStack>
-        </FluentStack>
+<DefaultWindowLayout>
+    <MudContainer Class="my-10">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
+            <MudText Typo="Typo.h3">Workers</MudText>
 
-        <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+            <MudStack Row="true" Spacing="1">
+                <MudButton OnClick="() => CreateWorker()" Variant="Variant.Outlined" Size="Size.Small">Create</MudButton>
+            </MudStack>
+        </MudStack>
+
+        <MudGrid Spacing="1">
             @foreach (var worker in _workers)
             {
-                <FluentCard MinimalStyle="true">
-                    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-                        <FluentStack Orientation="Orientation.Vertical" VerticalGap="0">
-                            <FluentLabel Typo="Typography.Subject" Class="truncate">@worker.Name</FluentLabel>
-                            <FluentLabel Typo="Typography.Body" Class="truncate">@worker.Id</FluentLabel>
-                        </FluentStack>
-                        <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End">
-                            <FluentButton OnClick="() => ViewWorker(worker.Id)">View</FluentButton>
-                        </FluentStack>
-                    </FluentStack>
-                </FluentCard>
+            <MudItem sm="12">
+                <MudPaper Outlined="true" Class="p-3">
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudStack Row="false" Spacing="1">
+                            <MudText Typo="Typo.h4">@worker.Name</MudText>
+                            <MudText Typo="Typo.subtitle1">@worker.Id</MudText>
+                        </MudStack>
+
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Size="Size.Small" Href="@($"/worker/{worker.Id}")" Variant="Variant.Outlined">View</MudButton>
+                        </MudStack>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
             }
-        </FluentStack>
-    </FluentStack>
-</FluentStack>
+        </MudGrid>
+    </MudContainer>
+</DefaultWindowLayout>
 
 @code {
     [Inject] public required NavigationManager NavigationManager { get; set; }
@@ -51,10 +53,4 @@
 
         Database.Update(worker);
     }
-
-    private void ViewWorker(Guid id)
-    {
-        NavigationManager.NavigateTo($"/worker/{id}");
-    }
-
 }
