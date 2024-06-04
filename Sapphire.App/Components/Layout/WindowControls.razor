@@ -1,6 +1,5 @@
 ﻿<button
-    class="rounded-none px-3 py-2 select-none border-none hover:bg-[var(--mud-palette-lines-default)]"
-    style="-webkit-app-region: no-drag;"
+    class="rounded-none h-full w-12 select-none border-none hover:bg-[var(--mud-palette-lines-default)] no-drag"
     @onclick="() => Window?.Minimize()">
     <MinusIcon class="h-4 w-4"/>
 </button>
@@ -8,8 +7,7 @@
 @if (Window?.IsMaximizedAsync().Result ?? false)
 {
     <button
-        class="rounded-none px-3 py-2 select-none border-none hover:bg-[var(--mud-palette-lines-default)]"
-        style="-webkit-app-region: no-drag;"
+        class="rounded-none h-full w-12 select-none border-none hover:bg-[var(--mud-palette-lines-default)] no-drag"
         @onclick="() => Window?.Restore()">
         <Square2StackIcon class="h-4 w-4"/>
     </button>
@@ -17,16 +15,14 @@
 else
 {
     <button
-        class="rounded-none px-3 py-2 select-none border-none hover:bg-[var(--mud-palette-lines-default)]"
-        style="-webkit-app-region: no-drag;"
+        class="rounded-none h-full w-12 select-none border-none hover:bg-[var(--mud-palette-lines-default)] no-drag"
         @onclick="() => Window?.Maximize()">
         <ArrowsPointingOutIcon class="h-4 w-4"/>
     </button>
 }
 
 <button
-    class="rounded-none px-3 py-2 select-none border-none hover:bg-[var(--mud-palette-lines-default)]"
-    style="-webkit-app-region: no-drag;"
+    class="rounded-none h-full w-12 select-none border-none hover:bg-[var(--mud-palette-lines-default)] no-drag"
     @onclick="() => Window?.Close()">
     <XMarkIcon class="h-4 w-4"/>
 </button>

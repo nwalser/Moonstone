@@ -1,0 +1,20 @@
+﻿@using Icons = MudBlazor.Icons
+@using Size = MudBlazor.Size
+
+<MudStack Row="true" Spacing="1">
+    <MudButton Variant="Variant.Outlined" Size="Size.Small" Href="/" Class="no-drag">@Path.GetFileName(Database.RootFolder)</MudButton>
+    <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Variant="Variant.Outlined" Class="no-drag" OnClick="CloseDatabase" />
+</MudStack>
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    
+    [Inject] public required DatabaseService<ProjectDatabase> DatabaseService { get; set; }
+    [Inject] public required NavigationManager NavigationManager { get; set; }
+
+    private void CloseDatabase()
+    {
+        DatabaseService.Close();
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+}

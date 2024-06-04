@@ -1,0 +1,18 @@
+﻿<WindowLayout>
+    <ToolbarLeftContent>
+        <CurrentWorkspace />
+    </ToolbarLeftContent>
+    <ToolbarCenterContent>
+        <WorkspaceMenu />
+    </ToolbarCenterContent>
+    <ToolbarRightContent>
+        <WindowControls/>
+    </ToolbarRightContent>
+    <ChildContent>
+        @ChildContent
+    </ChildContent>
+</WindowLayout>
+
+@code {
+    [Parameter] public required RenderFragment? ChildContent { get; set; }
+}
