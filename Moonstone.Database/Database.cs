@@ -8,7 +8,7 @@ using ProtoBuf;
 namespace Moonstone.Database;
 
 // todo: improve error handling
-public abstract class Database : IDatabase
+public abstract class Database : IDatabase, IDisposable
 {
     private const long MaxSize = 10 * 1024 * 1024;
 
@@ -256,5 +256,13 @@ public abstract class Database : IDatabase
         }
 
         fs.Dispose();
+    }
+
+    public void Dispose()
+    {
+        _watcher?.Dispose();
+        _backgroundTask?.Dispose();
+        _cts.Dispose();
+        _lastUpdate.Dispose();
     }
 }

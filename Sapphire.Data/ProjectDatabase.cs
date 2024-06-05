@@ -1,18 +1,20 @@
-﻿using System.Reactive.Subjects;
+﻿using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Moonstone.Database;
 using Sapphire.Data.Entities;
 using Sapphire.Data.Entities.WorkingHours;
-using Sapphire.Data.Extensions;
 
 namespace Sapphire.Data;
 
-public class ProjectDatabase : Database
+public class ProjectDatabase : Database, IDisposable
 {
     private readonly BehaviorSubject<DateTime> _lastSimulation = new(DateTime.MinValue);
     public BehaviorSubject<DateTime> LastSimulation => _lastSimulation;
     
     private readonly BehaviorSubject<bool> _simulationOngoing = new(false);
     public BehaviorSubject<bool> SimulationOngoing => _simulationOngoing;
+
+    private IDisposable? _subscription;
     
     protected override Dictionary<int, Type> TypeMap { get; } = new()
     {
@@ -51,18 +53,40 @@ public class ProjectDatabase : Database
 
     protected override void OnAfterOpening()
     {
-        LastUpdate.SubscribeWithoutOverlap(RunSimulation);
+        _subscription = LastUpdate.Subscribe(async t => await RunSimulation(t));
+        
         base.OnAfterOpening();
     }
 
-    private void RunSimulation(DateTime change)
+    private async Task RunSimulation(DateTime change)
     {
-        SimulationOngoing.OnNext(true);
+        await Task.Run(() =>
+        {
+            // todo: implement skipping of intermediary simulations
+            Monitor.Enter(this);
+            try
+            {
+                SimulationOngoing.OnNext(true);
+
+                // simulate
+                Thread.Sleep(2000);
+
+                LastSimulation.OnNext(change);
+                SimulationOngoing.OnNext(false);
+            }
+            finally
+            {
+                Monitor.Exit(this);
+            }
+        });
+    }
+
+    public new void Dispose()
+    {
+        _lastSimulation.Dispose();
+        _simulationOngoing.Dispose();
+        _subscription?.Dispose();
         
-        // simulate
-        Thread.Sleep(2000);
-        
-        LastSimulation.OnNext(change);
-        SimulationOngoing.OnNext(false);
+        base.Dispose();
     }
 }
