@@ -1,31 +1,31 @@
-﻿@using Size = MudBlazor.Size
-@using Icons = MudBlazor.Icons
+﻿<MudItem xs="12">
+    <MudCard Elevation="0" Outlined="true" Class="my-1">
+        <MudStack Row="false" Spacing="0">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
+                    <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
+                        <MudIcon Icon="@Icons.Material.Filled.Sort" Size="Size.Small"/>
+                    </FluentDropZone>
 
-<MudCard Elevation="0" Outlined="true" Class="my-1">
-    <MudStack Row="false" Spacing="0">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
-                <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
-                    <MudIcon Icon="@Icons.Material.Filled.Sort" Size="Size.Small"/>
-                </FluentDropZone>
+                    <div class="sortable-grab h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
+                        <MudIcon Icon="@Icons.Material.Filled.DoubleArrow" Size="Size.Small"/>
+                    </div>
+                </MudStack>
 
-                <div class="sortable-grab h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
-                    <MudIcon Icon="@Icons.Material.Filled.DoubleArrow" Size="Size.Small"/>
-                </div>
-            </MudStack>
-            
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="flex-grow h-full" @onclick="() => _editing = !_editing">
-                <p class="w-96" style="@($"padding-left: {Depth * 12}px")">@Todo.Name</p>
-                <p class="w-12">@Todo.CurrentEstimatedEffort.TotalHours / @Todo.InitialEstimatedEffort.TotalHours</p>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="flex-grow h-full" @onclick="() => _editing = !_editing">
+                    <p class="w-96" style="@($"padding-left: {Depth * 12}px")">@Todo.Name</p>
+                    <p class="w-12">@Todo.CurrentEstimatedEffort.TotalHours / @Todo.InitialEstimatedEffort.TotalHours</p>
+                </MudStack>
+
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
+                    <div class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]" @onclick="AddSubTodo">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small"/>
+                    </div>
+                </MudStack>
             </MudStack>
 
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
-                <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="AddSubTodo" />
-            </MudStack>
-        </MudStack>
-        
-        @if (_editing)
-        {
+            @if (_editing)
+            {
             <MudGrid Spacing="0">
                 <MudItem sm="4">
                     <MudGrid Spacing="1" Class="p-2">
@@ -41,9 +41,10 @@
                     </MudGrid>
                 </MudItem>
             </MudGrid>
-        }
-    </MudStack>
-</MudCard>
+            }
+        </MudStack>
+    </MudCard>
+</MudItem>
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }

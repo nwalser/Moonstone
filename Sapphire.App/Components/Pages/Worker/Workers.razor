@@ -1,17 +1,12 @@
-﻿@using Size = MudBlazor.Size
-@inherits DatabaseRefresh
+﻿@inherits DatabaseRefresh
 @page "/worker"
 
-<DefaultWindowLayout>
-    <MudContainer Class="my-10">
-        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
-            <MudText Typo="Typo.h3">Workers</MudText>
+<DefaultWindowLayout PageTitle="Workers">
+    <RibbonRightContent>
+        <MudButton OnClick="() => CreateWorker()" Variant="Variant.Outlined" Size="Size.Small">New Worker</MudButton>
+    </RibbonRightContent>
 
-            <MudStack Row="true" Spacing="1">
-                <MudButton OnClick="() => CreateWorker()" Variant="Variant.Outlined" Size="Size.Small">Create</MudButton>
-            </MudStack>
-        </MudStack>
-
+    <ChildContent>
         <MudGrid Spacing="1">
             @foreach (var worker in _workers)
             {
@@ -31,7 +26,7 @@
             </MudItem>
             }
         </MudGrid>
-    </MudContainer>
+    </ChildContent>
 </DefaultWindowLayout>
 
 @code {

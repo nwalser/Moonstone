@@ -1,7 +1,4 @@
-﻿@using Icons = MudBlazor.Icons
-@using Size = MudBlazor.Size
-
-<WindowLayout>
+﻿<WindowLayout>
     <ToolbarRightContent>
         <WindowControls />
     </ToolbarRightContent>
@@ -11,15 +8,15 @@
                 <MudText Typo="Typo.h3">Recent Workspaces</MudText>
 
                 <MudStack Row="true" Spacing="1">
-                    <MudButton OnClick="() => OpenWorkspace(create: true)" Variant="Variant.Outlined" Size="Size.Small">Create</MudButton>
-                    <MudButton OnClick="() => OpenWorkspace()" Variant="Variant.Outlined" Size="Size.Small">Open</MudButton>
+                    <MudButton OnClick="() => OpenWorkspace(create: true)" Variant="Variant.Outlined" Size="Size.Small">New Workspace</MudButton>
+                    <MudButton OnClick="() => OpenWorkspace()" Variant="Variant.Outlined" Size="Size.Small">Open Workspace</MudButton>
                 </MudStack>
             </MudStack>
             
             <MudGrid Spacing="1">
                 @foreach (var recent in DatabaseService.RecentDatabases.Reverse().Take(10))
                 {
-                    <MudItem sm="12">
+                    <MudItem xs="12">
                         <MudPaper Outlined="true" Class="p-3">
                             <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
                                 <MudStack Row="false" Spacing="1">

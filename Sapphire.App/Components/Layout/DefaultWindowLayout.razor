@@ -1,4 +1,4 @@
-﻿<WindowLayout>
+﻿<WindowLayout PageTitle="@PageTitle">
     <ToolbarLeftContent>
         <CurrentWorkspace />
     </ToolbarLeftContent>
@@ -8,11 +8,26 @@
     <ToolbarRightContent>
         <WindowControls/>
     </ToolbarRightContent>
+    
+    <RibbonCenterContent>
+        @RibbonCenterContent
+    </RibbonCenterContent>
+    <RibbonRightContent>
+        @RibbonRightContent
+    </RibbonRightContent>
+    
     <ChildContent>
-        @ChildContent
+        <MudContainer MaxWidth="ChildContentMaxWidth" Class="my-8">
+            @ChildContent
+        </MudContainer>
     </ChildContent>
 </WindowLayout>
 
 @code {
+    [Parameter] public string PageTitle { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? RibbonCenterContent { get; set; }
+    [Parameter] public RenderFragment? RibbonRightContent { get; set; }
+
+    [Parameter] public MaxWidth ChildContentMaxWidth { get; set; } = MaxWidth.Large;
     [Parameter] public required RenderFragment? ChildContent { get; set; }
 }

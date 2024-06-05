@@ -1,33 +1,31 @@
-﻿@using Size = MudBlazor.Size
-@inherits DatabaseRefresh
+﻿@inherits DatabaseRefresh
 @page "/project/{ProjectId:guid}"
 
-<DefaultWindowLayout>
-    <MudContainer Class="my-10">
-        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
-            <MudText Typo="Typo.h3">Tasks</MudText>
+<DefaultWindowLayout PageTitle="@($"{_project?.Name} - Todos")">
+    <RibbonRightContent>
+        <MudButton OnClick="() => AddRootTodo()" Variant="Variant.Outlined" Size="Size.Small">Add Todo</MudButton>
+    </RibbonRightContent>
 
-            <MudStack Row="true" Spacing="1">
-                <MudButton OnClick="() => AddRootTodo()" Variant="Variant.Outlined" Size="Size.Small">Add Todo</MudButton>
-            </MudStack>
-        </MudStack>
-
+    <ChildContent>
         <MudGrid Spacing="1">
             <FluentDragContainer TItem="TodoAggregate" OnDropEnd="OnDropEnd" Class="w-full">
                 <TodoGroup Depth="0" Todos="_todos" ProjectId="ProjectId" TodoId="null"/>
             </FluentDragContainer>
         </MudGrid>
-    </MudContainer>
+    </ChildContent>
 </DefaultWindowLayout>
-
 
 @code {
     [Parameter] public required Guid ProjectId { get; set; }
 
+    private ProjectAggregate? _project;
     private List<TodoAggregate> _todos = [];
 
     protected override void OnLoadData()
     {
+        _project = Database.Enumerate<ProjectAggregate>()
+            .SingleOrDefault(p => p.Id == ProjectId);
+        
         _todos = Database.Enumerate<TodoAggregate>()
             .Where(t => t.ProjectId == ProjectId)
             .ToList();
