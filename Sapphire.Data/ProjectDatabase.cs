@@ -1,5 +1,6 @@
 ﻿using Moonstone.Database;
 using Sapphire.Data.Entities;
+using Sapphire.Data.Entities.WorkingHours;
 
 namespace Sapphire.Data;
 
@@ -11,6 +12,10 @@ public class ProjectDatabase : Database
         { 1, typeof(TodoAggregate) },
         { 2, typeof(PossibleWorkerAssignment) },
         { 3, typeof(WorkerAggregate) },
+        
+        { 4, typeof(LeaveDayAggregate) },
+        { 5, typeof(OfficeDayAggregate) },
+        { 6, typeof(WeeklyWorkDay) },
     };
 
     public override void Create(string path, string session)
