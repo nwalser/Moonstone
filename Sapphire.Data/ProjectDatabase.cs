@@ -1,8 +1,8 @@
-﻿using System.Reactive.Linq;
-using System.Reactive.Subjects;
+﻿using System.Reactive.Subjects;
 using Moonstone.Database;
 using Sapphire.Data.Entities;
 using Sapphire.Data.Entities.WorkingHours;
+using Sapphire.Data.ValueObjects;
 
 namespace Sapphire.Data;
 
@@ -15,6 +15,11 @@ public class ProjectDatabase : Database, IDisposable
     public BehaviorSubject<bool> SimulationOngoing => _simulationOngoing;
 
     private IDisposable? _subscription;
+    
+    
+    public required List<PlannedTodo> PlannedTodos { get; set; }
+    public required List<PlannedAllocation> PlannedAllocations { get; set; }
+    
     
     protected override Dictionary<int, Type> TypeMap { get; } = new()
     {

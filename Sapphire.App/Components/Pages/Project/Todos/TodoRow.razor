@@ -178,7 +178,7 @@
 
     private async Task Delete()
     {
-        var allChildren = Todo.GetAllChildren(Database).ToList();
+        var allChildren = Todo.GetAllChildTodos(Database).ToList();
         List<TodoAggregate> allTodosToDelete = [..allChildren, Todo];
         
         var delete = await DialogService.ShowMessageBox(

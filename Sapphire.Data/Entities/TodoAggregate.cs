@@ -1,4 +1,6 @@
 ﻿using Moonstone.Database;
+using Sapphire.Data.Entities.SchedulingLocks;
+using Sapphire.Data.ValueObjects;
 
 namespace Sapphire.Data.Entities;
 
@@ -22,23 +24,89 @@ public class TodoAggregate : Document
     public bool Splittable { get; set; } = false;
 
 
-    public List<TodoAggregate> GetChildren(ProjectDatabase database, TodoAggregate? todo = default)
+    private IEnumerable<TodoAggregate> GetChildTodos(ProjectDatabase db, TodoAggregate? todo = default)
     {
-        return database.Enumerate<TodoAggregate>().Where(t => t.ParentId == (todo ?? this).Id).ToList();
+        return db.Enumerate<TodoAggregate>()
+            .Where(t => t.ParentId == (todo ?? this).Id);
     }
 
-    public IEnumerable<TodoAggregate> GetAllChildren(ProjectDatabase database, TodoAggregate? todo = default)
+    public IEnumerable<TodoAggregate> GetAllChildTodos(ProjectDatabase db, TodoAggregate? todo = default)
     {
-        var children = GetChildren(database, todo ?? this);
+        var children = GetChildTodos(db, todo ?? this);
         
         foreach (var child in children)
         {
             yield return child;
             
-            foreach (var grandChild in GetAllChildren(database, child))
+            foreach (var grandChild in GetAllChildTodos(db, child))
                 yield return grandChild;
         }
     }
+    
+    
+    public IEnumerable<ILock> GetActiveLocks(ProjectDatabase db, DateOnly date)
+    {
+        // ParentLock
+        {
+            var parentTodo = GetParentTodo(db);
+
+            if (parentTodo is null)
+                yield break;
+        
+            if (parentTodo.State == TodoState.Completed)
+                yield break;
+
+            var plannedTodo = parentTodo.GetPlannedTodo(db);
+        
+            if(plannedTodo is not null && plannedTodo.PlannedEnd <= date)
+                yield break;
+
+            yield return new ParentLock(Id, parentTodo.Id);
+        }
+        
+        // MinDateLocks
+        {
+            var activeMinDateLocks = db.Enumerate<MinDateLockAggregate>()
+                .Where(l => l.TodoId == Id)
+                .Where(m => m.MinDate > date);
+
+            foreach (var minDateLock in activeMinDateLocks)
+                yield return minDateLock;
+        }
+
+        // DelayLock
+        {
+            var delayLocks = db.Enumerate<DelayLockAggregate>()
+                .Where(l => l.TodoId == Id);
+
+            foreach (var delayLock in delayLocks)
+            {
+                var dependeeTodo = db.Enumerate<TodoAggregate>()
+                    .Single(t => t.Id == delayLock.TodoLockerId);
+
+                if (dependeeTodo.State == TodoState.Completed)
+                    continue;
+
+                var plannedTodo = dependeeTodo.GetPlannedTodo(db);
+
+                if (plannedTodo is not null && plannedTodo.PlannedEnd <= date)
+                    continue;
+
+                yield return delayLock;
+            }
+        }
+    }
+
+    public TodoAggregate? GetParentTodo(ProjectDatabase db)
+    {
+        return db.Enumerate<TodoAggregate>()
+            .SingleOrDefault(t => t.ParentId == ParentId);
+    }
+    
+    public PlannedTodo? GetPlannedTodo(ProjectDatabase db)
+    {
+        return db.PlannedTodos.SingleOrDefault(t => t.TodoId == Id);
+    } 
 }
 
 public enum TodoState
