@@ -2,6 +2,7 @@
 using Moonstone.Database;
 using Sapphire.Data.Entities;
 using Sapphire.Data.Entities.WorkingHours;
+using Sapphire.Data.Simulation;
 using Sapphire.Data.ValueObjects;
 
 namespace Sapphire.Data;
@@ -74,7 +75,7 @@ public class ProjectDatabase : Database, IDisposable
                 SimulationOngoing.OnNext(true);
 
                 // simulate
-                Thread.Sleep(2000);
+                CalendarSimulation.RunSimulation(this, DateOnly.MaxValue, DateOnly.MaxValue);
 
                 LastSimulation.OnNext(change);
                 SimulationOngoing.OnNext(false);
