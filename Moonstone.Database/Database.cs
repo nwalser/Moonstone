@@ -211,7 +211,7 @@ public abstract class Database : IDatabase, IDisposable
         return _documents.Select(d => d.Value);
     }
 
-    public IEnumerable<TType> Enumerate<TType>()
+    public IEnumerable<TType> Enumerate<TType>() where TType : Document
     {
         return _documents.Select(v => v.Value)
             .Where(t => t.GetType() == typeof(TType))
