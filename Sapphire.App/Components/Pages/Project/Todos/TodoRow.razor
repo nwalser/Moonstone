@@ -35,7 +35,7 @@
 
             @if (_editing)
             {
-                <MudGrid Spacing="0">
+                <MudGrid Spacing="0" Style="border-top: 1px solid var(--mud-palette-text-primary)">
                     <MudItem xs="4">
                         <MudGrid Spacing="1" Class="p-2">
                             <MudItem xs="12">
@@ -66,7 +66,7 @@
                             <MudItem xs="12">
                                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
                                     <MudText Typo="Typo.body2">Splittable</MudText>
-                                    <MudSwitch T="bool" Value="Todo.Splittable" ValueChanged="UpdateSplittable" Size="Size.Medium" Class="!-mr-5"/>
+                                    <MudCheckBox T="bool" Value="Todo.Splittable" ValueChanged="UpdateSplittable" Size="Size.Medium" />
                                 </MudStack>
                             </MudItem>
                         </MudGrid>
@@ -76,8 +76,11 @@
                     </MudItem>
                     <MudItem xs="12">
                         <MudStack Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Row="true" Spacing="1" Class="p-2">
-                            <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Warning" OnClick="async () => await Delete()">Delete</MudButton>
-                            <MudButton Size="Size.Small" Variant="Variant.Outlined">Complete</MudButton>
+                            <MudButtonGroup Size="Size.Small" Variant="Variant.Outlined">
+                                <MudButton OnClick="() => UpdateState(TodoState.Draft)" Disabled="Todo.State == TodoState.Draft">Draft</MudButton>
+                                <MudButton OnClick="() => UpdateState(TodoState.Active)" Disabled="Todo.State == TodoState.Active">Active</MudButton>
+                                <MudButton OnClick="() => UpdateState(TodoState.Completed)" Disabled="Todo.State == TodoState.Completed">Completed</MudButton>
+                            </MudButtonGroup>
                         </MudStack>
                     </MudItem>
                 </MudGrid>
@@ -145,6 +148,12 @@
     private void UpdateTags(IEnumerable<string> values)
     {
         Todo.Tags = values.ToList();
+        Database.Update(Todo);
+    }
+
+    private void UpdateState(TodoState state)
+    {
+        Todo.State = state;
         Database.Update(Todo);
     }
 

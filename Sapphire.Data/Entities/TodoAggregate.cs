@@ -7,19 +7,19 @@ public class TodoAggregate : Document
     public required string Name { get; set; }
     
     public required Guid ProjectId { get; init; }
-
+    
     public Guid? ParentId { get; set; } = Guid.Empty;
     public uint Order { get; set; } = 0;
     
+    public TodoState State { get; set; } = TodoState.Active;
+
     public TimeSpan InitialEstimatedEffort { get; set; } = TimeSpan.Zero;
     public TimeSpan CurrentEstimatedEffort { get; set; } = TimeSpan.Zero;
 
     public Guid[] PossibleWorkerIds { get; set; } = [];
     public List<string> Tags { get; set; } = [];
     
-    
     public bool Splittable { get; set; } = false;
-
 
 
     public List<TodoAggregate> GetChildren(ProjectDatabase database, TodoAggregate? todo = default)
@@ -39,4 +39,11 @@ public class TodoAggregate : Document
                 yield return grandChild;
         }
     }
+}
+
+public enum TodoState
+{
+    Draft,
+    Active,
+    Completed
 }
