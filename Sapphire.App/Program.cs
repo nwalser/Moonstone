@@ -20,6 +20,7 @@ builder.Services.AddFluentUIComponents();
 var userData = await Electron.App.GetPathAsync(PathName.UserData);
 var recentDatabaseStoragePath = Path.Join(userData, "recent_database_storage_path.json");
 builder.Services.AddSingleton(new DatabaseService<ProjectDatabase>(recentDatabaseStoragePath));
+builder.Services.AddSingleton(new TimeZoneService());
 
 var app = builder.Build();
 

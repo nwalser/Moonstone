@@ -1,11 +1,19 @@
-﻿using Moonstone.Database;
+﻿using System.Reactive.Subjects;
+using Moonstone.Database;
 using Sapphire.Data.Entities;
 using Sapphire.Data.Entities.WorkingHours;
+using Sapphire.Data.Extensions;
 
 namespace Sapphire.Data;
 
 public class ProjectDatabase : Database
 {
+    private readonly BehaviorSubject<DateTime> _lastSimulation = new(DateTime.MinValue);
+    public BehaviorSubject<DateTime> LastSimulation => _lastSimulation;
+    
+    private readonly BehaviorSubject<bool> _simulationOngoing = new(false);
+    public BehaviorSubject<bool> SimulationOngoing => _simulationOngoing;
+    
     protected override Dictionary<int, Type> TypeMap { get; } = new()
     {
         { 0, typeof(ProjectAggregate) },
@@ -39,5 +47,22 @@ public class ProjectDatabase : Database
             Name = "Todo 2",
             ProjectId = project.Id,
         });
+    }
+
+    protected override void OnAfterOpening()
+    {
+        LastUpdate.SubscribeWithoutOverlap(RunSimulation);
+        base.OnAfterOpening();
+    }
+
+    private void RunSimulation(DateTime change)
+    {
+        SimulationOngoing.OnNext(true);
+        
+        // simulate
+        Thread.Sleep(2000);
+        
+        LastSimulation.OnNext(change);
+        SimulationOngoing.OnNext(false);
     }
 }

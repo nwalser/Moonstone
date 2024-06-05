@@ -106,7 +106,11 @@ public abstract class Database : IDatabase
         // init background worker
         _cts = new CancellationTokenSource();
         _backgroundTask = Task.Run(() => BackgroundTask(_cts.Token));
+        
+        OnAfterOpening();
     }
+
+    protected virtual void OnAfterOpening() { }
 
     private async Task BackgroundTask(CancellationToken ct = default)
     {

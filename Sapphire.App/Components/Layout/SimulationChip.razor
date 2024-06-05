@@ -1,0 +1,32 @@
+﻿@implements IDisposable
+
+@if (Database.SimulationOngoing.Value)
+{
+    <MudChip Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Medium">Simulation Ongoing</MudChip>
+}
+else
+{
+    <MudChip Variant="Variant.Outlined" Color="Color.Success" Size="Size.Medium">@Time.ToLocalTime(Database.LastSimulation.Value)</MudChip>
+}
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [Inject] public required TimeZoneService Time { get; set; }
+
+    private IDisposable? _subscription;
+    
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _subscription = Database.SimulationOngoing.Subscribe(_ => InvokeAsync(StateHasChanged));
+        }
+        
+        base.OnAfterRender(firstRender);
+    }
+
+    public void Dispose()
+    {
+        _subscription?.Dispose();
+    }
+}
