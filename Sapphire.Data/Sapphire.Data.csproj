@@ -7,10 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="ValueObjects\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Moonstone.Database\Moonstone.Database.csproj" />
     </ItemGroup>
 

@@ -6,7 +6,8 @@ public class ProjectAggregate : Document
 {
     public required string Name { get; set; }
     public string Description { get; set; } = string.Empty;
-    
+
+    public uint Priority { get; set; } = 0;
     public DateOnly Start { get; set; }
     public DateOnly? Deadline { get; set; }
 

@@ -1,6 +1,8 @@
-﻿namespace Sapphire.Data.Entities.WorkingHours;
+﻿using Moonstone.Database;
 
-public class WeeklyWorkDay
+namespace Sapphire.Data.Entities.WorkingHours;
+
+public class WeeklyWorkDay : Document
 {
     public required Guid WorkerId { get; set; }
     

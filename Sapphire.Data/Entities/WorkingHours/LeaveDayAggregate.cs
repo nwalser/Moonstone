@@ -1,6 +1,8 @@
-﻿namespace Sapphire.Data.Entities.WorkingHours;
+﻿using Moonstone.Database;
 
-public class LeaveDayAggregate
+namespace Sapphire.Data.Entities.WorkingHours;
+
+public class LeaveDayAggregate : Document
 {
     public Guid WorkerId { get; set; }
     public DateOnly Date { get; set; }
