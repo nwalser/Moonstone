@@ -11,5 +11,7 @@ public static class CalendarSimulation
 
         Thread.Sleep(2000);
         //throw new NotImplementedException();
+        
+        // todo: implement time summation of tasks
     }
 }
