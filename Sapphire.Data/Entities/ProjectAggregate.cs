@@ -9,4 +9,6 @@ public class ProjectAggregate : Document
     
     public DateOnly Start { get; set; }
     public DateOnly? Deadline { get; set; }
+
+    public string[] PossibleTags { get; set; } = [];
 }

@@ -1,23 +1,32 @@
-﻿<MudItem xs="12">
-    <MudCard Elevation="0" Outlined="true" Class="my-1">
+﻿@using IDialogService = MudBlazor.IDialogService
+<MudItem xs="12">
+    <MudCard Elevation="0" Outlined="true" Class="my-1" Style="@(_editing ? "border-color: var(--mud-palette-text-primary)" : "")">
         <MudStack Row="false" Spacing="0">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
                     <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
-                        <MudIcon Icon="@Icons.Material.Filled.Sort" Size="Size.Small"/>
+                        <MudIcon Icon="@Icons.Material.Filled.DragIndicator" Size="Size.Small"/>
                     </FluentDropZone>
 
                     <div class="sortable-grab h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
-                        <MudIcon Icon="@Icons.Material.Filled.DoubleArrow" Size="Size.Small"/>
+                        <MudIcon Icon="@Icons.Material.Filled.List" Size="Size.Small"/>
                     </div>
                 </MudStack>
 
-                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="flex-grow h-full" @onclick="() => _editing = !_editing">
-                    <p class="w-96" style="@($"padding-left: {Depth * 12}px")">@Todo.Name</p>
-                    <p class="w-12">@Todo.CurrentEstimatedEffort.TotalHours / @Todo.InitialEstimatedEffort.TotalHours</p>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="flex-grow h-full" @onclick="() => _editing = !_editing" Justify="Justify.Center">
+                    <MudText Typo="Typo.body2" Class="w-80" Style="@($"padding-left: {Depth * 12}px")">@Todo.Name</MudText>
+                    <MudText Typo="Typo.body2" Class="w-60 text-right truncate">0h / @($"{Todo.CurrentEstimatedEffort.TotalHours:N1}h") / @($"{Todo.InitialEstimatedEffort.TotalHours:N1}h")</MudText>
+                    <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkerIdsText(Todo.PossibleWorkerIds)</MudText>
+                    <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@TagsMultiSelectText(Todo.Tags)</MudText>
+                    <MudCheckBox Value="Todo.Splittable" ReadOnly="true" Class="w-12"/>
+                    
+                    <MudSpacer />
                 </MudStack>
 
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
+                    <div class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]" @onclick="async () => await Delete()">
+                        <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Warning"/>
+                    </div>
                     <div class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]" @onclick="AddSubTodo">
                         <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small"/>
                     </div>
@@ -26,21 +35,52 @@
 
             @if (_editing)
             {
-            <MudGrid Spacing="0">
-                <MudItem sm="4">
-                    <MudGrid Spacing="1" Class="p-2">
-                        <MudItem sm="12">
-                            <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" />
-                        </MudItem>
-                        <MudItem sm="6">
-                            <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" />
-                        </MudItem>
-                        <MudItem sm="6">
-                            <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" />
-                        </MudItem>
-                    </MudGrid>
-                </MudItem>
-            </MudGrid>
+                <MudGrid Spacing="0">
+                    <MudItem xs="4">
+                        <MudGrid Spacing="1" Class="p-2">
+                            <MudItem xs="12">
+                                <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" AutoFocus="true" />
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudNumericField T="double" Format="N1" Value="@Todo.CurrentEstimatedEffort.TotalHours" AdornmentText="h" Adornment="Adornment.End" ValueChanged="UpdateCurrentEstimatedEffort" Label="Current Estimate" Immediate="false" />
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudNumericField T="double" Format="N1" Value="@Todo.InitialEstimatedEffort.TotalHours" AdornmentText="h" Adornment="Adornment.End" ValueChanged="UpdateInitialEstimatedEffort" Label="Initial Estimate" Immediate="false" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudSelect MultiSelection="true" T="Guid" AnchorOrigin="Origin.BottomCenter" Dense="true" MultiSelectionTextFunc="WorkerMultiSelectText" SelectedValues="Todo.PossibleWorkerIds" ShrinkLabel="true" SelectedValuesChanged="UpdatePossibleAssignees" Label="Possible Workers" Immediate="false">
+                                    @foreach (var worker in Database.Enumerate<WorkerAggregate>())
+                                    {
+                                        <MudSelectItem T="Guid" Value="@worker.Id">@worker.Name</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudSelect MultiSelection="true" T="string" AnchorOrigin="Origin.BottomCenter" Dense="true" MultiSelectionTextFunc="TagsMultiSelectText" SelectedValues="Todo.Tags" ShrinkLabel="true" SelectedValuesChanged="UpdateTags" Label="Tags" Immediate="false">
+                                    @foreach (var tag in Project.PossibleTags)
+                                    {
+                                        <MudSelectItem T="string" Value="@tag">@tag</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.body2">Splittable</MudText>
+                                    <MudSwitch T="bool" Value="Todo.Splittable" ValueChanged="UpdateSplittable" Size="Size.Medium" Class="!-mr-5"/>
+                                </MudStack>
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+                    <MudItem xs="8">
+                        
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudStack Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Row="true" Spacing="1" Class="p-2">
+                            <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Warning" OnClick="async () => await Delete()">Delete</MudButton>
+                            <MudButton Size="Size.Small" Variant="Variant.Outlined">Complete</MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
             }
         </MudStack>
     </MudCard>
@@ -48,17 +88,22 @@
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [Inject] public required IDialogService DialogService { get; set; }
+    
     [Parameter] public required TodoAggregate Todo { get; set; }
+    [Parameter] public required ProjectAggregate Project { get; set; }
     [Parameter] public required uint Depth { get; set; }
+    [Parameter] public required List<TodoAggregate> Todos { get; set; }
     [Parameter] public required List<TodoAggregate> ChildTodos { get; set; }
-
+    
+    
     private bool _editing = false;
     
     private void AddSubTodo()
     {
         var todo = new TodoAggregate
         {
-            Name = "New Todo 1",
+            Name = $"Task {Todos.Count}",
             ProjectId = Todo.ProjectId,
             ParentId = Todo.Id
         };
@@ -67,11 +112,75 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private void UpdateName(string? name)
+    private void UpdateName(string? value)
     {
-        if (name is null) return;
-
-        Todo.Name = name;
+        Todo.Name = value ?? "";
         Database.Update(Todo);
+    }
+    
+    private void UpdateSplittable(bool value)
+    {
+        Todo.Splittable = value;
+        Database.Update(Todo);
+    }
+    
+    private void UpdateCurrentEstimatedEffort(double value)
+    {
+        Todo.CurrentEstimatedEffort = TimeSpan.FromHours(value);
+        Database.Update(Todo);
+    }
+    
+    private void UpdateInitialEstimatedEffort(double value)
+    {
+        Todo.InitialEstimatedEffort = TimeSpan.FromHours(value);
+        Database.Update(Todo);
+    }
+
+    private void UpdatePossibleAssignees(IEnumerable<Guid> values)
+    {
+        Todo.PossibleWorkerIds = values.ToArray();
+        Database.Update(Todo);
+    }
+    
+    private void UpdateTags(IEnumerable<string> values)
+    {
+        Todo.Tags = values.ToList();
+        Database.Update(Todo);
+    }
+
+    private string WorkerMultiSelectText(List<string> args)
+    {
+        return WorkerIdsText(args.Select(Guid.Parse));
+    }
+    
+    private string TagsMultiSelectText(List<string> values)
+    {
+        return string.Join(", ", values);
+    }
+
+    private string WorkerIdsText(IEnumerable<Guid> values)
+    {
+        var names = values
+            .Select(guid => Database.Enumerate<WorkerAggregate>().FirstOrDefault(w => w.Id == guid))
+            .Select(w => w?.Name)
+            .ToArray();
+
+        return string.Join(", ", names);
+    }
+
+    private async Task Delete()
+    {
+        var allChildren = Todo.GetAllChildren(Database).ToList();
+        List<TodoAggregate> allTodosToDelete = [..allChildren, Todo];
+        
+        var delete = await DialogService.ShowMessageBox(
+            title: "Confirm Deletion", 
+            message: $"Are you sure you want to delete {allTodosToDelete.Count} tasks?", 
+            yesText: "Delete", 
+            cancelText:"Cancel") ?? false;
+
+        if (!delete) return;
+
+        Database.Remove(allTodosToDelete);
     }
 }

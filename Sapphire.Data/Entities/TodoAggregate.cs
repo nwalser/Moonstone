@@ -14,5 +14,29 @@ public class TodoAggregate : Document
     public TimeSpan InitialEstimatedEffort { get; set; } = TimeSpan.Zero;
     public TimeSpan CurrentEstimatedEffort { get; set; } = TimeSpan.Zero;
 
+    public Guid[] PossibleWorkerIds { get; set; } = [];
+    public List<string> Tags { get; set; } = [];
+    
+    
     public bool Splittable { get; set; } = false;
+
+
+
+    public List<TodoAggregate> GetChildren(ProjectDatabase database, TodoAggregate? todo = default)
+    {
+        return database.Enumerate<TodoAggregate>().Where(t => t.ParentId == (todo ?? this).Id).ToList();
+    }
+
+    public IEnumerable<TodoAggregate> GetAllChildren(ProjectDatabase database, TodoAggregate? todo = default)
+    {
+        var children = GetChildren(database, todo ?? this);
+        
+        foreach (var child in children)
+        {
+            yield return child;
+            
+            foreach (var grandChild in GetAllChildren(database, child))
+                yield return grandChild;
+        }
+    }
 }

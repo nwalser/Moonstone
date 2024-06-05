@@ -1,17 +1,20 @@
 ﻿@inherits DatabaseRefresh
 @page "/project/{ProjectId:guid}"
 
-<DefaultWindowLayout PageTitle="@($"{_project?.Name} - Todos")">
+<DefaultWindowLayout PageTitle="@($"{_project?.Name} - Todos")" ChildContentMaxWidth="MaxWidth.False">
     <RibbonRightContent>
         <MudButton OnClick="() => AddRootTodo()" Variant="Variant.Outlined" Size="Size.Small">Add Todo</MudButton>
     </RibbonRightContent>
 
     <ChildContent>
-        <MudGrid Spacing="1">
-            <FluentDragContainer TItem="TodoAggregate" OnDropEnd="OnDropEnd" Class="w-full">
-                <TodoGroup Depth="0" Todos="_todos" ProjectId="ProjectId" TodoId="null"/>
-            </FluentDragContainer>
-        </MudGrid>
+        @if (_project is not null)
+        {
+            <MudGrid Spacing="1">
+                <FluentDragContainer TItem="TodoAggregate" OnDropEnd="OnDropEnd" Class="w-full">
+                    <TodoGroup Depth="0" Todos="_todos" Project="_project" TodoId="null"/>
+                </FluentDragContainer>
+            </MudGrid>
+        }
     </ChildContent>
 </DefaultWindowLayout>
 

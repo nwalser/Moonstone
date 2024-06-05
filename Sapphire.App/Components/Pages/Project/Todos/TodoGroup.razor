@@ -1,11 +1,11 @@
 ﻿@if (_todo is not null)
 {
-    <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" @key="_todo.Id" />
+    <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" @key="_todo.Id" Todos="Todos" Project="Project" />
 }
 
 <FluentUnstyledSortableList Items="_childTodos" OnUpdate="OnUpdate" Handle="true">
     <ItemTemplate>
-        <TodoGroup TodoId="context.Id" Todos="Todos" Depth="Depth+1" ProjectId="ProjectId" @key="context.Id" />
+        <TodoGroup TodoId="context.Id" Todos="Todos" Depth="Depth+1" Project="Project" @key="context.Id" />
     </ItemTemplate>
 </FluentUnstyledSortableList>
 
@@ -14,7 +14,7 @@
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
     [Parameter] public required List<TodoAggregate> Todos { get; set; }
     [Parameter] public required Guid? TodoId { get; set; }
-    [Parameter] public required Guid ProjectId { get; set; }
+    [Parameter] public required ProjectAggregate Project { get; set; }
     [Parameter] public required uint Depth { get; set; }
 
     private TodoAggregate?  _todo;
@@ -33,7 +33,7 @@
         var todo = new TodoAggregate
         {
             Name = "New Todo 1",
-            ProjectId = ProjectId,
+            ProjectId = Project.Id,
             ParentId = TodoId
         };
 

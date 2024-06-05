@@ -20,7 +20,8 @@ public class ProjectDatabase : Database
         // create initial objects
         var project = new ProjectAggregate()
         {
-            Name = "Project Name"
+            Name = "Project Name",
+            PossibleTags = ["Backend", "Frontend", "Operations"]
         };
         Update(project);
         Update(new TodoAggregate()

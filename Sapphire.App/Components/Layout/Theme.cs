@@ -27,7 +27,7 @@ public class Theme
             ActionDefault = Black,
             LinesDefault = LinesLight,
             LinesInputs = LinesLight,
-            TableLines = LinesLight
+            TableLines = LinesLight,
         },
         PaletteDark = new PaletteDark
         {
@@ -70,6 +70,7 @@ public class Theme
             },
             Button = new Button
             {
+                TextTransform = "none",
                 FontWeight = 400
             }
         }

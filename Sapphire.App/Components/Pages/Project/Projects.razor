@@ -10,7 +10,7 @@
         <MudGrid Spacing="1">
             @foreach (var project in _projects)
             {
-            <MudItem sm="12">
+            <MudItem xs="12">
                 <MudPaper Outlined="true" Class="p-3">
                     <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
                         <MudStack Row="false" Spacing="1">
@@ -43,7 +43,8 @@
     {
         var project = new ProjectAggregate
         {
-            Name = "Project 1"
+            Name = "Project 1",
+            PossibleTags = ["Backend", "Frontend", "Operations"]
         };
 
         Database.Update(project);
