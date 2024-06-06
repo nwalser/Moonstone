@@ -19,6 +19,16 @@
                     <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@TagsMultiSelectText(Todo.Tags)</MudText>
                     <MudCheckBox Value="Todo.Splittable" ReadOnly="true" Class="w-12"/>
                     
+                    @if (Todo.State == TodoState.Completed)
+                    {
+                        <MudChip Size="Size.Small" Color="Color.Success" Variant="Variant.Outlined">Completed</MudChip>
+                    }
+                    
+                    @if (Todo.State == TodoState.Draft)
+                    {
+                        <MudChip Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">Draft</MudChip>
+                    }
+                    
                     <MudSpacer />
                 </MudStack>
 
