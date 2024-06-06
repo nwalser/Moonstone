@@ -59,7 +59,7 @@ public class ProjectDatabase : Database, IDisposable
 
     protected override void OnAfterOpening()
     {
-        _subscription = LastUpdate.Subscribe(async t => await RunSimulation(t));
+        //_subscription = LastUpdate.Subscribe(async t => await RunSimulation(t));
         
         base.OnAfterOpening();
     }

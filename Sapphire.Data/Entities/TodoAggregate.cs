@@ -1,5 +1,6 @@
 ﻿using Moonstone.Database;
 using Sapphire.Data.Entities.SchedulingLocks;
+using Sapphire.Data.Extensions;
 using Sapphire.Data.ValueObjects;
 
 namespace Sapphire.Data.Entities;
@@ -113,10 +114,44 @@ public class TodoAggregate : Document
         return db.PlannedTodos.SingleOrDefault(t => t.TodoId == Id);
     }
 
-    public ProjectAggregate GetProject(Database db)
+    public ProjectAggregate GetProject(ProjectDatabase db)
     {
         return db.Enumerate<ProjectAggregate>()
             .Single(p => p.Id == ProjectId);
+    }
+
+
+
+    public TimeSpan GetWorkedEffort(ProjectDatabase db)
+    {
+        var allocations = db.Enumerate<AllocationAggregate>()
+            .Where(a => a.TodoId == Id)
+            .Select(a => a.AllocatedTime);
+
+        return TimeSpanExtensions.Sum(allocations);
+    }
+    
+    public TimeSpan GetChildPlannedEffort(ProjectDatabase db)
+    {
+        var totalPlannedEfforts = GetChildTodos(db)
+            .Select(c => c.CurrentEstimatedEffort);
+
+        return TimeSpanExtensions.Sum(totalPlannedEfforts);
+    }
+    
+    public TimeSpan GetPlannedEffort(ProjectDatabase db)
+    {
+        var planned = db.PlannedAllocations
+            .Where(p => p.TodoId == Id)
+            .Select(p => p.PlannedTime);
+        
+        return TimeSpanExtensions.Sum(planned);
+    }
+    
+    public TimeSpan GetRemainingEffort(ProjectDatabase db)
+    {
+        // subtract child planned effort because the child tasks will book this plan
+        return CurrentEstimatedEffort - GetWorkedEffort(db) - GetPlannedEffort(db) - GetChildPlannedEffort(db);
     }
 }
 

@@ -28,7 +28,8 @@ public static class CalendarSimulation
             foreach (var worker in workers)
             {
                 var todosForWorker = possibleTodos
-                    .Where(p => p.PossibleWorkerIds.Contains(worker.Id));
+                    .Where(p => p.PossibleWorkerIds.Contains(worker.Id))
+                    .ToList();
 
                 foreach (var todoForWorker in todosForWorker)
                 {
