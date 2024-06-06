@@ -105,7 +105,7 @@ public class TodoAggregate : Document
     public TodoAggregate? GetParentTodo(ProjectDatabase db)
     {
         return db.Enumerate<TodoAggregate>()
-            .SingleOrDefault(t => t.ParentId == ParentId);
+            .SingleOrDefault(t => t.Id == ParentId);
     }
     
     public PlannedTodo? GetPlannedTodo(ProjectDatabase db)
