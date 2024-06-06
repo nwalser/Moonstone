@@ -8,8 +8,9 @@ namespace Sapphire.Data.Entities;
 public class WorkerAggregate : Document
 {
     public required string Name { get; set; }
+    public TimeSpan ConstantBaseLoad { get; set; } = TimeSpan.Zero;
 
-
+    
     public TimeSpan RegularHours(ProjectDatabase db, DateOnly date)
     {
         // OfficeDay
@@ -69,8 +70,14 @@ public class WorkerAggregate : Document
         return TimeSpanExtensions.Sum(plannedAllocations.Select(t => t.PlannedTime));
     }
 
+    public TimeSpan BaseLoad(ProjectDatabase db, DateOnly date)
+    {
+        return ConstantBaseLoad;
+    }
+    
+    
     public TimeSpan AvailableHours(ProjectDatabase db, DateOnly date)
     {
-        return RegularHours(db, date) - WorkedHours(db, date) - PlannedHours(db, date);
+        return RegularHours(db, date) - WorkedHours(db, date) - PlannedHours(db, date) - BaseLoad(db, date);
     }
 }

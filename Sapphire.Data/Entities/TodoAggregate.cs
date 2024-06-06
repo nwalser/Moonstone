@@ -30,7 +30,7 @@ public class TodoAggregate : Document
             .Where(t => t.ParentId == (todo ?? this).Id);
     }
 
-    public IEnumerable<TodoAggregate> GetAllChildTodos(ProjectDatabase db, TodoAggregate? todo = default)
+    public IEnumerable<TodoAggregate> GetDescendantTodos(ProjectDatabase db, TodoAggregate? todo = default)
     {
         var children = GetChildTodos(db, todo ?? this);
         
@@ -38,65 +38,71 @@ public class TodoAggregate : Document
         {
             yield return child;
             
-            foreach (var grandChild in GetAllChildTodos(db, child))
+            foreach (var grandChild in GetDescendantTodos(db, child))
                 yield return grandChild;
         }
     }
+
+
+    private IEnumerable<ILock> GetParentLocks(ProjectDatabase db, DateOnly date)
+    {
+        var parentTodo = GetParentTodo(db);
+
+        if (parentTodo is null)
+            yield break;
+            
+        var parentLocks = parentTodo.GetActiveLocks(db, date);
+
+        foreach (var parentLock in parentLocks)
+            yield return parentLock;
+    }
+
+    private IEnumerable<ILock> GetMinDateLocks(ProjectDatabase db, DateOnly date)
+    {
+        var activeMinDateLocks = db.Enumerate<MinDateLockAggregate>()
+            .Where(l => l.TodoId == Id)
+            .Where(m => m.MinDate > date);
+
+        foreach (var minDateLock in activeMinDateLocks)
+            yield return minDateLock;
+    }
     
+    private IEnumerable<ILock> GetDelayLocks(ProjectDatabase db, DateOnly date)
+    {
+        var delayLocks = db.Enumerate<DelayLockAggregate>()
+            .Where(l => l.TodoId == Id);
+
+        foreach (var delayLock in delayLocks)
+        {
+            var dependeeTodo = db.Enumerate<TodoAggregate>()
+                .Single(t => t.Id == delayLock.TodoLockerId);
+
+            if (dependeeTodo.State == TodoState.Completed)
+                continue;
+
+            var plannedTodo = dependeeTodo.GetPlannedTodo(db);
+
+            if (plannedTodo is not null && plannedTodo.PlannedCompletion <= date)
+                continue;
+
+            yield return delayLock;
+        }
+    }
     
     public IEnumerable<ILock> GetActiveLocks(ProjectDatabase db, DateOnly date)
     {
-        // ParentLock
-        {
-            var parentTodo = GetParentTodo(db);
-
-            if (parentTodo is null)
-                yield break;
+        foreach (var @lock in GetParentLocks(db, date))
+            yield return @lock;
         
-            if (parentTodo.State == TodoState.Completed)
-                yield break;
+        foreach (var @lock in GetMinDateLocks(db, date))
+            yield return @lock;
 
-            var plannedTodo = parentTodo.GetPlannedTodo(db);
-        
-            if(plannedTodo is not null && plannedTodo.PlannedEnd <= date)
-                yield break;
-
-            yield return new ParentLock(Id, parentTodo.Id);
-        }
-        
-        // MinDateLocks
-        {
-            var activeMinDateLocks = db.Enumerate<MinDateLockAggregate>()
-                .Where(l => l.TodoId == Id)
-                .Where(m => m.MinDate > date);
-
-            foreach (var minDateLock in activeMinDateLocks)
-                yield return minDateLock;
-        }
-
-        // DelayLock
-        {
-            var delayLocks = db.Enumerate<DelayLockAggregate>()
-                .Where(l => l.TodoId == Id);
-
-            foreach (var delayLock in delayLocks)
-            {
-                var dependeeTodo = db.Enumerate<TodoAggregate>()
-                    .Single(t => t.Id == delayLock.TodoLockerId);
-
-                if (dependeeTodo.State == TodoState.Completed)
-                    continue;
-
-                var plannedTodo = dependeeTodo.GetPlannedTodo(db);
-
-                if (plannedTodo is not null && plannedTodo.PlannedEnd <= date)
-                    continue;
-
-                yield return delayLock;
-            }
-        }
+        foreach (var @lock in GetDelayLocks(db, date))
+            yield return @lock;
     }
 
+    
+    
     public TodoAggregate? GetParentTodo(ProjectDatabase db)
     {
         return db.Enumerate<TodoAggregate>()

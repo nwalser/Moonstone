@@ -5,5 +5,5 @@ public class PlannedTodo
     public Guid TodoId { get; init; }
     
     public DateOnly? PlannedStart { get; init; }
-    public DateOnly? PlannedEnd { get; init; }
+    public DateOnly? PlannedCompletion { get; init; }
 }
