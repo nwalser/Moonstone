@@ -11,15 +11,46 @@ public static class CalendarSimulation
             .Select((d, index) => (Day: start.AddDays(d), Index: index))
             .ToList();
 
+        var prioritizedTodos = GetPrioritizedTodos(db)
+            .OrderByDescending(t => t.Key)
+            .Select(t => t.Value)
+            .ToList();
+
+        var workers = db.Enumerate<WorkerAggregate>()
+            .ToList();
         
+        foreach (var (day, i) in days)
+        {
+            var possibleTodos = prioritizedTodos
+                .Where(t => !t.GetActiveLocks(db, day).Any())
+                .ToList();
+
+            foreach (var worker in workers)
+            {
+                var todosForWorker = possibleTodos
+                    .Where(p => p.PossibleWorkerIds.Contains(worker.Id));
+
+                foreach (var todoForWorker in todosForWorker)
+                {
+                    var availableHours = worker.PlannedHours(db, day);
+
+                    if (availableHours <= TimeSpan.Zero)
+                        break;
+
+                    // todo: do not pickup work if other is assigned to task and todo is not splittable
+                    
+                    
+                    
+                    
+                }
+            }
+        }
         
         
         
         
         Thread.Sleep(2000);
         //throw new NotImplementedException();
-        
-        // todo: implement time summation of tasks
     }
 
 
@@ -38,7 +69,6 @@ public static class CalendarSimulation
             AssignPrioritiesToChildren(db, rootTodos, ref currentPriority, ref prioritized);
         }
 
-        Console.WriteLine(prioritized.Count);
         return prioritized;
     }
 
@@ -46,10 +76,10 @@ public static class CalendarSimulation
     {
         foreach (var todo in todos.OrderByDescending(t => t.Order))
         {
+            prioritized.Add(currentPriority++, todo);
+
             var childTodos = todo.GetChildTodos(db);
             AssignPrioritiesToChildren(db, childTodos, ref currentPriority, ref prioritized);
-            
-            prioritized.Add(currentPriority++, todo);
         }
     }
 }

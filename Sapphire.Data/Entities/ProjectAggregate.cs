@@ -17,6 +17,7 @@ public class ProjectAggregate : Document
     public IEnumerable<TodoAggregate> GetRootTodos(ProjectDatabase db)
     {
         return db.Enumerate<TodoAggregate>()
+            .Where(t => t.ProjectId == Id)
             .Where(t => t.ParentId is null);
     }
 }
