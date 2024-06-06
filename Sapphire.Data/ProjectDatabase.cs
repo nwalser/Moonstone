@@ -18,8 +18,8 @@ public class ProjectDatabase : Database, IDisposable
     private IDisposable? _subscription;
     
     
-    public required List<PlannedTodo> PlannedTodos { get; set; }
-    public required List<PlannedAllocation> PlannedAllocations { get; set; }
+    public List<PlannedTodo> PlannedTodos { get; set; } = [];
+    public List<PlannedAllocation> PlannedAllocations { get; set; } = [];
     
     
     protected override Dictionary<int, Type> TypeMap { get; } = new()
