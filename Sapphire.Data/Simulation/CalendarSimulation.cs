@@ -1,4 +1,6 @@
 ﻿using Sapphire.Data.Entities;
+using Sapphire.Data.Extensions;
+using Sapphire.Data.ValueObjects;
 
 namespace Sapphire.Data.Simulation;
 
@@ -6,6 +8,9 @@ public static class CalendarSimulation
 {
     public static void RunSimulation(ProjectDatabase db, DateOnly start, DateOnly stop, Action<double>? progressCallback = default)
     {
+        db.PlannedTodos.Clear();
+        db.PlannedAllocations.Clear();
+        
         var days = Enumerable
             .Range(0, stop.DayNumber - start.DayNumber + 1)
             .Select((d, index) => (Day: start.AddDays(d), Index: index))
@@ -39,19 +44,27 @@ public static class CalendarSimulation
                         break;
 
                     // todo: do not pickup work if other is assigned to task and todo is not splittable
+
+                    var remainingEffort = todoForWorker.GetRemainingEffort(db);
                     
+                    // todo: project allocation
                     
+                    var allocatableTime = TimeSpanExtensions.Min([availableHours, remainingEffort]);
+                    if (allocatableTime <= TimeSpan.Zero)
+                        continue;
+
+                    db.PlannedAllocations.Add(new PlannedAllocation()
+                    {
+                        Date = day,
+                        PlannedTime = allocatableTime,
+                        TodoId = todoForWorker.Id,
+                        WorkerId = worker.Id
+                    });
                     
-                    
+                    // todo: implement update of tasks if completed
                 }
             }
         }
-        
-        
-        
-        
-        Thread.Sleep(2000);
-        //throw new NotImplementedException();
     }
 
 
