@@ -1,4 +1,5 @@
-﻿<MudItem xs="12">
+﻿@using Sapphire.Data.Simulation
+<MudItem xs="12">
     <MudCard Elevation="0" Outlined="true" Class="my-1" Style="@(_editing ? "border-color: var(--mud-palette-text-primary)" : "")">
         <MudStack Row="false" Spacing="0">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8">
@@ -18,18 +19,21 @@
                     <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkerIdsText(Todo.PossibleWorkerIds)</MudText>
                     <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@TagsMultiSelectText(Todo.Tags)</MudText>
                     <MudCheckBox Value="Todo.Splittable" ReadOnly="true" Class="w-12"/>
-                    
+
+                    <MudSpacer />
+
                     @if (Todo.State == TodoState.Completed)
                     {
                         <MudChip Size="Size.Small" Color="Color.Success" Variant="Variant.Outlined">Completed</MudChip>
                     }
-                    
+
                     @if (Todo.State == TodoState.Draft)
                     {
                         <MudChip Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">Draft</MudChip>
                     }
-                    
-                    <MudSpacer />
+
+
+                    <MudChip>Priority @CalendarSimulation.GetPrioritizedTodos(Database).Where(p => p.Value.Id == Todo.Id).Count()</MudChip>
                 </MudStack>
 
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">

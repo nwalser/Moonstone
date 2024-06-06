@@ -7,6 +7,7 @@ using Sapphire.Data;
 using App = Sapphire.App.Components.App;
 
 var builder = WebApplication.CreateBuilder(args);
+var webRuntime = Convert.ToBoolean(Environment.GetEnvironmentVariable("WEB"));
 
 builder.WebHost.UseElectron(args);
 builder.Services.AddElectron();
@@ -17,9 +18,17 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
 
-var userData = await Electron.App.GetPathAsync(PathName.UserData);
-var recentDatabaseStoragePath = Path.Join(userData, "recent_database_storage_path.json");
-builder.Services.AddSingleton(new DatabaseService<ProjectDatabase>(recentDatabaseStoragePath));
+if (!webRuntime)
+{
+    var userData = await Electron.App.GetPathAsync(PathName.UserData);
+    var recentDatabaseStoragePath = Path.Join(userData, "recent_database_storage_path.json");
+    builder.Services.AddSingleton(new DatabaseService<ProjectDatabase>(recentDatabaseStoragePath));
+}
+else
+{
+    builder.Services.AddSingleton(new DatabaseService<ProjectDatabase>("C:\\Users\\Nathaniel Walser\\Desktop\\recent.json"));
+}
+
 builder.Services.AddSingleton(new TimeZoneService());
 
 var app = builder.Build();
@@ -40,15 +49,22 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-await app.StartAsync();
-
-var options = new BrowserWindowOptions()
+if (!webRuntime)
 {
-    MinHeight = 800,
-    MinWidth = 1400,
-    Frame = false
-};
-var window = await Electron.WindowManager.CreateWindowAsync(options);
-await window.WebContents.Session.ClearCacheAsync();
+    await app.StartAsync();
 
-app.WaitForShutdown();
+    var options = new BrowserWindowOptions()
+    {
+        MinHeight = 800,
+        MinWidth = 1400,
+        Frame = false
+    };
+    var window = await Electron.WindowManager.CreateWindowAsync(options);
+    await window.WebContents.Session.ClearCacheAsync();
+
+    app.WaitForShutdown();
+}
+else
+{
+    app.Run();
+}

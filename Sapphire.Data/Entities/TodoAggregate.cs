@@ -24,7 +24,7 @@ public class TodoAggregate : Document
     public bool Splittable { get; set; } = false;
 
 
-    private IEnumerable<TodoAggregate> GetChildTodos(ProjectDatabase db, TodoAggregate? todo = default)
+    public IEnumerable<TodoAggregate> GetChildTodos(ProjectDatabase db, TodoAggregate? todo = default)
     {
         return db.Enumerate<TodoAggregate>()
             .Where(t => t.ParentId == (todo ?? this).Id);
@@ -100,7 +100,6 @@ public class TodoAggregate : Document
         foreach (var @lock in GetDelayLocks(db, date))
             yield return @lock;
     }
-
     
     
     public TodoAggregate? GetParentTodo(ProjectDatabase db)
@@ -112,7 +111,13 @@ public class TodoAggregate : Document
     public PlannedTodo? GetPlannedTodo(ProjectDatabase db)
     {
         return db.PlannedTodos.SingleOrDefault(t => t.TodoId == Id);
-    } 
+    }
+
+    public ProjectAggregate GetProject(Database db)
+    {
+        return db.Enumerate<ProjectAggregate>()
+            .Single(p => p.Id == ProjectId);
+    }
 }
 
 public enum TodoState

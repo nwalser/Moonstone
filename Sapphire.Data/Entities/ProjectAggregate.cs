@@ -12,4 +12,11 @@ public class ProjectAggregate : Document
     public DateOnly? Deadline { get; set; }
 
     public string[] PossibleTags { get; set; } = [];
+
+
+    public IEnumerable<TodoAggregate> GetRootTodos(ProjectDatabase db)
+    {
+        return db.Enumerate<TodoAggregate>()
+            .Where(t => t.ParentId is null);
+    }
 }
