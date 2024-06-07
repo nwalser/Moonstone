@@ -39,8 +39,8 @@ public class WorkerAggregate : Document
             var weeklyWorkDays = db.Enumerate<WeeklyWorkDay>()
                 .Where(w => w.WorkerId == Id)
                 .Where(w => w.DayOfWeek == date.DayOfWeek)
-                .Where(w => w.ActiveFrom >= date)
-                .Where(w => w.ActiveTo <= date)
+                .Where(w => w.ActiveFrom <= date)
+                .Where(w => w.ActiveTo >= date)
                 .ToList();
             
             if(weeklyWorkDays.Any())

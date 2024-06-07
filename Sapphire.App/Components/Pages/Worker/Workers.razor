@@ -1,4 +1,5 @@
-﻿@inherits DatabaseRefresh
+﻿@using Sapphire.Data.Entities.WorkingHours
+@inherits DatabaseRefresh
 @page "/worker"
 
 <DefaultWindowLayout PageTitle="Workers">
@@ -43,9 +44,20 @@
     {
         var worker = new WorkerAggregate()
         {
-            Name = $"Worker {_workers.Count}"
+            Name = $"Worker {_workers.Count}",
+            ConstantBaseLoad = TimeSpan.FromHours(0.5)
+        };
+
+        var weeklyWorkDay = new WeeklyWorkDay()
+        {
+            ActiveFrom = DateOnly.MinValue,
+            ActiveTo = DateOnly.MaxValue,
+            WorkerId = worker.Id,
+            WorkingHours = TimeSpan.FromHours(8.5),
+            DayOfWeek = DayOfWeek.Monday
         };
 
         Database.Update(worker);
+        Database.Update(weeklyWorkDay);
     }
 }

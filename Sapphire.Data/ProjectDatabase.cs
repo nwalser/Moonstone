@@ -74,8 +74,11 @@ public class ProjectDatabase : Database, IDisposable
             {
                 SimulationOngoing.OnNext(true);
 
+                var start = DateOnly.FromDateTime(DateTime.UtcNow);
+                var end = start.AddDays(2 * 365);
+                
                 // simulate
-                CalendarSimulation.RunSimulation(this, DateOnly.MaxValue, DateOnly.MaxValue);
+                CalendarSimulation.RunSimulation(this, start, end);
 
                 LastSimulation.OnNext(change);
                 SimulationOngoing.OnNext(false);

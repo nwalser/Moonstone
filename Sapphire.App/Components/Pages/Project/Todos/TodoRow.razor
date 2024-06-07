@@ -82,6 +82,11 @@
                         </MudGrid>
                     </MudItem>
                     <MudItem xs="8">
+                        @foreach (var allocation in Database.PlannedAllocations.Where(t => t.TodoId == Todo.Id))
+                        {
+                            <MudText>@allocation.Date - @allocation.WorkerId - @allocation.PlannedTime</MudText>
+                        }
+                        
                         
                     </MudItem>
                     <MudItem xs="12">
