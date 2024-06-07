@@ -6,7 +6,7 @@
 }
 else
 {
-    <MudChip Variant="Variant.Outlined" Color="Color.Success" Size="Size.Medium">@Time.ToLocalTime(Database.LastSimulation.Value)</MudChip>
+    <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Start" Class="no-drag" OnClick="() => Database.RunSimulation(DateTime.UtcNow)">Run Simulation</MudButton>
 }
 
 @code {

@@ -64,7 +64,7 @@ public class ProjectDatabase : Database, IDisposable
         base.OnAfterOpening();
     }
 
-    private async Task RunSimulation(DateTime change)
+    public async Task RunSimulation(DateTime change)
     {
         await Task.Run(() =>
         {
