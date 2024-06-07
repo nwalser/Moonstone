@@ -4,10 +4,14 @@
 @page "/worker/{WorkerId:guid}/calendar/{Year:int}"
 
 <DefaultWindowLayout PageTitle="@($"{_worker?.Name} - Calendar")">
+    <MenuContent>
+        <MudIconButton Href="@($"/worker/{WorkerId}/calendar")" Size="Size.Small" Icon="@Icons.Material.Outlined.CalendarMonth" />
+        <MudIconButton Href="@($"/worker/{WorkerId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" />
+    </MenuContent>
     <RibbonCenterContent>
-        <MudIconButton Href="@($"/worker/{WorkerId}/calendar/{Year-1}")" Size="Size.Small" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.KeyboardArrowLeft" />
+        <MudIconButton Href="@($"/worker/{WorkerId}/calendar/{Year - 1}")" Size="Size.Small" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.KeyboardArrowLeft"/>
         <MudText Typo="Typo.h2">@Year</MudText>
-        <MudIconButton Href="@($"/worker/{WorkerId}/calendar/{Year+1}")" Size="Size.Small" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.KeyboardArrowRight" />
+        <MudIconButton Href="@($"/worker/{WorkerId}/calendar/{Year + 1}")" Size="Size.Small" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.KeyboardArrowRight"/>
     </RibbonCenterContent>
 
     <ChildContent>
@@ -17,13 +21,13 @@
                 <MudItem sm="12">
                     <MudGrid>
                         <MudItem sm="12">
-                            <WeeklyWorkdaysView Worker="_worker" Year="Year.Value" />
+                            <WeeklyWorkdaysView Worker="_worker" Year="Year.Value"/>
                         </MudItem>
                         <MudItem sm="12">
-                            <LeaveDaysView Worker="_worker" Year="Year.Value" />
+                            <LeaveDaysView Worker="_worker" Year="Year.Value"/>
                         </MudItem>
                         <MudItem sm="12">
-                            <OfficeDaysView Worker="_worker" Year="Year.Value" />
+                            <OfficeDaysView Worker="_worker" Year="Year.Value"/>
                         </MudItem>
                     </MudGrid>
                 </MudItem>

@@ -29,9 +29,12 @@
     }
 
     <div class="flex flex-row flex-grow overflow-hidden">
-        <div class="w-20">
-            Hello
-        </div>
+        @if (MenuContent is not null)
+        {
+            <div class="w-10 flex flex-col overflow-hidden p-2 h-full" style="border-right: 1px var(--mud-palette-lines-default) solid">
+                @MenuContent
+            </div>
+        }
         <main class="flex-grow overflow-x-hidden overflow-y-scroll">
             @ChildContent
         </main>
@@ -49,6 +52,8 @@
     [Parameter] public string? PageTitle { get; set; }
     [Parameter] public RenderFragment? RibbonCenterContent { get; set; }
     [Parameter] public RenderFragment? RibbonRightContent { get; set; }
+    
+    [Parameter] public RenderFragment? MenuContent { get; set; }
     
     [Parameter] public RenderFragment? ChildContent { get; set; }
 }

@@ -2,15 +2,19 @@
 @page "/worker/{WorkerId:guid}/settings"
 
 <DefaultWindowLayout PageTitle="@($"{_worker?.Name} - Settings")">
+    <MenuContent>
+        <MudIconButton Href="@($"/worker/{WorkerId}/calendar")" Size="Size.Small" Icon="@Icons.Material.Outlined.CalendarMonth" />
+        <MudIconButton Href="@($"/worker/{WorkerId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" />
+    </MenuContent>
     <ChildContent>
         @if (_worker is not null)
         {
             <MudGrid>
                 <MudItem sm="12">
-                    <WorkerGeneralSettings Worker="_worker" />
+                    <WorkerGeneralSettings Worker="_worker"/>
                 </MudItem>
                 <MudItem sm="12">
-                    <WorkerActions Worker="_worker" />
+                    <WorkerActions Worker="_worker"/>
                 </MudItem>
             </MudGrid>
         }
