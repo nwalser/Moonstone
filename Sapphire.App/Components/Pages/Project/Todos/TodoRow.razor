@@ -63,10 +63,10 @@
                                 <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" AutoFocus="true" />
                             </MudItem>
                             <MudItem xs="6">
-                                <MudNumericField T="double" Format="N1" Value="@Todo.CurrentEstimatedEffort.TotalHours" AdornmentText="h" Adornment="Adornment.End" ValueChanged="UpdateCurrentEstimatedEffort" Label="Current Estimate" Immediate="false" />
+                                <MudNumericField T="double" Format="N1" Value="@Todo.CurrentEstimatedEffort.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateCurrentEstimatedEffort" Label="Current Estimate" Immediate="false" />
                             </MudItem>
                             <MudItem xs="6">
-                                <MudNumericField T="double?" Format="N1" Value="@Todo.InitialEstimatedEffort?.TotalHours" AdornmentText="h" Adornment="Adornment.End" ValueChanged="UpdateInitialEstimatedEffort" Label="Initial Estimate" Immediate="false" />
+                                <MudNumericField T="double?" Format="N1" Value="@Todo.InitialEstimatedEffort?.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateInitialEstimatedEffort" Label="Initial Estimate" Immediate="false" />
                             </MudItem>
                             <MudItem xs="12">
                                 <MudSelect MultiSelection="true" T="Guid" AnchorOrigin="Origin.BottomCenter" Dense="true" MultiSelectionTextFunc="WorkerMultiSelectText" SelectedValues="Todo.PossibleWorkerIds" ShrinkLabel="true" SelectedValuesChanged="UpdatePossibleAssignees" Label="Possible Workers" Immediate="false">
