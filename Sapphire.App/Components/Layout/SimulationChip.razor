@@ -1,13 +1,20 @@
 ﻿@implements IDisposable
 
-@if (Database.SimulationOngoing.Value)
-{
-    <MudChip Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Medium">Simulation Ongoing</MudChip>
-}
-else
-{
-    <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Start" Class="no-drag" OnClick="() => Database.RunSimulation(DateTime.UtcNow)">Run Simulation</MudButton>
-}
+<MudButton Size="Size.Small"
+           Variant="Variant.Outlined"
+           StartIcon="@Icons.Material.Outlined.Start" Class="no-drag mx-1"
+           OnClick="() => Database.RunSimulation(DateTime.UtcNow)"
+           Disabled="@Database.SimulationOngoing.Value"
+           Color="@(Database.SimulationOngoing.Value ? Color.Warning : Color.Default)">
+    @if (Database.SimulationOngoing.Value)
+    {
+        @($"Simulating ({Database.SimulationProgress.Value:P0})")
+    }
+    else
+    { 
+        @("Run Simulation")
+    }
+</MudButton>
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
@@ -20,6 +27,7 @@ else
         if (firstRender)
         {
             _subscription = Database.SimulationOngoing.Subscribe(_ => InvokeAsync(StateHasChanged));
+            _subscription = Database.SimulationProgress.Subscribe(_ => InvokeAsync(StateHasChanged));
         }
         
         base.OnAfterRender(firstRender);

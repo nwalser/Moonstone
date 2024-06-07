@@ -64,6 +64,8 @@ public static class CalendarSimulation
                     // todo: implement update of tasks if completed
                 }
             }
+            
+            progressCallback?.Invoke((double)i / days.Count);
         }
     }
 

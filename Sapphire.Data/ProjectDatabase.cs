@@ -9,14 +9,9 @@ namespace Sapphire.Data;
 
 public class ProjectDatabase : Database, IDisposable
 {
-    private readonly BehaviorSubject<DateTime> _lastSimulation = new(DateTime.MinValue);
-    public BehaviorSubject<DateTime> LastSimulation => _lastSimulation;
-    
-    private readonly BehaviorSubject<bool> _simulationOngoing = new(false);
-    public BehaviorSubject<bool> SimulationOngoing => _simulationOngoing;
-
-    private IDisposable? _subscription;
-    
+    public BehaviorSubject<DateTime> LastSimulation { get; private set; } = new(DateTime.MinValue);
+    public BehaviorSubject<bool> SimulationOngoing { get; private set; } = new(false);
+    public BehaviorSubject<double> SimulationProgress { get; private set; } = new(0);
     
     public List<PlannedTodo> PlannedTodos { get; set; } = [];
     public List<PlannedAllocation> PlannedAllocations { get; set; } = [];
@@ -57,13 +52,6 @@ public class ProjectDatabase : Database, IDisposable
         });
     }
 
-    protected override void OnAfterOpening()
-    {
-        //_subscription = LastUpdate.Subscribe(async t => await RunSimulation(t));
-        
-        base.OnAfterOpening();
-    }
-
     public async Task RunSimulation(DateTime change)
     {
         await Task.Run(() =>
@@ -78,7 +66,7 @@ public class ProjectDatabase : Database, IDisposable
                 var end = start.AddDays(2 * 365);
                 
                 // simulate
-                CalendarSimulation.RunSimulation(this, start, end);
+                CalendarSimulation.RunSimulation(this, start, end, progress => SimulationProgress.OnNext(progress));
 
                 LastSimulation.OnNext(change);
                 SimulationOngoing.OnNext(false);
@@ -92,9 +80,9 @@ public class ProjectDatabase : Database, IDisposable
 
     public new void Dispose()
     {
-        _lastSimulation.Dispose();
-        _simulationOngoing.Dispose();
-        _subscription?.Dispose();
+        LastSimulation.Dispose();
+        SimulationOngoing.Dispose();
+        SimulationProgress.Dispose();
         
         base.Dispose();
     }
