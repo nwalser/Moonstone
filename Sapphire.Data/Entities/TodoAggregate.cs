@@ -16,8 +16,8 @@ public class TodoAggregate : Document
     
     public TodoState State { get; set; } = TodoState.Active;
 
-    public TimeSpan InitialEstimatedEffort { get; set; } = TimeSpan.Zero;
     public TimeSpan CurrentEstimatedEffort { get; set; } = TimeSpan.Zero;
+    public TimeSpan? InitialEstimatedEffort { get; set; } = TimeSpan.Zero;
 
     public Guid[] PossibleWorkerIds { get; set; } = [];
     public List<string> Tags { get; set; } = [];
@@ -25,6 +25,11 @@ public class TodoAggregate : Document
     public bool Splittable { get; set; } = false;
 
 
+    public bool HasChildren(ProjectDatabase db)
+    {
+        return GetChildTodos(db).Any();
+    }
+    
     public IEnumerable<TodoAggregate> GetChildTodos(ProjectDatabase db, TodoAggregate? todo = default)
     {
         return db.Enumerate<TodoAggregate>()
@@ -120,8 +125,6 @@ public class TodoAggregate : Document
             .Single(p => p.Id == ProjectId);
     }
     
-
-    
     
     private TimeSpan GetChildrenEstimatedEffort(ProjectDatabase db)
     {
@@ -139,52 +142,19 @@ public class TodoAggregate : Document
         return TimeSpanExtensions.Sum(childrenWorkedEffort);
     }
     
+    
     public TimeSpan GetEstimatedEffort(ProjectDatabase db)
     {
         return GetGroupEstimatedEffort(db) - GetChildrenEstimatedEffort(db);
     }
 
-    public TimeSpan GetWorkedEffort2(ProjectDatabase db)
+    public TimeSpan GetWorkedEffort(ProjectDatabase db)
     {
         var workedEfforts = db.Enumerate<AllocationAggregate>()
             .Where(a => a.TodoId == Id)
             .Select(a => a.AllocatedTime);
 
         return TimeSpanExtensions.Sum(workedEfforts);
-    }
-    
-    public TimeSpan GetGroupEstimatedEffort(ProjectDatabase db)
-    {
-        return CurrentEstimatedEffort;
-    }
-
-    public TimeSpan GetGroupWorkedEffort(ProjectDatabase db)
-    {
-        return GetChildrenWorkedEffort(db) + GetWorkedEffort2(db);
-    }
-
-
-    public bool HasChildren(ProjectDatabase db)
-    {
-        return GetChildTodos(db).Any();
-    }
-    
-    
-    public TimeSpan GetWorkedEffort(ProjectDatabase db)
-    {
-        var allocations = db.Enumerate<AllocationAggregate>()
-            .Where(a => a.TodoId == Id)
-            .Select(a => a.AllocatedTime);
-
-        return TimeSpanExtensions.Sum(allocations);
-    }
-    
-    public TimeSpan GetChildPlannedEffort(ProjectDatabase db)
-    {
-        var totalPlannedEfforts = GetChildTodos(db)
-            .Select(c => c.CurrentEstimatedEffort);
-
-        return TimeSpanExtensions.Sum(totalPlannedEfforts);
     }
     
     public TimeSpan GetPlannedEffort(ProjectDatabase db)
@@ -195,11 +165,21 @@ public class TodoAggregate : Document
         
         return TimeSpanExtensions.Sum(planned);
     }
-    
-    public TimeSpan GetRemainingEffort(ProjectDatabase db)
+
+    public TimeSpan GetRemainingUnplannedEffort(ProjectDatabase db)
     {
-        // subtract child planned effort because the child tasks will book this plan
-        return CurrentEstimatedEffort - GetWorkedEffort(db) - GetPlannedEffort(db) - GetChildPlannedEffort(db);
+        return GetEstimatedEffort(db) - GetWorkedEffort(db) - GetPlannedEffort(db);
+    }
+    
+    
+    public TimeSpan GetGroupEstimatedEffort(ProjectDatabase db)
+    {
+        return CurrentEstimatedEffort;
+    }
+
+    public TimeSpan GetGroupWorkedEffort(ProjectDatabase db)
+    {
+        return GetChildrenWorkedEffort(db) + GetWorkedEffort(db);
     }
 }
 

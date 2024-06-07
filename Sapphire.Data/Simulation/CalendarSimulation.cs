@@ -45,7 +45,7 @@ public static class CalendarSimulation
 
                     // todo: do not pickup work if other is assigned to task and todo is not splittable
 
-                    var remainingEffort = todoForWorker.GetRemainingEffort(db);
+                    var remainingEffort = todoForWorker.GetRemainingUnplannedEffort(db);
                     
                     // todo: project allocation
                     

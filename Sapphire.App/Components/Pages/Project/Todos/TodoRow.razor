@@ -24,7 +24,7 @@
                         }
                     </MudText>
                     <MudText Typo="Typo.body2" Class="w-60 text-right truncate">
-                        @($"{Todo.GetWorkedEffort2(Database).TotalHours:N1}h / {Todo.GetEstimatedEffort(Database).TotalHours:N1}h")
+                        @($"{Todo.GetWorkedEffort(Database).TotalHours:N1}h / {Todo.GetEstimatedEffort(Database).TotalHours:N1}h")
                     </MudText>
                     
                     <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkerIdsText(Todo.PossibleWorkerIds)</MudText>
@@ -66,7 +66,7 @@
                                 <MudNumericField T="double" Format="N1" Value="@Todo.CurrentEstimatedEffort.TotalHours" AdornmentText="h" Adornment="Adornment.End" ValueChanged="UpdateCurrentEstimatedEffort" Label="Current Estimate" Immediate="false" />
                             </MudItem>
                             <MudItem xs="6">
-                                <MudNumericField T="double" Format="N1" Value="@Todo.InitialEstimatedEffort.TotalHours" AdornmentText="h" Adornment="Adornment.End" ValueChanged="UpdateInitialEstimatedEffort" Label="Initial Estimate" Immediate="false" />
+                                <MudNumericField T="double?" Format="N1" Value="@Todo.InitialEstimatedEffort?.TotalHours" AdornmentText="h" Adornment="Adornment.End" ValueChanged="UpdateInitialEstimatedEffort" Label="Initial Estimate" Immediate="false" />
                             </MudItem>
                             <MudItem xs="12">
                                 <MudSelect MultiSelection="true" T="Guid" AnchorOrigin="Origin.BottomCenter" Dense="true" MultiSelectionTextFunc="WorkerMultiSelectText" SelectedValues="Todo.PossibleWorkerIds" ShrinkLabel="true" SelectedValuesChanged="UpdatePossibleAssignees" Label="Possible Workers" Immediate="false">
@@ -159,9 +159,13 @@
         Database.Update(Todo);
     }
     
-    private void UpdateInitialEstimatedEffort(double value)
+    private void UpdateInitialEstimatedEffort(double? value)
     {
-        Todo.InitialEstimatedEffort = TimeSpan.FromHours(value);
+        if (value is null)
+            Todo.InitialEstimatedEffort = null;
+        else
+            Todo.InitialEstimatedEffort = TimeSpan.FromHours(value.Value);
+        
         Database.Update(Todo);
     }
 
