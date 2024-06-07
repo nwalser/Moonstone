@@ -15,7 +15,18 @@
 
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="flex-grow h-full" @onclick="() => _editing = !_editing" Justify="Justify.Center">
                     <MudText Typo="Typo.body2" Class="w-80" Style="@($"padding-left: {Depth * 12}px")">@Todo.Name</MudText>
-                    <MudText Typo="Typo.body2" Class="w-60 text-right truncate">0h / @($"{Todo.CurrentEstimatedEffort.TotalHours:N1}h") / @($"{Todo.InitialEstimatedEffort.TotalHours:N1}h")</MudText>
+                    
+
+                    <MudText Typo="Typo.body2" Class="w-60 text-right truncate">
+                        @if (Todo.HasChildren(Database))
+                        {
+                            @($"{Todo.GetGroupWorkedEffort(Database).TotalHours:N1}h / {Todo.GetGroupEstimatedEffort(Database).TotalHours:N1}h")
+                        }
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="w-60 text-right truncate">
+                        @($"{Todo.GetWorkedEffort2(Database).TotalHours:N1}h / {Todo.GetEstimatedEffort(Database).TotalHours:N1}h")
+                    </MudText>
+                    
                     <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkerIdsText(Todo.PossibleWorkerIds)</MudText>
                     <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@TagsMultiSelectText(Todo.Tags)</MudText>
                     <MudCheckBox Value="Todo.Splittable" ReadOnly="true" Class="w-12"/>

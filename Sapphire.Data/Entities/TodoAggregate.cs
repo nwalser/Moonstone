@@ -119,9 +119,57 @@ public class TodoAggregate : Document
         return db.Enumerate<ProjectAggregate>()
             .Single(p => p.Id == ProjectId);
     }
+    
+
+    
+    
+    private TimeSpan GetChildrenEstimatedEffort(ProjectDatabase db)
+    {
+        var estimatedEfforts = GetChildTodos(db)
+            .Select(c => c.CurrentEstimatedEffort);
+
+        return TimeSpanExtensions.Sum(estimatedEfforts);
+    }
+
+    private TimeSpan GetChildrenWorkedEffort(ProjectDatabase db)
+    {
+        var childrenWorkedEffort = GetChildTodos(db)
+            .Select(c => c.GetGroupWorkedEffort(db));
+
+        return TimeSpanExtensions.Sum(childrenWorkedEffort);
+    }
+    
+    public TimeSpan GetEstimatedEffort(ProjectDatabase db)
+    {
+        return GetGroupEstimatedEffort(db) - GetChildrenEstimatedEffort(db);
+    }
+
+    public TimeSpan GetWorkedEffort2(ProjectDatabase db)
+    {
+        var workedEfforts = db.Enumerate<AllocationAggregate>()
+            .Where(a => a.TodoId == Id)
+            .Select(a => a.AllocatedTime);
+
+        return TimeSpanExtensions.Sum(workedEfforts);
+    }
+    
+    public TimeSpan GetGroupEstimatedEffort(ProjectDatabase db)
+    {
+        return CurrentEstimatedEffort;
+    }
+
+    public TimeSpan GetGroupWorkedEffort(ProjectDatabase db)
+    {
+        return GetChildrenWorkedEffort(db) + GetWorkedEffort2(db);
+    }
 
 
-
+    public bool HasChildren(ProjectDatabase db)
+    {
+        return GetChildTodos(db).Any();
+    }
+    
+    
     public TimeSpan GetWorkedEffort(ProjectDatabase db)
     {
         var allocations = db.Enumerate<AllocationAggregate>()
