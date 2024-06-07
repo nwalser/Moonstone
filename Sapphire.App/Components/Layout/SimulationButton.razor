@@ -2,7 +2,8 @@
 
 <MudButton Size="Size.Small"
            Variant="Variant.Outlined"
-           StartIcon="@Icons.Material.Outlined.Start" Class="no-drag mx-1"
+           StartIcon="@Icons.Material.Outlined.Start" 
+           Class="no-drag mx-1 w-40"
            OnClick="() => Database.RunSimulation(DateTime.UtcNow)"
            Disabled="@Database.SimulationOngoing.Value"
            Color="@(Database.SimulationOngoing.Value ? Color.Warning : Color.Default)">
