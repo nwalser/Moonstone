@@ -17,7 +17,7 @@ public class TodoAggregate : Document
     public TodoState State { get; set; } = TodoState.Active;
 
     public TimeSpan CurrentEstimatedEffort { get; set; } = TimeSpan.Zero;
-    public TimeSpan? InitialGroupEstimatedEffort { get; set; } = TimeSpan.Zero;
+    public TimeSpan? InitialGroupEstimatedEffort { get; set; }
 
     public Guid[] PossibleWorkerIds { get; set; } = [];
     public List<string> Tags { get; set; } = [];
