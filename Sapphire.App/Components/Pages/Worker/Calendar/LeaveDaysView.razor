@@ -16,7 +16,7 @@
                 <MudPaper Outlined="true" Class="pa-3">
                     <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
                         <MudText>@start - @end (@duration days)</MudText>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Text" Color="Color.Default" Size="Size.Small" OnClick="@(() => DeleteLeaveDays(leaveDayGroup))"/>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Text" Color="Color.Default" Size="Size.Small" OnClick="@(() => DeleteLeaveDays(start, end))"/>
                     </MudStack>
                 </MudPaper>
             </MudItem>
@@ -38,13 +38,18 @@
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
     [Parameter] public required WorkerAggregate Worker { get; set; }
     [Parameter] public required int Year { get; set; }
+    // todo: fix coloration of date picker calendar
 
     private DateRange? _dateRange;
     
 
-    private void DeleteLeaveDays(IEnumerable<LeaveDayAggregate> leaveDays)
+    private void DeleteLeaveDays(DateOnly start, DateOnly end)
     {
-        // todo: fix that removal of twice applied leave days works
+        var leaveDays = Database.Enumerate<LeaveDayAggregate>()
+            .Where(l => l.WorkerId == Worker.Id)
+            .Where(l => l.Date >= start)
+            .Where(l => l.Date <= end);
+        
         Database.Remove(leaveDays);
     }
 

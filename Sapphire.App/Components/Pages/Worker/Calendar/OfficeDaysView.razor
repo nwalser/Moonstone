@@ -1,0 +1,75 @@
+﻿<MudGrid Spacing="1">
+    @{
+        var officeDays = Database.Enumerate<OfficeDayAggregate>()
+            .Where(l => l.WorkerId == Worker.Id)
+            .Where(l => l.Date.Year == Year);
+
+        var groupedOfficeDays = OfficeDayAggregate.GetGrouped(officeDays);
+
+        @foreach (var officeDayGroup in groupedOfficeDays)
+        {
+            var start = officeDayGroup.MinBy(l => l.Date)?.Date ?? DateOnly.MinValue;
+            var end = officeDayGroup.MaxBy(l => l.Date)?.Date ?? DateOnly.MaxValue;
+            var duration = end.DayNumber - start.DayNumber + 1;
+
+            <MudItem sm="6" @key="officeDayGroup.Key">
+                <MudPaper Outlined="true" Class="pa-3">
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText>@start - @end (@duration days)</MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Text" Color="Color.Default" Size="Size.Small" OnClick="@(() => DeleteOfficeDays(start, end))"/>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        }
+
+        <MudItem sm="12">
+            <MudPaper Outlined="true" Class="pa-3">
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudDateRangePicker @bind-DateRange="_dateRange" />
+                    <MudNumericField T="double" Value="_workingHours.TotalHours" ValueChanged="v => _workingHours = TimeSpan.FromHours(v)" 
+                                     Format="N2" Label="Working Hours" AdornmentText="h" Adornment="Adornment.End"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Default" Size="Size.Small" OnClick="@AddOfficeDays"/>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    }
+</MudGrid>
+
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [Parameter] public required WorkerAggregate Worker { get; set; }
+    [Parameter] public required int Year { get; set; }
+    // todo: fix coloration of date picker calendar
+
+    private DateRange? _dateRange;
+    private TimeSpan _workingHours = TimeSpan.Zero;
+
+    
+    private void DeleteOfficeDays(DateOnly start, DateOnly end)
+    {
+        var leaveDays = Database.Enumerate<OfficeDayAggregate>()
+            .Where(l => l.WorkerId == Worker.Id)
+            .Where(l => l.Date >= start)
+            .Where(l => l.Date <= end);
+
+        Database.Remove(leaveDays);
+    }
+
+    private void AddOfficeDays()
+    {
+        var start = _dateRange?.Start?.ToDateOnly();
+        var end = _dateRange?.End?.ToDateOnly();
+
+        if (start is null || end is null)
+            return;
+
+        if (_workingHours <= TimeSpan.Zero)
+            return;
+        
+        var officeDay = OfficeDayAggregate.FromRange(Worker.Id, _workingHours, start.Value, end.Value);
+
+        Database.Update(officeDay);
+    }
+
+}
