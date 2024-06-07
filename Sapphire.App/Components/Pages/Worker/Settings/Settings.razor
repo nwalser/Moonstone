@@ -1,0 +1,31 @@
+﻿@inherits DatabaseRefresh
+@page "/worker/{WorkerId:guid}/settings"
+
+<DefaultWindowLayout PageTitle="@($"{_worker?.Name} - Settings")">
+    <ChildContent>
+        @if (_worker is not null)
+        {
+            <MudGrid>
+                <MudItem sm="12">
+                    <WorkerGeneralSettings Worker="_worker" />
+                </MudItem>
+                <MudItem sm="12">
+                    <WorkerActions Worker="_worker" />
+                </MudItem>
+            </MudGrid>
+        }
+    </ChildContent>
+</DefaultWindowLayout>
+
+@code {
+    [Inject] public required TimeZoneService Time { get; set; }
+    
+    [Parameter] public required Guid WorkerId { get; set; }
+
+    private WorkerAggregate? _worker;
+
+    protected override void OnLoadData()
+    {
+        _worker = Database.Enumerate<WorkerAggregate>().SingleOrDefault(w => w.Id == WorkerId);
+    }
+}

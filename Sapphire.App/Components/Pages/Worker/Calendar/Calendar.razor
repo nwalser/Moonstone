@@ -3,7 +3,7 @@
 @page "/worker/{WorkerId:guid}/calendar"
 @page "/worker/{WorkerId:guid}/calendar/{Year:int}"
 
-<DefaultWindowLayout PageTitle="Workers">
+<DefaultWindowLayout PageTitle="@($"{_worker?.Name} - Calendar")">
     <RibbonCenterContent>
         <MudIconButton Href="@($"/worker/{WorkerId}/calendar/{Year-1}")" Size="Size.Small" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.KeyboardArrowLeft" />
         <MudText Typo="Typo.h2">@Year</MudText>
@@ -41,29 +41,11 @@
     [Parameter] public required Guid WorkerId { get; set; }
     [Parameter] public required int? Year { get; set; }
     
-    private readonly SemaphoreSlim _updateLock = new(1, 1);
-    
     private WorkerAggregate? _worker;
     
-    protected override async Task OnParametersSetAsync()
+    protected override void OnLoadData()
     {
-        await LoadData();
-        await base.OnParametersSetAsync();
-    }
-    
-    private async Task LoadData()
-    {
-        await _updateLock.WaitAsync();
-        try
-        {
-            Year ??= Time.ToLocalTime(DateTime.UtcNow).Year;
-            _worker = Database.Enumerate<WorkerAggregate>().SingleOrDefault(w => w.Id == WorkerId);
-            
-            await InvokeAsync(StateHasChanged);
-        }
-        finally
-        {
-            _updateLock.Release();
-        }
+        Year ??= Time.ToLocalTime(DateTime.UtcNow).Year;
+        _worker = Database.Enumerate<WorkerAggregate>().SingleOrDefault(w => w.Id == WorkerId);
     }
 }

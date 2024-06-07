@@ -8,6 +8,7 @@ namespace Sapphire.Data.Entities;
 public class WorkerAggregate : Document
 {
     public required string Name { get; set; }
+    public string Abbreviation { get; set; } = string.Empty;
     public TimeSpan ConstantBaseLoad { get; set; } = TimeSpan.Zero;
 
     

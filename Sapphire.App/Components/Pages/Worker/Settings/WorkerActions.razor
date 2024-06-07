@@ -1,0 +1,51 @@
+﻿<MudGrid Spacing="1">
+    <MudItem sm="12">
+        <MudPaper Outlined="true" Class="pa-3" Style="border-color: var(--mud-palette-warning)">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudStack Row="false">
+                    <MudText Typo="Typo.h4">Archive Worker</MudText>
+                    <MudText Typo="Typo.subtitle1">Archiving worker will remove him from views but keeps project specific data.</MudText>
+                </MudStack>
+
+                <MudButton Variant="Variant.Outlined" Color="Color.Error">Archive Worker</MudButton>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+    <MudItem sm="12">
+        <MudPaper Outlined="true" Class="pa-3" Style="border-color: var(--mud-palette-error)">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudStack Row="false">
+                    <MudText Typo="Typo.h4">Delete Worker</MudText>
+                    <MudText Typo="Typo.subtitle1">Deleting this worker will remove all of his registered hours.</MudText>
+                </MudStack>
+
+                <MudButton OnClick="@DeleteWorker" Variant="Variant.Outlined" Color="Color.Error">Delete Worker</MudButton>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    
+    [Inject] public required IDialogService DialogService { get; set; }
+    [Inject] public required NavigationManager Navigation { get; set; }
+
+    [Parameter] public required WorkerAggregate Worker { get; set; }
+
+    // todo: implement archival of worker
+    
+    private async void DeleteWorker()
+    {
+        var deletionConfirmed = await DialogService.ShowMessageBox(
+            $"Are you sure you want to delete {Worker.Name}", 
+            "Deleting can not be undone.", 
+            yesText:"Delete", cancelText:"Cancel") ?? false;
+
+        if (!deletionConfirmed)
+            return;
+
+        Database.Remove(Worker);
+        Navigation.NavigateTo("/worker");
+    }
+}
