@@ -1,0 +1,63 @@
+﻿<MudGrid Spacing="1">
+    @{
+        var leaveDays = Database.Enumerate<LeaveDayAggregate>()
+            .Where(l => l.WorkerId == Worker.Id)
+            .Where(l => l.Date.Year == Year);
+
+        var groupedLeaveDays = LeaveDayAggregate.GetGrouped(leaveDays);
+        
+        @foreach (var leaveDayGroup in groupedLeaveDays)
+        {
+            var start = leaveDayGroup.MinBy(l => l.Date)?.Date ?? DateOnly.MinValue;
+            var end = leaveDayGroup.MaxBy(l => l.Date)?.Date ?? DateOnly.MaxValue;
+            var duration = end.DayNumber - start.DayNumber + 1;
+
+            <MudItem sm="6" @key="leaveDayGroup.Key">
+                <MudPaper Outlined="true" Class="pa-3">
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText>@start - @end (@duration days)</MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Text" Color="Color.Default" Size="Size.Small" OnClick="@(() => DeleteLeaveDays(leaveDayGroup))"/>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        }
+        
+        <MudItem sm="12">
+            <MudPaper Outlined="true" Class="pa-3">
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudDateRangePicker @bind-DateRange="_dateRange" Class="overwrite"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Default" Size="Size.Small" OnClick="@AddLeaveDays"/>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    }
+</MudGrid>
+
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [Parameter] public required WorkerAggregate Worker { get; set; }
+    [Parameter] public required int Year { get; set; }
+
+    private DateRange? _dateRange;
+    
+
+    private void DeleteLeaveDays(IEnumerable<LeaveDayAggregate> leaveDays)
+    {
+        // todo: fix that removal of twice applied leave days works
+        Database.Remove(leaveDays);
+    }
+
+    private void AddLeaveDays()
+    {
+        var start = _dateRange?.Start?.ToDateOnly();
+        var end = _dateRange?.End?.ToDateOnly();
+        
+        if (start is null || end is null)
+            return;
+
+        var leaveDays = LeaveDayAggregate.FromRange(Worker.Id, start.Value, end.Value);
+        
+        Database.Update(leaveDays);
+    }
+}
