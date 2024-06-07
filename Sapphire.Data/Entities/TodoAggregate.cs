@@ -17,7 +17,7 @@ public class TodoAggregate : Document
     public TodoState State { get; set; } = TodoState.Active;
 
     public TimeSpan CurrentEstimatedEffort { get; set; } = TimeSpan.Zero;
-    public TimeSpan? InitialEstimatedEffort { get; set; } = TimeSpan.Zero;
+    public TimeSpan? InitialGroupEstimatedEffort { get; set; } = TimeSpan.Zero;
 
     public Guid[] PossibleWorkerIds { get; set; } = [];
     public List<string> Tags { get; set; } = [];
@@ -129,7 +129,7 @@ public class TodoAggregate : Document
     private TimeSpan GetChildrenEstimatedEffort(ProjectDatabase db)
     {
         var estimatedEfforts = GetChildTodos(db)
-            .Select(c => c.CurrentEstimatedEffort);
+            .Select(c => c.GetGroupEstimatedEffort(db));
 
         return TimeSpanExtensions.Sum(estimatedEfforts);
     }
@@ -145,7 +145,7 @@ public class TodoAggregate : Document
     
     public TimeSpan GetEstimatedEffort(ProjectDatabase db)
     {
-        return GetGroupEstimatedEffort(db) - GetChildrenEstimatedEffort(db);
+        return CurrentEstimatedEffort;
     }
 
     public TimeSpan GetWorkedEffort(ProjectDatabase db)
@@ -174,7 +174,7 @@ public class TodoAggregate : Document
     
     public TimeSpan GetGroupEstimatedEffort(ProjectDatabase db)
     {
-        return CurrentEstimatedEffort;
+        return GetChildrenEstimatedEffort(db) + GetEstimatedEffort(db);
     }
 
     public TimeSpan GetGroupWorkedEffort(ProjectDatabase db)

@@ -1,14 +1,16 @@
 ﻿@if (_todo is not null)
 {
-    <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" @key="_todo.Id" Todos="Todos" Project="Project" />
+    <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" @key="_todo.Id" Todos="Todos" Project="Project" @bind-Expanded="_expanded" />
 }
 
-<FluentUnstyledSortableList Items="_childTodos" OnUpdate="OnUpdate" Handle="true">
-    <ItemTemplate>
-        <TodoGroup TodoId="context.Id" Todos="Todos" Depth="Depth+1" Project="Project" @key="context.Id" />
-    </ItemTemplate>
-</FluentUnstyledSortableList>
-
+@if (_expanded)
+{
+    <FluentUnstyledSortableList Items="_childTodos" OnUpdate="OnUpdate" Handle="true">
+        <ItemTemplate>
+            <TodoGroup TodoId="context.Id" Todos="Todos" Depth="Depth+1" Project="Project" @key="context.Id" />
+        </ItemTemplate>
+    </FluentUnstyledSortableList>
+}
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
@@ -19,7 +21,9 @@
 
     private TodoAggregate?  _todo;
     private List<TodoAggregate> _childTodos = [];
-
+    private bool _expanded = true;
+    
+    
     protected override Task OnParametersSetAsync()
     {
         _todo = Todos.SingleOrDefault(t => t.Id == TodoId);

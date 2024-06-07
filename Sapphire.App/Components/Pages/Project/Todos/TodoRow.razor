@@ -1,6 +1,5 @@
-﻿@using Sapphire.Data.Simulation
-<MudItem xs="12">
-    <MudCard Elevation="0" Outlined="true" Class="my-1" Style="@(_editing ? "border-color: var(--mud-palette-text-primary)" : "")">
+﻿<MudItem xs="12">
+    <MudCard Elevation="0" Outlined="true" Class="my-1" Style="@(Editing ? "border-color: var(--mud-palette-text-primary)" : "")">
         <MudStack Row="false" Spacing="0">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
@@ -13,9 +12,23 @@
                     </div>
                 </MudStack>
 
-                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="flex-grow h-full" @onclick="() => _editing = !_editing" Justify="Justify.Center">
-                    <MudText Typo="Typo.body2" Class="w-80" Style="@($"padding-left: {Depth * 12}px")">@Todo.Name</MudText>
-                    
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="flex-grow h-full" @onclick="ToggleEditing" Justify="Justify.Center">
+                    <MudText Typo="Typo.body2" Class="w-80" Style="@($"padding-left: {Depth * 12}px")">
+                        @switch (Todo.HasChildren(Database))
+                        {
+                            case true when Expanded:
+                                <MudIconButton Icon="@Icons.Material.Outlined.KeyboardArrowDown" Size="Size.Small" OnClick="ToggleExpanded" Class="w-4"/>
+                                break;
+                            case true when !Expanded:
+                                <MudIconButton Icon="@Icons.Material.Outlined.KeyboardArrowRight" Size="Size.Small" OnClick="ToggleExpanded" Class="w-4"/>
+                                break;
+                            case false:
+                                <MudIconButton Size="Size.Small" Class="w-4"/>
+                                break;
+                        }
+
+                        @Todo.Name
+                    </MudText>
 
                     <MudText Typo="Typo.body2" Class="w-60 text-right truncate">
                         @if (Todo.HasChildren(Database))
@@ -54,62 +67,9 @@
                 </MudStack>
             </MudStack>
 
-            @if (_editing)
+            @if (Editing)
             {
-                <MudGrid Spacing="0" Style="border-top: 1px solid var(--mud-palette-text-primary)">
-                    <MudItem xs="4">
-                        <MudGrid Spacing="1" Class="p-2">
-                            <MudItem xs="12">
-                                <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" AutoFocus="true" />
-                            </MudItem>
-                            <MudItem xs="6">
-                                <MudNumericField T="double" Format="N1" Value="@Todo.CurrentEstimatedEffort.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateCurrentEstimatedEffort" Label="Current Estimate" Immediate="false" />
-                            </MudItem>
-                            <MudItem xs="6">
-                                <MudNumericField T="double?" Format="N1" Value="@Todo.InitialEstimatedEffort?.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateInitialEstimatedEffort" Label="Initial Estimate" Immediate="false" />
-                            </MudItem>
-                            <MudItem xs="12">
-                                <MudSelect MultiSelection="true" T="Guid" AnchorOrigin="Origin.BottomCenter" Dense="true" MultiSelectionTextFunc="WorkerMultiSelectText" SelectedValues="Todo.PossibleWorkerIds" ShrinkLabel="true" SelectedValuesChanged="UpdatePossibleAssignees" Label="Possible Workers" Immediate="false">
-                                    @foreach (var worker in Database.Enumerate<WorkerAggregate>())
-                                    {
-                                        <MudSelectItem T="Guid" Value="@worker.Id">@worker.Name</MudSelectItem>
-                                    }
-                                </MudSelect>
-                            </MudItem>
-                            <MudItem xs="12">
-                                <MudSelect MultiSelection="true" T="string" AnchorOrigin="Origin.BottomCenter" Dense="true" MultiSelectionTextFunc="TagsMultiSelectText" SelectedValues="Todo.Tags" ShrinkLabel="true" SelectedValuesChanged="UpdateTags" Label="Tags" Immediate="false">
-                                    @foreach (var tag in Project.PossibleTags)
-                                    {
-                                        <MudSelectItem T="string" Value="@tag">@tag</MudSelectItem>
-                                    }
-                                </MudSelect>
-                            </MudItem>
-                            <MudItem xs="12">
-                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                                    <MudText Typo="Typo.body2">Splittable</MudText>
-                                    <MudCheckBox T="bool" Value="Todo.Splittable" ValueChanged="UpdateSplittable" Size="Size.Medium" />
-                                </MudStack>
-                            </MudItem>
-                        </MudGrid>
-                    </MudItem>
-                    <MudItem xs="8">
-                        @foreach (var allocation in Database.PlannedAllocations.Where(t => t.TodoId == Todo.Id))
-                        {
-                            <MudText>@allocation.Date - @allocation.WorkerId - @allocation.PlannedTime</MudText>
-                        }
-                        
-                        
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudStack Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Row="true" Spacing="1" Class="p-2">
-                            <MudButtonGroup Size="Size.Small" Variant="Variant.Outlined">
-                                <MudButton OnClick="() => UpdateState(TodoState.Draft)" Disabled="Todo.State == TodoState.Draft">Draft</MudButton>
-                                <MudButton OnClick="() => UpdateState(TodoState.Active)" Disabled="Todo.State == TodoState.Active">Active</MudButton>
-                                <MudButton OnClick="() => UpdateState(TodoState.Completed)" Disabled="Todo.State == TodoState.Completed">Completed</MudButton>
-                            </MudButtonGroup>
-                        </MudStack>
-                    </MudItem>
-                </MudGrid>
+                <TodoRowEdit Project="Project" Todo="Todo" />
             }
         </MudStack>
     </MudCard>
@@ -124,9 +84,13 @@
     [Parameter] public required uint Depth { get; set; }
     [Parameter] public required List<TodoAggregate> Todos { get; set; }
     [Parameter] public required List<TodoAggregate> ChildTodos { get; set; }
-    
-    
-    private bool _editing = false;
+
+
+    [Parameter] public bool Expanded { get; set; } = true;
+    [Parameter] public EventCallback<bool> ExpandedChanged { get; set; }
+
+    [Parameter] public bool Editing { get; set; } = false;
+    [Parameter] public EventCallback<bool> EditingChanged { get; set; }
     
     private void AddSubTodo()
     {
@@ -139,72 +103,6 @@
 
         Database.Update(todo);
         InvokeAsync(StateHasChanged);
-    }
-
-    private void UpdateName(string? value)
-    {
-        Todo.Name = value ?? "";
-        Database.Update(Todo);
-    }
-    
-    private void UpdateSplittable(bool value)
-    {
-        Todo.Splittable = value;
-        Database.Update(Todo);
-    }
-    
-    private void UpdateCurrentEstimatedEffort(double value)
-    {
-        Todo.CurrentEstimatedEffort = TimeSpan.FromHours(value);
-        Database.Update(Todo);
-    }
-    
-    private void UpdateInitialEstimatedEffort(double? value)
-    {
-        if (value is null)
-            Todo.InitialEstimatedEffort = null;
-        else
-            Todo.InitialEstimatedEffort = TimeSpan.FromHours(value.Value);
-        
-        Database.Update(Todo);
-    }
-
-    private void UpdatePossibleAssignees(IEnumerable<Guid> values)
-    {
-        Todo.PossibleWorkerIds = values.ToArray();
-        Database.Update(Todo);
-    }
-    
-    private void UpdateTags(IEnumerable<string> values)
-    {
-        Todo.Tags = values.ToList();
-        Database.Update(Todo);
-    }
-
-    private void UpdateState(TodoState state)
-    {
-        Todo.State = state;
-        Database.Update(Todo);
-    }
-
-    private string WorkerMultiSelectText(List<string> args)
-    {
-        return WorkerIdsText(args.Select(Guid.Parse));
-    }
-    
-    private string TagsMultiSelectText(List<string> values)
-    {
-        return string.Join(", ", values);
-    }
-
-    private string WorkerIdsText(IEnumerable<Guid> values)
-    {
-        var names = values
-            .Select(guid => Database.Enumerate<WorkerAggregate>().FirstOrDefault(w => w.Id == guid))
-            .Select(w => w?.Name)
-            .ToArray();
-
-        return string.Join(", ", names);
     }
 
     private async Task Delete()
@@ -221,5 +119,32 @@
         if (!delete) return;
 
         Database.Remove(allTodosToDelete);
+    }
+
+    private void ToggleEditing()
+    {
+        Editing = !Editing;
+        EditingChanged.InvokeAsync(Editing);
+    }
+
+    private void ToggleExpanded()
+    {
+        Expanded = !Expanded;
+        ExpandedChanged.InvokeAsync(Expanded);
+    }
+    
+    private string WorkerIdsText(IEnumerable<Guid> values)
+    {
+        var names = values
+            .Select(guid => Database.Enumerate<WorkerAggregate>().FirstOrDefault(w => w.Id == guid))
+            .Select(w => w?.Name)
+            .ToArray();
+
+        return string.Join(", ", names);
+    }
+    
+    private string TagsMultiSelectText(List<string> values)
+    {
+        return string.Join(", ", values);
     }
 }
