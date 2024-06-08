@@ -1,8 +1,5 @@
-﻿.mud-button-outlined {
-    border-color: var(--mud-palette-lines-default) !important;
-}
-
-.mud-chip-outlined {
+﻿/* MudButton Overrides */
+.mud-button-outlined {
     border-color: var(--mud-palette-lines-default) !important;
 }
 
@@ -10,6 +7,7 @@
     border-color: var(--mud-palette-lines-default);
 }
 
+/* MudDatePicker Overrides */
 @layer{
     .mud-picker-datepicker-toolbar {
         background-color: var(--mud-palette-background) !important;
@@ -27,7 +25,23 @@
     color: inherit !important;
 }
 
+/* MudChip Overrides */
 .mud-chip.mud-chip-size-small{
     height: 18px !important;
     padding: 0 5px;
+}
+
+.mud-chip-outlined {
+    border-color: var(--mud-palette-lines-default) !important;
+}
+
+
+/* MudIcon Overrides */
+.mud-icon-size-small{
+    width: 0.84em !important;
+    height: 0.84em !important;
+}
+
+.mud-icon-button.mud-button{
+    padding: 6px !important;
 }
