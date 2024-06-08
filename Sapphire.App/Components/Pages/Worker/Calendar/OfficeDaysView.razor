@@ -1,4 +1,6 @@
-﻿<MudGrid Spacing="1">
+﻿<BoxHeader Title="Office Days" />
+
+<MudGrid Spacing="1">
     @{
         var officeDays = Database.Enumerate<OfficeDayAggregate>()
             .Where(l => l.WorkerId == Worker.Id)

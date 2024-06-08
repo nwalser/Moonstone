@@ -1,4 +1,6 @@
-﻿<MudGrid Spacing="1">
+﻿<BoxHeader Title="Possible Tags" />
+
+<MudGrid Spacing="1">
     @foreach (var tag in Project.PossibleTags)
     {
         <MudItem sm="12" @key="tag">

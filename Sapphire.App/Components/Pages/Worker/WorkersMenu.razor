@@ -1,18 +1,40 @@
 ﻿<MudStack Row="false" Spacing="1" Class="p-1">
-    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-        <MudIconButton Icon="@Icons.Material.Outlined.Add" Size="Size.Small" Variant="Variant.Outlined"/>
-    </MudStack>
-
-
     @foreach (var worker in Database.Enumerate<WorkerAggregate>())
     {
         <MudStack Row="true" Justify="Justify.SpaceBetween" Spacing="1" AlignItems="AlignItems.Center">
-            <MudButton Class="justify-start w-full" Href="@($"/project/{worker.Id}/todos")" Variant="Variant.Outlined" Size="Size.Small">@worker.Name</MudButton>
+            <MudButton Class="justify-start w-full" Href="@($"/worker/{worker.Id}")" Variant="Variant.Outlined" Size="Size.Small">@worker.Name</MudButton>
+            <MudIconButton Href="@($"/worker/{worker.Id}/calendar")" Size="Size.Small" Icon="@Icons.Material.Outlined.Work" Variant="Variant.Outlined" />
+            <MudIconButton Href="@($"/worker/{worker.Id}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" Variant="Variant.Outlined" />
         </MudStack>
     }
+
+    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+        <MudIconButton Icon="@Icons.Material.Outlined.Add" Size="Size.Small" Variant="Variant.Outlined" OnClick="CreateWorker"/>
+    </MudStack>
 </MudStack>
 
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    
+    private void CreateWorker()
+    {
+        var worker = new WorkerAggregate()
+        {
+            Name = $"Worker {Database.Enumerate<WorkerAggregate>().Count() + 1}",
+            ConstantBaseLoad = TimeSpan.FromHours(0.5)
+        };
+
+        var weeklyWorkDay = new WeeklyWorkDay()
+        {
+            ActiveFrom = DateOnly.MinValue,
+            ActiveTo = DateOnly.MaxValue,
+            WorkerId = worker.Id,
+            WorkingHours = TimeSpan.FromHours(8.5),
+            DayOfWeek = DayOfWeek.Monday
+        };
+
+        Database.Update(worker);
+        Database.Update(weeklyWorkDay);
+    }
 }

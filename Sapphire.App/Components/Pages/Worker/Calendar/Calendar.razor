@@ -4,9 +4,6 @@
 @page "/worker/{WorkerId:guid}/calendar/{Year:int}"
 
 <DefaultWindowLayout PageTitle="@($"{_worker?.Name} - Calendar")">
-    <RibbonLeftContent>
-        <WorkerMenu WorkerId="WorkerId"/>
-    </RibbonLeftContent>
     <MenuContent>
         <WorkersMenu />
     </MenuContent>

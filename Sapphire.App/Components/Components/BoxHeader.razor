@@ -1,0 +1,13 @@
+﻿<MudStack Row="true" Class="mb-3 mt-4" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+    <MudText Typo="Typo.h3">@Title</MudText>
+    
+    <MudStack Row="true" Spacing="1">
+        @ChildContent
+    </MudStack>
+</MudStack>
+
+
+@code {
+    [Parameter] public required string Title { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

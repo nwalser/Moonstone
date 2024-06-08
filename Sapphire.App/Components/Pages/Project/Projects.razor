@@ -38,15 +38,4 @@
     {
         _projects = Database.Enumerate<ProjectAggregate>().ToList();
     }
-
-    private void CreateProject()
-    {
-        var project = new ProjectAggregate
-        {
-            Name = "Project 1",
-            PossibleTags = ["Backend", "Frontend", "Operations"]
-        };
-
-        Database.Update(project);
-    }
 }

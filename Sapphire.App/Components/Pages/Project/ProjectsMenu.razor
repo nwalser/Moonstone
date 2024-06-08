@@ -1,18 +1,29 @@
 ﻿<MudStack Row="false" Spacing="1" Class="p-1">
-    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-        <MudIconButton Icon="@Icons.Material.Outlined.Add" Size="Size.Small" Variant="Variant.Outlined"/>
-    </MudStack>
-
-
     @foreach (var project in Database.Enumerate<ProjectAggregate>())
     {
         <MudStack Row="true" Justify="Justify.SpaceBetween" Spacing="1" AlignItems="AlignItems.Center">
             <MudButton Class="justify-start w-full" Href="@($"/project/{project.Id}/todos")" Variant="Variant.Outlined" Size="Size.Small">@project.Name</MudButton>
+            <MudIconButton Href="@($"/project/{project.Id}/todos")" Size="Size.Small" Icon="@Icons.Material.Outlined.Work" Variant="Variant.Outlined" />
+            <MudIconButton Href="@($"/project/{project.Id}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" Variant="Variant.Outlined" />
         </MudStack>
     }
+
+    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+        <MudIconButton Icon="@Icons.Material.Outlined.Add" Size="Size.Small" Variant="Variant.Outlined"/>
+    </MudStack>
 </MudStack>
 
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    
+    private void CreateProject()
+    {
+        var project = new ProjectAggregate
+        {
+            Name = $"Project {Database.Enumerate<ProjectAggregate>().Count()}",
+        };
+
+        Database.Update(project);
+    }
 }

@@ -1,4 +1,6 @@
-﻿<MudGrid Spacing="1">
+﻿<BoxHeader Title="Weekly Workdays" />
+
+<MudGrid Spacing="1">
     @foreach (var dailyAllocationRule in Database.Enumerate<WeeklyWorkDay>()
                   .Where(w => w.WorkerId == Worker.Id)
                   .Where(w => w.ActiveFrom.Year <= Year)

@@ -3,9 +3,6 @@
 @page "/project/{ProjectId:guid}/todos"
 
 <DefaultWindowLayout PageTitle="@($"{_project?.Name} - Todos")" ChildContentMaxWidth="MaxWidth.False">
-    <RibbonLeftContent>
-        <ProjectMenu ProjectId="ProjectId"/>
-    </RibbonLeftContent>
     <MenuContent>
         <ProjectsMenu />
     </MenuContent>

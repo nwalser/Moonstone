@@ -6,10 +6,6 @@
         <WorkersMenu />
     </MenuContent>
     
-    <RibbonRightContent>
-        <MudButton OnClick="() => CreateWorker()" Variant="Variant.Outlined" Size="Size.Small">New Worker</MudButton>
-    </RibbonRightContent>
-
     <ChildContent>
         <MudGrid Spacing="1">
             @foreach (var worker in _workers)
@@ -41,26 +37,5 @@
     protected override void OnLoadData()
     {
         _workers = Database.Enumerate<WorkerAggregate>().ToList();
-    }
-
-    private void CreateWorker()
-    {
-        var worker = new WorkerAggregate()
-        {
-            Name = $"Worker {_workers.Count}",
-            ConstantBaseLoad = TimeSpan.FromHours(0.5)
-        };
-
-        var weeklyWorkDay = new WeeklyWorkDay()
-        {
-            ActiveFrom = DateOnly.MinValue,
-            ActiveTo = DateOnly.MaxValue,
-            WorkerId = worker.Id,
-            WorkingHours = TimeSpan.FromHours(8.5),
-            DayOfWeek = DayOfWeek.Monday
-        };
-
-        Database.Update(worker);
-        Database.Update(weeklyWorkDay);
     }
 }

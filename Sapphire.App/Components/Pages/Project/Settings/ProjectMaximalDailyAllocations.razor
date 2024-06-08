@@ -1,4 +1,6 @@
-﻿<MudGrid Spacing="1">
+﻿<BoxHeader Title="Maximal Daily Allocations" />
+
+<MudGrid Spacing="1">
     @foreach (var dailyAllocationRule in Database.Enumerate<DailyAllocationRule>().Where(d => d.ProjectId == Project.Id))
     {
         <MudItem sm="12">

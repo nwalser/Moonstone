@@ -2,9 +2,6 @@
 @page "/project/{ProjectId:guid}/settings"
 
 <DefaultWindowLayout PageTitle="@($"{_project?.Name} - Settings")">
-    <RibbonLeftContent>
-        <ProjectMenu ProjectId="ProjectId"/>
-    </RibbonLeftContent>
     <MenuContent>
         <ProjectsMenu />
     </MenuContent>
