@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Subjects;
 using Moonstone.Database;
 using Sapphire.Data.Entities;
+using Sapphire.Data.Entities.MaximalAllocation;
 using Sapphire.Data.Entities.WorkingHours;
 using Sapphire.Data.Simulation;
 using Sapphire.Data.ValueObjects;
@@ -21,12 +22,14 @@ public class ProjectDatabase : Database, IDisposable
     {
         { 0, typeof(ProjectAggregate) },
         { 1, typeof(TodoAggregate) },
-        { 2, typeof(PossibleWorkerAssignment) },
         { 3, typeof(WorkerAggregate) },
         
         { 4, typeof(LeaveDayAggregate) },
         { 5, typeof(OfficeDayAggregate) },
         { 6, typeof(WeeklyWorkDay) },
+        
+        { 7, typeof(DailyAllocationRule) },
+        { 8, typeof(WeeklyAllocationRule) },
     };
 
     public override void Create(string path, string session)

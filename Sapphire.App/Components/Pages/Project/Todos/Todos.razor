@@ -1,8 +1,12 @@
-﻿@using Sapphire.Data.Simulation
-@inherits DatabaseRefresh
+﻿@inherits DatabaseRefresh
 @page "/project/{ProjectId:guid}"
+@page "/project/{ProjectId:guid}/todos"
 
 <DefaultWindowLayout PageTitle="@($"{_project?.Name} - Todos")" ChildContentMaxWidth="MaxWidth.False">
+    <MenuContent>
+        <MudIconButton Href="@($"/project/{ProjectId}/todos")" Size="Size.Small" Icon="@Icons.Material.Outlined.Work" />
+        <MudIconButton Href="@($"/project/{ProjectId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" />
+    </MenuContent>
     <RibbonRightContent>
         <MudButton OnClick="() => AddRootTodo()" Variant="Variant.Outlined" Size="Size.Small">New Todo</MudButton>
     </RibbonRightContent>

@@ -1,0 +1,46 @@
+﻿<MudGrid Spacing="1">
+    @foreach (var tag in Project.PossibleTags)
+    {
+        <MudItem sm="12" @key="tag">
+            <MudPaper Outlined="true" Class="pa-3">
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudText>@tag</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Text" Color="Color.Default" Size="Size.Small" OnClick="@(() => DeleteTag(tag))"/>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    }
+
+    <MudItem sm="12">
+        <MudPaper Outlined="true" Class="pa-3">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudTextField T="string" @bind-Value="_tagValue" Class="overwrite"/>
+                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Default" Size="Size.Small" OnClick="@AddTag"/>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+
+    [Parameter] public required ProjectAggregate Project { get; set; }
+
+    private string _tagValue = string.Empty;
+
+    private void AddTag()
+    {
+        if (string.IsNullOrWhiteSpace(_tagValue))
+            return;
+        
+        Project.PossibleTags.Add(_tagValue);
+        Database.Update(Project);
+    }
+    
+    private void DeleteTag(string tag)
+    {
+        Project.PossibleTags.Remove(tag);
+        Database.Update(Project);
+    }
+}

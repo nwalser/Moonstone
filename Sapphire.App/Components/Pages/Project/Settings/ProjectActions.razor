@@ -1,0 +1,36 @@
+﻿@using DialogService = MudBlazor.DialogService
+<MudGrid Spacing="1">
+    <MudItem sm="12">
+        <MudPaper Outlined="true" Class="pa-3" Style="border-color: var(--mud-palette-error)">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudStack Row="false">
+                    <MudText Typo="Typo.h4">Delete Project</MudText>
+                    <MudText Typo="Typo.subtitle1">Deleting this project will remove all tasks and tracked hours.</MudText>
+                </MudStack>
+
+                <MudButton OnClick="@DeleteProject" Variant="Variant.Outlined" Color="Color.Error">Delete Project</MudButton>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+
+    [Inject] public required IDialogService Dialog { get; set; }
+    
+    [Parameter] public required ProjectAggregate Project { get; set; }
+    
+    private async void DeleteProject()
+    {
+        var deletionConfirmed = await Dialog.ShowMessageBox(
+            $"Are you sure you want to delete {Project.Name}", 
+            "Deleting can not be undone.", 
+            yesText:"Delete", cancelText:"Cancel") ?? false;
+
+        if (!deletionConfirmed)
+            return;
+
+        Project.Delete(Database);
+    }
+}

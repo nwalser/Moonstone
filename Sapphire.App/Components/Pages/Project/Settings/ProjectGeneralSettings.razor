@@ -1,0 +1,46 @@
+﻿<MudGrid Spacing="1">
+    <MudItem sm="12">
+        <MudPaper Outlined="true" Class="pa-3">
+            <MudTextField T="string" Value="@Project.Name" ValueChanged="NameChanged" Margin="0" Immediate="false" Label="Name" ShrinkLabel="true" />
+        </MudPaper>
+    </MudItem>
+    <MudItem sm="12">
+        <MudPaper Outlined="true" Class="pa-3">
+            <MudNumericField T="int" Value="@Project.Priority" ValueChanged="PriorityChanged" Margin="0" Immediate="false" Label="Priority" ShrinkLabel="true"/>
+        </MudPaper>
+    </MudItem>
+    <MudItem sm="12">
+        <MudPaper Outlined="true" Class="pa-3">
+            <MudDatePicker Date="Project.Deadline?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="Deadline" Placeholder="" />
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+
+    [Parameter] public required ProjectAggregate Project { get; set; }
+
+    private void NameChanged(string name)
+    {
+        Project.Name = name;
+        Database.Update(Project);
+    }
+    
+    private void PriorityChanged(int priority)
+    {
+        Project.Priority = priority;
+        Database.Update(Project);
+    }
+    
+    private void ActiveFromChanged(DateTime? date)
+    {
+        if (date is null)
+            return;
+
+        Project.Deadline = date.Value.ToDateOnly();
+        Database.Update(Project);
+    }
+}

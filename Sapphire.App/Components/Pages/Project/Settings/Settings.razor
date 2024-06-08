@@ -1,0 +1,45 @@
+﻿@inherits DatabaseRefresh
+@page "/project/{ProjectId:guid}/settings"
+
+<DefaultWindowLayout PageTitle="@($"{_project?.Name} - Settings")">
+    <MenuContent>
+        <MudIconButton Href="@($"/project/{ProjectId}/todos")" Size="Size.Small" Icon="@Icons.Material.Outlined.Work" />
+        <MudIconButton Href="@($"/project/{ProjectId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" />
+    </MenuContent>
+    <ChildContent>
+        @if (_project is not null && _workers is not null)
+        {
+            <MudGrid>
+                <MudItem sm="12">
+                    <ProjectGeneralSettings Project="_project"  />
+                </MudItem>
+
+                <MudItem sm="12">
+                    <ProjectMaximalDailyAllocations Project="_project"  Workers="_workers" />
+                </MudItem>
+
+                <MudItem sm="12">
+                    <ProjectTags Project="_project"  />
+                </MudItem>
+
+                <MudItem sm="12">
+                    <ProjectActions Project="_project" />
+                </MudItem>
+            </MudGrid>
+        }
+    </ChildContent>
+</DefaultWindowLayout>
+
+
+@code {
+    [Parameter] public required Guid ProjectId { get; set; }
+
+    private ProjectAggregate? _project;
+    private List<WorkerAggregate>? _workers;
+
+    protected override void OnLoadData()
+    {
+        _project = Database.Enumerate<ProjectAggregate>().SingleOrDefault(p => p.Id == ProjectId);
+        _workers = Database.Enumerate<WorkerAggregate>().ToList();
+    }
+}

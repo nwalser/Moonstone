@@ -9,6 +9,7 @@ public class WorkerAggregate : Document
 {
     public required string Name { get; set; }
     public string Abbreviation { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
     public TimeSpan ConstantBaseLoad { get; set; } = TimeSpan.Zero;
 
     
