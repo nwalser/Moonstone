@@ -26,4 +26,10 @@ public class ProjectAggregate : Document
         // todo: delete all related entities
         db.Remove(this);
     }
+
+    public int GetNumberOfTodos(ProjectDatabase db)
+    {
+        return db.Enumerate<TodoAggregate>()
+            .Count(p => p.ProjectId == Id);
+    }
 }

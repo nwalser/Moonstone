@@ -1,12 +1,20 @@
 ﻿<MudStack Row="false" Spacing="1" Class="p-1">
-    @foreach (var project in Database.Enumerate<ProjectAggregate>())
+    @foreach (var project in Database.Enumerate<ProjectAggregate>().OrderByDescending(p => p.Priority))
     {
-        <MudStack Row="true" Justify="Justify.SpaceBetween" Spacing="1" AlignItems="AlignItems.Center">
-            <MudButton Class="justify-start w-full" Href="@($"/project/{project.Id}/todos")" Variant="Variant.Outlined" Size="Size.Small">@project.Name</MudButton>
-        </MudStack>
+        <a href="@($"/project/{project.Id}")">
+            <MudCard Elevation="0" Outlined="true" Class="p-1">
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Spacing="1">
+                    <MudText Typo="Typo.body2">@project.Name</MudText>
+                    <MudSpacer />
+                    <MudChip Size="Size.Small">@($"{project.GetNumberOfTodos(Database)} Tasks")</MudChip>
+                    <MudChip Size="Size.Small">@($"{project.Priority}")</MudChip>
+                </MudStack>
+            </MudCard>
+        </a>
     }
 
-    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Row="true" Spacing="1">
+        <MudIconButton Icon="@Icons.Material.Outlined.List" Size="Size.Small" Variant="Variant.Outlined" Href="/project" />
         <MudIconButton Icon="@Icons.Material.Outlined.Add" Size="Size.Small" Variant="Variant.Outlined" OnClick="CreateProject"/>
     </MudStack>
 </MudStack>
@@ -14,7 +22,8 @@
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
-    
+    [Inject] public required NavigationManager Navigation { get; set; }
+
     private void CreateProject()
     {
         var project = new ProjectAggregate
@@ -23,5 +32,6 @@
         };
 
         Database.Update(project);
+        Navigation.NavigateTo($"/project/{project.Id}");
     }
 }

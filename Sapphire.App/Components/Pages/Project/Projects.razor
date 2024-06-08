@@ -36,6 +36,6 @@
 
     protected override void OnLoadData()
     {
-        _projects = Database.Enumerate<ProjectAggregate>().ToList();
+        _projects = Database.Enumerate<ProjectAggregate>().OrderByDescending(p => p.Priority).ToList();
     }
 }

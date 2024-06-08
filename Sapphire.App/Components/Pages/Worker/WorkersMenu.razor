@@ -1,14 +1,18 @@
 ﻿<MudStack Row="false" Spacing="1" Class="p-1">
     @foreach (var worker in Database.Enumerate<WorkerAggregate>())
     {
-        <MudStack Row="true" Justify="Justify.SpaceBetween" Spacing="1" AlignItems="AlignItems.Center">
-            <MudButton Class="justify-start w-full" Href="@($"/worker/{worker.Id}")" Variant="Variant.Outlined" Size="Size.Small">@worker.Name</MudButton>
-            <MudIconButton Href="@($"/worker/{worker.Id}/calendar")" Size="Size.Small" Icon="@Icons.Material.Outlined.Work" Variant="Variant.Outlined" />
-            <MudIconButton Href="@($"/worker/{worker.Id}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" Variant="Variant.Outlined" />
-        </MudStack>
+        <a href="@($"/worker/{worker.Id}")">
+            <MudCard Elevation="0" Outlined="true" Class="p-1">
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudText Typo="Typo.body2">@worker.Name</MudText>
+                    <MudChip Size="Size.Small">@($"{worker.RegularHours(Database, DateOnly.FromDateTime(DateTime.UtcNow)).TotalHours:N1}h")</MudChip>
+                </MudStack>
+            </MudCard>
+        </a>
     }
 
-    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Row="true" Spacing="1">
+        <MudIconButton Icon="@Icons.Material.Outlined.List" Size="Size.Small" Variant="Variant.Outlined" Href="/worker" />
         <MudIconButton Icon="@Icons.Material.Outlined.Add" Size="Size.Small" Variant="Variant.Outlined" OnClick="CreateWorker"/>
     </MudStack>
 </MudStack>
@@ -16,10 +20,11 @@
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [Inject] public required NavigationManager Navigation { get; set; }
     
     private void CreateWorker()
     {
-        var worker = new WorkerAggregate()
+        var worker = new WorkerAggregate
         {
             Name = $"Worker {Database.Enumerate<WorkerAggregate>().Count() + 1}",
             ConstantBaseLoad = TimeSpan.FromHours(0.5)
@@ -36,5 +41,6 @@
 
         Database.Update(worker);
         Database.Update(weeklyWorkDay);
+        Navigation.NavigateTo($"/worker/{worker.Id}");
     }
 }
