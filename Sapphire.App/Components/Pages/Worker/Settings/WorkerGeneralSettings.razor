@@ -11,6 +11,14 @@
             <MudTextField T="string" Value="@Worker.Abbreviation" ValueChanged="AbbreviationChanged" Margin="0" Immediate="false" Label="Abbreviation" ShrinkLabel="true" />
         </MudPaper>
     </MudItem>
+    <MudItem sm="12">
+        <MudPaper Outlined="true" Class="pa-3">
+            <MudNumericField T="double" Format="N1" Value="@Worker.ConstantBaseLoad.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateConstantBaseLoad" Label="Daily Base Load" Immediate="false" />
+        </MudPaper>
+    </MudItem>
+
+
+
 </MudGrid>
 
 @code {
@@ -18,15 +26,21 @@
 
     [Parameter] public required WorkerAggregate Worker { get; set; }
 
-    private async void NameChanged(string name)
+    private void NameChanged(string name)
     {
         Worker.Name = name;
         Database.Update(Worker);
     }
     
-    private async void AbbreviationChanged(string abbreviation)
+    private void AbbreviationChanged(string abbreviation)
     {
         Worker.Abbreviation = abbreviation;
+        Database.Update(Worker);
+    }
+
+    private void UpdateConstantBaseLoad(double value)
+    {
+        Worker.ConstantBaseLoad = TimeSpan.FromHours(value);
         Database.Update(Worker);
     }
 }
