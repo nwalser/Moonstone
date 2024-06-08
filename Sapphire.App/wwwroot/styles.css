@@ -45,3 +45,12 @@
 .mud-icon-button.mud-button{
     padding: 6px !important;
 }
+
+/* MudInput Small */
+.mud-input-narrow {
+    margin-top: 0 !important;
+}
+
+.mud-input-narrow > div > div > input {
+    padding: 6px 10px 7px !important;
+}

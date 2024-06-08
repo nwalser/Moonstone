@@ -10,6 +10,11 @@
         <ProjectMenu ProjectId="ProjectId" />
     </ThirdMenu>
     
+    <RibbonCenterContent>
+        <MudTextField T="string" Value="string.Empty" Class="w-96 mud-input-narrow" Margin="0" DebounceInterval="300"
+                      Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.FilterList"
+                      AdornmentColor="Color.Default" Clearable="true"/>
+    </RibbonCenterContent>
     <RibbonRightContent>
         <MudButton OnClick="() => AddRootTodo()" Variant="Variant.Outlined" Size="Size.Small">New Todo</MudButton>
     </RibbonRightContent>
