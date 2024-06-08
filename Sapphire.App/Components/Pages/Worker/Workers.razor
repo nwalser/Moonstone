@@ -2,6 +2,10 @@
 @page "/worker"
 
 <DefaultWindowLayout PageTitle="Workers">
+    <MenuContent>
+        <WorkersMenu />
+    </MenuContent>
+    
     <RibbonRightContent>
         <MudButton OnClick="() => CreateWorker()" Variant="Variant.Outlined" Size="Size.Small">New Worker</MudButton>
     </RibbonRightContent>
