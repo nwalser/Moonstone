@@ -2,13 +2,14 @@
               RibbonCenterContent="RibbonCenterContent"
               RibbonRightContent="RibbonRightContent"
               RibbonLeftContent="RibbonLeftContent"
-              MenuContent="MenuContent">
+              SecondMenu="SecondMenu"
+              ThirdMenu="ThirdMenu">
     <ToolbarLeftContent>
         <CurrentWorkspace/>
     </ToolbarLeftContent>
-    <ToolbarCenterContent>
+    <FirstMenu>
         <WorkspaceMenu/>
-    </ToolbarCenterContent>
+    </FirstMenu>
     <ToolbarRightContent>
         <CurrentWorker/>
         <SimulationButton/>
@@ -27,7 +28,8 @@
     [Parameter] public RenderFragment? RibbonLeftContent { get; set; }
     [Parameter] public RenderFragment? RibbonCenterContent { get; set; }
     [Parameter] public RenderFragment? RibbonRightContent { get; set; }
-    [Parameter] public RenderFragment? MenuContent { get; set; }
+    [Parameter] public RenderFragment? SecondMenu { get; set; }
+    [Parameter] public RenderFragment? ThirdMenu { get; set; }
 
     [Parameter] public MaxWidth ChildContentMaxWidth { get; set; } = MaxWidth.Large;
     [Parameter] public required RenderFragment? ChildContent { get; set; }

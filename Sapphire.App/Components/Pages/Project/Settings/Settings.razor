@@ -2,9 +2,12 @@
 @page "/project/{ProjectId:guid}/settings"
 
 <DefaultWindowLayout PageTitle="@($"{_project?.Name} - Settings")">
-    <MenuContent>
+    <SecondMenu>
         <ProjectsMenu />
-    </MenuContent>
+    </SecondMenu>
+    <ThirdMenu>
+        <ProjectMenu ProjectId="ProjectId" />
+    </ThirdMenu>
     
     <ChildContent>
         @if (_project is not null && _workers is not null)

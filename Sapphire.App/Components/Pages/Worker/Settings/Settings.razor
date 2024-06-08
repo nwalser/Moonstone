@@ -2,9 +2,12 @@
 @page "/worker/{WorkerId:guid}/settings"
 
 <DefaultWindowLayout PageTitle="@($"{_worker?.Name} - Settings")">
-    <MenuContent>
+    <SecondMenu>
         <WorkersMenu />
-    </MenuContent>
+    </SecondMenu>
+    <ThirdMenu>
+        <WorkerMenu WorkerId="WorkerId" />
+    </ThirdMenu>
     
     <ChildContent>
         @if (_worker is not null)

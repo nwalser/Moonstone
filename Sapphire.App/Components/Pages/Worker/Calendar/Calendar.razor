@@ -4,9 +4,12 @@
 @page "/worker/{WorkerId:guid}/calendar/{Year:int}"
 
 <DefaultWindowLayout PageTitle="@($"{_worker?.Name} - Calendar")">
-    <MenuContent>
+    <SecondMenu>
         <WorkersMenu />
-    </MenuContent>
+    </SecondMenu>
+    <ThirdMenu>
+        <WorkerMenu WorkerId="WorkerId" />
+    </ThirdMenu>
     
     <RibbonCenterContent>
         <MudIconButton Href="@($"/worker/{WorkerId}/calendar/{Year - 1}")" Size="Size.Small" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.KeyboardArrowLeft"/>

@@ -3,9 +3,12 @@
 @page "/project/{ProjectId:guid}/todos"
 
 <DefaultWindowLayout PageTitle="@($"{_project?.Name} - Todos")" ChildContentMaxWidth="MaxWidth.False">
-    <MenuContent>
+    <SecondMenu>
         <ProjectsMenu />
-    </MenuContent>
+    </SecondMenu>
+    <ThirdMenu>
+        <ProjectMenu ProjectId="ProjectId" />
+    </ThirdMenu>
     
     <RibbonRightContent>
         <MudButton OnClick="() => AddRootTodo()" Variant="Variant.Outlined" Size="Size.Small">New Todo</MudButton>

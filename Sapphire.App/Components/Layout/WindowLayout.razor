@@ -14,17 +14,24 @@
     </div>
 
     <div class="flex flex-row flex-grow overflow-hidden">
-        @if (ToolbarCenterContent is not null)
+        @if (FirstMenu is not null)
         {
             <div class="min-w-10 w-10 flex flex-col overflow-hidden p-1 h-full" style="border-right: 1px var(--mud-palette-lines-default) solid">
-                @ToolbarCenterContent
+                @FirstMenu
             </div>
         }
 
-        @if (MenuContent is not null)
+        @if (SecondMenu is not null)
         {
             <div class="min-w-72 w-72 flex flex-col overflow-hidden h-full" style="border-right: 1px var(--mud-palette-lines-default) solid">
-                @MenuContent
+                @SecondMenu
+            </div>
+        }
+
+        @if (ThirdMenu is not null)
+        {
+            <div class="min-w-10 w-10 flex flex-col overflow-hidden p-1 h-full" style="border-right: 1px var(--mud-palette-lines-default) solid">
+                @ThirdMenu
             </div>
         }
 
@@ -54,16 +61,16 @@
 
 @code {
     [Parameter] public string? PageTitle { get; set; }
-    
     [Parameter] public RenderFragment? ToolbarLeftContent { get; set; }
-    [Parameter] public RenderFragment? ToolbarCenterContent { get; set; }
     [Parameter] public RenderFragment? ToolbarRightContent { get; set; }
-
+    
+    [Parameter] public RenderFragment? FirstMenu { get; set; }
+    [Parameter] public RenderFragment? SecondMenu { get; set; }
+    [Parameter] public RenderFragment? ThirdMenu { get; set; }
+    
     [Parameter] public RenderFragment? RibbonLeftContent { get; set; }
     [Parameter] public RenderFragment? RibbonCenterContent { get; set; }
     [Parameter] public RenderFragment? RibbonRightContent { get; set; }
-    
-    [Parameter] public RenderFragment? MenuContent { get; set; }
     
     [Parameter] public RenderFragment? ChildContent { get; set; }
 }

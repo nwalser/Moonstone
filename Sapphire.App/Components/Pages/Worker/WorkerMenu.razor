@@ -1,0 +1,9 @@
+﻿<MudStack Row="false" Spacing="1">
+    <MudIconButton Href="@($"/worker/{WorkerId}/calendar")" Size="Size.Small" Icon="@Icons.Material.Outlined.CalendarMonth" Variant="Variant.Outlined" />
+    <MudIconButton Href="@($"/worker/{WorkerId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" Variant="Variant.Outlined" />
+</MudStack>
+
+
+@code {
+[Parameter] public required Guid WorkerId { get; set; }
+}
