@@ -2,10 +2,13 @@
 @page "/worker/{WorkerId:guid}/settings"
 
 <DefaultWindowLayout PageTitle="@($"{_worker?.Name} - Settings")">
+    <RibbonLeftContent>
+        <WorkerMenu WorkerId="WorkerId"/>
+    </RibbonLeftContent>
     <MenuContent>
-        <MudIconButton Href="@($"/worker/{WorkerId}/calendar")" Size="Size.Small" Icon="@Icons.Material.Outlined.CalendarMonth" />
-        <MudIconButton Href="@($"/worker/{WorkerId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" />
+        <WorkersMenu />
     </MenuContent>
+    
     <ChildContent>
         @if (_worker is not null)
         {

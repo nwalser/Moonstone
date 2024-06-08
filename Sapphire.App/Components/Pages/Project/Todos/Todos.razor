@@ -3,10 +3,13 @@
 @page "/project/{ProjectId:guid}/todos"
 
 <DefaultWindowLayout PageTitle="@($"{_project?.Name} - Todos")" ChildContentMaxWidth="MaxWidth.False">
+    <RibbonLeftContent>
+        <ProjectMenu ProjectId="ProjectId"/>
+    </RibbonLeftContent>
     <MenuContent>
-        <MudIconButton Href="@($"/project/{ProjectId}/todos")" Size="Size.Small" Icon="@Icons.Material.Outlined.Work" />
-        <MudIconButton Href="@($"/project/{ProjectId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" />
+        <ProjectsMenu />
     </MenuContent>
+    
     <RibbonRightContent>
         <MudButton OnClick="() => AddRootTodo()" Variant="Variant.Outlined" Size="Size.Small">New Todo</MudButton>
     </RibbonRightContent>

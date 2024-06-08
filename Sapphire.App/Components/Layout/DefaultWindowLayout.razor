@@ -1,16 +1,20 @@
-﻿<WindowLayout PageTitle="@PageTitle" RibbonCenterContent="RibbonCenterContent" RibbonRightContent="RibbonRightContent" MenuContent="MenuContent">
+﻿<WindowLayout PageTitle="@PageTitle"
+              RibbonCenterContent="RibbonCenterContent"
+              RibbonRightContent="RibbonRightContent"
+              RibbonLeftContent="RibbonLeftContent"
+              MenuContent="MenuContent">
     <ToolbarLeftContent>
-        <CurrentWorkspace />
+        <CurrentWorkspace/>
     </ToolbarLeftContent>
     <ToolbarCenterContent>
-        <WorkspaceMenu />
+        <WorkspaceMenu/>
     </ToolbarCenterContent>
     <ToolbarRightContent>
-        <CurrentWorker />
-        <SimulationButton />
-        <WindowControls />
+        <CurrentWorker/>
+        <SimulationButton/>
+        <WindowControls/>
     </ToolbarRightContent>
-    
+
     <ChildContent>
         <MudContainer MaxWidth="ChildContentMaxWidth" Class="my-8">
             @ChildContent
@@ -20,6 +24,7 @@
 
 @code {
     [Parameter] public string PageTitle { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? RibbonLeftContent { get; set; }
     [Parameter] public RenderFragment? RibbonCenterContent { get; set; }
     [Parameter] public RenderFragment? RibbonRightContent { get; set; }
     [Parameter] public RenderFragment? MenuContent { get; set; }

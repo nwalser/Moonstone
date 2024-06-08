@@ -1,0 +1,6 @@
+﻿<MudIconButton Href="@($"/project/{ProjectId}/todos")" Size="Size.Small" Icon="@Icons.Material.Outlined.Work" Variant="Variant.Outlined" />
+<MudIconButton Href="@($"/project/{ProjectId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" Variant="Variant.Outlined" />
+
+@code {
+    [Parameter] public required Guid ProjectId { get; set; }
+}

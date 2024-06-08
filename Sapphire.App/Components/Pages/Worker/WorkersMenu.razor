@@ -1,0 +1,18 @@
+﻿<MudStack Row="false" Spacing="1" Class="p-1">
+    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+        <MudIconButton Icon="@Icons.Material.Outlined.Add" Size="Size.Small" Variant="Variant.Outlined"/>
+    </MudStack>
+
+
+    @foreach (var worker in Database.Enumerate<WorkerAggregate>())
+    {
+        <MudStack Row="true" Justify="Justify.SpaceBetween" Spacing="1" AlignItems="AlignItems.Center">
+            <MudButton Class="justify-start w-full" Href="@($"/project/{worker.Id}/todos")" Variant="Variant.Outlined" Size="Size.Small">@worker.Name</MudButton>
+        </MudStack>
+    }
+</MudStack>
+
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+}

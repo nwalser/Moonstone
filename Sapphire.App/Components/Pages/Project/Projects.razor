@@ -2,9 +2,9 @@
 @page "/project"
 
 <DefaultWindowLayout PageTitle="Projects">
-    <RibbonRightContent>
-        <MudButton OnClick="() => CreateProject()" Variant="Variant.Outlined" Size="Size.Small">New Project</MudButton>
-    </RibbonRightContent>
+    <MenuContent>
+        <ProjectsMenu />
+    </MenuContent>
     
     <ChildContent>
         <MudGrid Spacing="1">

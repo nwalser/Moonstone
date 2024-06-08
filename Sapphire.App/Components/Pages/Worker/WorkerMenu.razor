@@ -1,0 +1,6 @@
+﻿<MudIconButton Href="@($"/worker/{WorkerId}/calendar")" Size="Size.Small" Icon="@Icons.Material.Outlined.Work" Variant="Variant.Outlined" />
+<MudIconButton Href="@($"/worker/{WorkerId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" Variant="Variant.Outlined" />
+
+@code {
+    [Parameter] public required Guid WorkerId { get; set; }
+}
