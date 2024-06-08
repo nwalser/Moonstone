@@ -3,7 +3,7 @@
     {
         <MudItem sm="12">
             <MudPaper Outlined="true" Class="pa-3" @key="@dailyAllocationRule.GetHashCode()">
-                <DailyAllocationRuleView Rule="dailyAllocationRule" OnDataChanged="OnDataChanged" Workers="Workers" OnRuleDeleted="OnRuleDeleted"/>
+                <DailyAllocationRuleView Rule="dailyAllocationRule" Workers="Workers" />
             </MudPaper>
         </MudItem>
     }
@@ -16,7 +16,7 @@
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
-    
+
     [Parameter] public required ProjectAggregate Project { get; set; }
     [Parameter] public required List<WorkerAggregate> Workers { get; set; }
 
