@@ -120,6 +120,7 @@
     {
         var names = values
             .Select(guid => Database.Enumerate<WorkerAggregate>().FirstOrDefault(w => w.Id == guid))
+            .Where(w => w is not null)
             .Select(w => w?.Name)
             .ToArray();
 

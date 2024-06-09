@@ -1,0 +1,44 @@
+﻿@{
+    var viewSize = Max.DayNumber - Min.DayNumber;
+    var widthPercent = (double)(To.DayNumber - From.DayNumber + 1)/viewSize;
+    var startPercent = (double)(From.DayNumber - Min.DayNumber)/viewSize;
+    var nowPercent = (double)(Now.DayNumber - Min.DayNumber)/viewSize;
+    var deadLinePercent = (double?)(Deadline?.DayNumber - Min.DayNumber)/viewSize;
+
+    var dayRange = Enumerable
+        .Range(0, Max.DayNumber - Min.DayNumber)
+        .Select(d => Min.AddDays(d))
+        .ToList();
+
+    var firstDaysOfMonths = dayRange.Select(d => (d.Year, d.Month))
+        .Distinct()
+        .Select(t => new DateOnly(t.Year, t.Month, 1))
+        .ToList();
+    
+    <svg preserveAspectRatio="none" width="100%" height="100%" viewBox="0 0 1 1">
+        @foreach (var date in firstDaysOfMonths)
+        {
+            var width = 1.0 / viewSize;
+            var start = (double)(date.DayNumber - Min.DayNumber)/viewSize;
+                    
+            <rect x="@start" y="0" width="@width" height="1" fill="var(--mud-palette-lines-default)"></rect>
+        }
+        
+        <rect x="@startPercent" y="0" width="@widthPercent" height="1" fill="var(--mud-palette-primary)"></rect>
+        <line x1="@nowPercent" x2="@nowPercent" y1="0" y2="1" stroke="var(--mud-palette-success)" stroke-width="0.003"/>
+        
+        @if (deadLinePercent is not null)
+        {
+            <line x1="@deadLinePercent" x2="@deadLinePercent" y1="0" y2="1" stroke="var(--mud-palette-error)" stroke-width="0.003"/>
+        }
+    </svg>
+}
+
+@code {
+    [Parameter] public required DateOnly From { get; set; }
+    [Parameter] public required DateOnly To { get; set; }
+    [Parameter] public required DateOnly Min { get; set; }
+    [Parameter] public required DateOnly Max { get; set; }
+    [Parameter] public required DateOnly Now { get; set; }
+    [Parameter] public DateOnly? Deadline { get; set; }
+}

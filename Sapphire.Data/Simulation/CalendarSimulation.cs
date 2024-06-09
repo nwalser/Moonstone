@@ -78,7 +78,7 @@ public static class CalendarSimulation
         var projects = db.Enumerate<ProjectAggregate>();
         
         // walk tree of todos and assign priorities, start with lowest priority first
-        foreach (var project in projects.OrderByDescending(p => p.Priority))
+        foreach (var project in projects.OrderBy(p => p.Priority))
         {
             var rootTodos = project.GetRootTodos(db);
             

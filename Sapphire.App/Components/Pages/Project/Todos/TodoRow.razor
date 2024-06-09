@@ -40,10 +40,25 @@
                         @($"{Todo.GetWorkedEffort(Database).TotalHours:N1}h / {Todo.GetEstimatedEffort(Database).TotalHours:N1}h")
                     </MudText>
                     
-                    <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkerIdsText(Todo.PossibleWorkerIds)</MudText>
+                    @*<MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkerIdsText(Todo.PossibleWorkerIds)</MudText>
                     <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@TagsMultiSelectText(Todo.Tags)</MudText>
-                    <MudCheckBox Value="Todo.Splittable" ReadOnly="true" Class="w-12"/>
+                    <MudCheckBox Value="Todo.Splittable" ReadOnly="true" Class="w-12"/>*@
 
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-96 h-4" Row="true">
+                        @{
+                            var allocations = Database.PlannedAllocations.Where(t => t.TodoId == Todo.Id).ToList();
+                            
+                            if (allocations.Any())
+                            {
+                                <VisualPosition From="allocations.Select(a => a.Date).Min()"
+                                                To="allocations.Select(a => a.Date).Max()" 
+                                                Min="DateOnly.FromDateTime(DateTime.UtcNow)" 
+                                                Now="DateOnly.FromDateTime(DateTime.UtcNow)"
+                                                Max="DateOnly.FromDateTime(DateTime.UtcNow).AddDays(120)"/>
+                            }
+                        }
+                    </MudStack>
+                    
                     <MudSpacer />
 
                     @if (Todo.State == TodoState.Completed)
@@ -137,6 +152,7 @@
     {
         var names = values
             .Select(guid => Database.Enumerate<WorkerAggregate>().FirstOrDefault(w => w.Id == guid))
+            .Where(w => w is not null)
             .Select(w => w?.Name)
             .ToArray();
 
