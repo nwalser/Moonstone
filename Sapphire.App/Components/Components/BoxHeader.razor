@@ -1,4 +1,4 @@
-﻿<MudStack Row="true" Class="mb-3 mt-8" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+﻿<MudStack Row="true" Class="@(First ? "mb-3" : "mb-3 mt-8")" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
     <MudText Typo="Typo.h3">@Title</MudText>
     
     <MudStack Row="true" Spacing="1">
@@ -9,5 +9,6 @@
 
 @code {
     [Parameter] public required string Title { get; set; }
+    [Parameter] public bool First { get; set; } = false; // todo: implement nicer box header
     [Parameter] public RenderFragment? ChildContent { get; set; }
 }

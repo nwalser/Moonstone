@@ -1,14 +1,15 @@
 ﻿<MudGrid Spacing="0">
-    <MudItem xs="4">
-        <MudGrid Spacing="1" Class="p-5">
+    <MudItem xs="4" Class="p-5">
+        <BoxHeader Title="Task" First="true"></BoxHeader>
+        <MudGrid Spacing="1">
             <MudItem xs="12">
-                <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" AutoFocus="true" />
+                <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" AutoFocus="true"/>
             </MudItem>
             <MudItem xs="6">
-                <MudNumericField T="double" Format="N1" Value="@Todo.CurrentEstimatedEffort.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateCurrentEstimatedEffort" Label="Current Estimate" Immediate="false" />
+                <MudNumericField T="double" Format="N1" Value="@Todo.CurrentEstimatedEffort.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateCurrentEstimatedEffort" Label="Current Estimate" Immediate="false"/>
             </MudItem>
             <MudItem xs="6">
-                <MudNumericField T="double?" Format="N1" Value="@Todo.InitialGroupEstimatedEffort?.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateInitialGroupEstimatedEffort" Label="Initial Group Estimate" Immediate="false" />
+                <MudNumericField T="double?" Format="N1" Value="@Todo.InitialGroupEstimatedEffort?.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateInitialGroupEstimatedEffort" Label="Initial Group Estimate" Immediate="false"/>
             </MudItem>
             <MudItem xs="12">
                 <MudSelect MultiSelection="true" T="Guid" AnchorOrigin="Origin.BottomCenter" Dense="true" MultiSelectionTextFunc="WorkerMultiSelectText" SelectedValues="Todo.PossibleWorkerIds" ShrinkLabel="true" SelectedValuesChanged="UpdatePossibleAssignees" Label="Possible Workers" Immediate="false">
@@ -29,27 +30,46 @@
             <MudItem xs="12">
                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
                     <MudText Typo="Typo.body2">Splittable</MudText>
-                    <MudCheckBox T="bool" Value="Todo.Splittable" ValueChanged="UpdateSplittable" Size="Size.Medium" />
+                    <MudCheckBox T="bool" Value="Todo.Splittable" ValueChanged="UpdateSplittable" Size="Size.Medium"/>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="12">
+                <MudStack Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Row="true" Spacing="1" Class="p-2">
+                    <MudButtonGroup Size="Size.Small" Variant="Variant.Outlined">
+                        <MudButton OnClick="() => UpdateState(TodoState.Draft)" Disabled="Todo.State == TodoState.Draft">Draft</MudButton>
+                        <MudButton OnClick="() => UpdateState(TodoState.Active)" Disabled="Todo.State == TodoState.Active">Active</MudButton>
+                        <MudButton OnClick="() => UpdateState(TodoState.Completed)" Disabled="Todo.State == TodoState.Completed">Completed</MudButton>
+                    </MudButtonGroup>
                 </MudStack>
             </MudItem>
         </MudGrid>
     </MudItem>
-    <MudItem xs="8">
-        @foreach (var allocation in Database.PlannedAllocations.Where(t => t.TodoId == Todo.Id))
-        {
-            <MudText>@allocation.Date - @allocation.WorkerId - @allocation.PlannedTime</MudText>
-        }
+    <MudItem xs="4" Class="p-5">
+        <BoxHeader Title="Planned Allocations" First="true">
+            @if (Todo.GetRemainingUnplannedEffort(Database) > TimeSpan.Zero)
+            {
+                <MudChip Icon="@Icons.Material.Filled.Warning" Color="Color.Error" Size="Size.Small" Variant="Variant.Outlined">Scheduling Incomplete</MudChip>
+            }
+        </BoxHeader>
+        
+        
+        <MudStack Spacing="1">
+            @foreach (var allocation in Database.PlannedAllocations.Where(t => t.TodoId == Todo.Id).GroupBy(a => a.WorkerId))
+            {
+                var worker = Database.Enumerate<WorkerAggregate>().SingleOrDefault(w => w.Id == allocation.Key);
 
-
-    </MudItem>
-    <MudItem xs="12">
-        <MudStack Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Row="true" Spacing="1" Class="p-2">
-            <MudButtonGroup Size="Size.Small" Variant="Variant.Outlined">
-                <MudButton OnClick="() => UpdateState(TodoState.Draft)" Disabled="Todo.State == TodoState.Draft">Draft</MudButton>
-                <MudButton OnClick="() => UpdateState(TodoState.Active)" Disabled="Todo.State == TodoState.Active">Active</MudButton>
-                <MudButton OnClick="() => UpdateState(TodoState.Completed)" Disabled="Todo.State == TodoState.Completed">Completed</MudButton>
-            </MudButtonGroup>
+                <MudPaper Outlined="true" Class="p-3">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.body2">@worker?.Name</MudText>
+                        <MudText Typo="Typo.body2">@($"{TimeSpanExtensions.Sum(allocation.Select(a => a.PlannedTime)).TotalHours:N1}h")</MudText>
+                    </MudStack>
+                </MudPaper>
+            }
         </MudStack>
+    </MudItem>
+    <MudItem xs="4" Class="p-5">
+        <BoxHeader Title="Track Effort" First="true" />
+        
     </MudItem>
 </MudGrid>
 
