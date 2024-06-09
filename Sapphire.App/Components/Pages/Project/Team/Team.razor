@@ -1,0 +1,36 @@
+﻿@inherits DatabaseRefresh
+@page "/project/{ProjectId:guid}/team"
+
+<DefaultWindowLayout PageTitle="@($"{_project?.Name} - Team")">
+    <SecondMenu>
+        <ProjectsMenu />
+    </SecondMenu>
+    <ThirdMenu>
+        <ProjectMenu ProjectId="ProjectId" />
+    </ThirdMenu>
+    
+    <ChildContent>
+        @if (_project is not null && _workers is not null)
+        {
+            <MudGrid>
+                <MudItem sm="12">
+                    
+                </MudItem>
+            </MudGrid>
+        }
+    </ChildContent>
+</DefaultWindowLayout>
+
+
+@code {
+    [Parameter] public required Guid ProjectId { get; set; }
+
+    private ProjectAggregate? _project;
+    private List<WorkerAggregate>? _workers;
+
+    protected override void OnLoadData()
+    {
+        _project = Database.Enumerate<ProjectAggregate>().SingleOrDefault(p => p.Id == ProjectId);
+        _workers = Database.Enumerate<WorkerAggregate>().ToList();
+    }
+}

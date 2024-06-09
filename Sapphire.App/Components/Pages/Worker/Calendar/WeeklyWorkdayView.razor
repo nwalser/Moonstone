@@ -9,10 +9,10 @@
             </MudSelect>
         </MudItem>
         <MudItem sm="3">
-            <MudDatePicker Date="WeeklyWorkDay.ActiveFrom.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="From"/>
+            <MudDatePicker Editable="true" Date="WeeklyWorkDay.ActiveFrom.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="From"/>
         </MudItem>
         <MudItem sm="3">
-            <MudDatePicker Date="WeeklyWorkDay.ActiveTo.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveToChanged" Label="To"/>
+            <MudDatePicker Editable="true" Date="WeeklyWorkDay.ActiveTo.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveToChanged" Label="To"/>
         </MudItem>
         <MudItem sm="3">
             <MudNumericField T="double" Value="WeeklyWorkDay.WorkingHours.TotalHours" ValueChanged="MaximalAllocationChanged" Format="N2" Label="Working Hours" AdornmentText="h" Adornment="Adornment.End"/>
