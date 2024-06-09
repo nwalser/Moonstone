@@ -10,20 +10,20 @@
         <MudGrid Spacing="1">
             @foreach (var project in _projects)
             {
-            <MudItem xs="12">
-                <MudPaper Outlined="true" Class="p-3">
-                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudStack Row="false" Spacing="1">
-                            <MudText Typo="Typo.h4">@project.Name</MudText>
-                            <MudText Typo="Typo.subtitle1">@project.Description @project.Deadline @project.Id</MudText>
-                        </MudStack>
+                <MudItem xs="12" @key="project.Id">
+                    <MudPaper Outlined="true" Class="p-3">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <MudStack Row="false" Spacing="1">
+                                <MudText Typo="Typo.h4">@project.Name</MudText>
+                                <MudText Typo="Typo.subtitle1">@project.Description @project.Deadline @project.Id</MudText>
+                            </MudStack>
 
-                        <MudStack Row="true" Spacing="1">
-                            <MudButton Size="Size.Small" Href="@($"/project/{project.Id}")" Variant="Variant.Outlined">View</MudButton>
+                            <MudStack Row="true" Spacing="1">
+                                <MudButton Size="Size.Small" Href="@($"/project/{project.Id}/todos")" Variant="Variant.Outlined">View</MudButton>
+                            </MudStack>
                         </MudStack>
-                    </MudStack>
-                </MudPaper>
-            </MudItem>
+                    </MudPaper>
+                </MudItem>
             }
         </MudGrid>
     </ChildContent>

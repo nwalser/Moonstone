@@ -1,4 +1,17 @@
 ﻿<MudStack Row="false" Spacing="1">
-    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.RocketLaunch" Href="/project" Variant="Variant.Outlined" />
-    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Person" Href="/worker" Variant="Variant.Outlined" />
+    <MudIconButton Size="Size.Small" 
+                   Icon="@Icons.Material.Filled.RocketLaunch" 
+                   Href="/project" 
+                   Variant="Variant.Outlined" 
+                   Style="@Navigation.GetSelectedStyle("/project")" />
+
+    <MudIconButton Size="Size.Small" 
+                   Icon="@Icons.Material.Filled.Person" 
+                   Href="/worker" 
+                   Variant="Variant.Outlined"
+                   Style="@Navigation.GetSelectedStyle("/worker")" />
 </MudStack>
+
+@code{
+    [Inject] public required NavigationManager Navigation { get; set; }
+}

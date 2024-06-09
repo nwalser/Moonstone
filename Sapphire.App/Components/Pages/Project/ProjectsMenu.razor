@@ -1,8 +1,9 @@
 ﻿<MudStack Row="false" Spacing="1" Class="p-1">
     @foreach (var project in Database.Enumerate<ProjectAggregate>().OrderByDescending(p => p.Priority))
     {
-        <a href="@($"/project/{project.Id}")">
-            <MudCard Elevation="0" Outlined="true" Class="p-1">
+        <a href="@($"/project/{project.Id}/todos")">
+            <MudCard Elevation="0" Outlined="true" Class="p-1"             
+                     Style="@Navigation.GetSelectedStyle($"/project/{project.Id}")">
                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Spacing="1">
                     <MudText Typo="Typo.body2">@project.Name</MudText>
                     <MudSpacer />
@@ -24,6 +25,14 @@
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
     [Inject] public required NavigationManager Navigation { get; set; }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            Navigation.LocationChanged += (_, _) => InvokeAsync(StateHasChanged);
+        
+        base.OnAfterRender(firstRender);
+    }
+    
     private void CreateProject()
     {
         var project = new ProjectAggregate

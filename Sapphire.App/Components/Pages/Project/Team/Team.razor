@@ -144,6 +144,8 @@
             WorkerId = _workerToBeAdded.Value,
         };
 
+        _workerToBeAdded = null;
+
         Database.Update(weeklyAllocations);
     }
 }

@@ -1,8 +1,9 @@
 ﻿<MudStack Row="false" Spacing="1" Class="p-1">
     @foreach (var worker in Database.Enumerate<WorkerAggregate>())
     {
-        <a href="@($"/worker/{worker.Id}")">
-            <MudCard Elevation="0" Outlined="true" Class="p-1">
+        <a href="@($"/worker/{worker.Id}/calendar")">
+            <MudCard Elevation="0" Outlined="true" Class="p-1" @onclick="@(() => Navigation.NavigateTo($"/worker/{worker.Id}/calendar"))"
+                     Style="@Navigation.GetSelectedStyle($"/worker/{worker.Id}")">
                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
                     <MudText Typo="Typo.body2">@worker.Name</MudText>
                     <MudChip Size="Size.Small">@($"{worker.GetRegularHours(Database, DateOnly.FromDateTime(DateTime.UtcNow)).TotalHours:N1}h")</MudChip>
@@ -21,7 +22,15 @@
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
     [Inject] public required NavigationManager Navigation { get; set; }
-    
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            Navigation.LocationChanged += (_, _) => InvokeAsync(StateHasChanged);
+        
+        base.OnAfterRender(firstRender);
+    }
+
     private void CreateWorker()
     {
         var worker = new WorkerAggregate

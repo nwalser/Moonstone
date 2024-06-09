@@ -1,9 +1,21 @@
 ﻿<MudStack Row="false" Spacing="1">
-    <MudIconButton Href="@($"/worker/{WorkerId}/calendar")" Size="Size.Small" Icon="@Icons.Material.Outlined.CalendarMonth" Variant="Variant.Outlined" />
-    <MudIconButton Href="@($"/worker/{WorkerId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" Variant="Variant.Outlined" />
+    <MudIconButton
+        Href="@($"/worker/{WorkerId}/calendar")"
+        Size="Size.Small"
+        Icon="@Icons.Material.Outlined.CalendarMonth"
+        Variant="Variant.Outlined"
+        Style="@Navigation.GetSelectedStyle($"/worker/{WorkerId}/calendar")"/>
+    
+    <MudIconButton
+        Href="@($"/worker/{WorkerId}/settings")"
+        Size="Size.Small"
+        Icon="@Icons.Material.Outlined.Settings"
+        Variant="Variant.Outlined"
+        Style="@Navigation.GetSelectedStyle($"/worker/{WorkerId}/settings")"/>
 </MudStack>
 
 
 @code {
-[Parameter] public required Guid WorkerId { get; set; }
+    [Inject] public required NavigationManager Navigation { get; set; }
+    [Parameter] public required Guid WorkerId { get; set; }
 }

@@ -1,10 +1,28 @@
 ﻿<MudStack Row="false" Spacing="1">
-    <MudIconButton Href="@($"/project/{ProjectId}/todos")" Size="Size.Small" Icon="@Icons.Material.Filled.AddTask" Variant="Variant.Outlined" />
-    <MudIconButton Href="@($"/project/{ProjectId}/team")" Size="Size.Small" Icon="@Icons.Material.Outlined.People" Variant="Variant.Outlined" />
-    <MudIconButton Href="@($"/project/{ProjectId}/settings")" Size="Size.Small" Icon="@Icons.Material.Outlined.Settings" Variant="Variant.Outlined" />
+    <MudIconButton
+        Href="@($"/project/{ProjectId}/todos")"
+        Size="Size.Small"
+        Icon="@Icons.Material.Filled.AddTask"
+        Variant="Variant.Outlined"
+        Style="@Navigation.GetSelectedStyle($"/project/{ProjectId}/todos")" />
+
+    <MudIconButton
+        Href="@($"/project/{ProjectId}/team")"
+        Size="Size.Small"
+        Icon="@Icons.Material.Outlined.People"
+        Variant="Variant.Outlined"
+        Style="@Navigation.GetSelectedStyle($"/project/{ProjectId}/team")" />
+
+    <MudIconButton
+        Href="@($"/project/{ProjectId}/settings")"
+        Size="Size.Small"
+        Icon="@Icons.Material.Outlined.Settings"
+        Variant="Variant.Outlined"
+        Style="@Navigation.GetSelectedStyle($"/project/{ProjectId}/settings")" />
 </MudStack>
 
 
 @code {
+    [Inject] public required NavigationManager Navigation { get; set; }
     [Parameter] public required Guid ProjectId { get; set; }
 }
