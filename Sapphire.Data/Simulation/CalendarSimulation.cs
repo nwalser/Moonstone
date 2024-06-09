@@ -38,7 +38,7 @@ public static class CalendarSimulation
 
                 foreach (var todoForWorker in todosForWorker)
                 {
-                    var availableHours = worker.AvailableHours(db, day);
+                    var availableHours = worker.GetAvailableHours(db, day);
 
                     if (availableHours <= TimeSpan.Zero)
                         break;

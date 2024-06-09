@@ -5,7 +5,7 @@
             <MudCard Elevation="0" Outlined="true" Class="p-1">
                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
                     <MudText Typo="Typo.body2">@worker.Name</MudText>
-                    <MudChip Size="Size.Small">@($"{worker.RegularHours(Database, DateOnly.FromDateTime(DateTime.UtcNow)).TotalHours:N1}h")</MudChip>
+                    <MudChip Size="Size.Small">@($"{worker.GetRegularHours(Database, DateOnly.FromDateTime(DateTime.UtcNow)).TotalHours:N1}h")</MudChip>
                 </MudStack>
             </MudCard>
         </a>

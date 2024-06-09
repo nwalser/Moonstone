@@ -12,28 +12,69 @@
     <ChildContent>
         @if (_project is not null)
         {
-            <MudGrid>
+            <MudGrid Spacing="2">
                 @foreach (var worker in _workersInProject)
                 {
-                    <MudItem sm="12">
+                    <MudItem xs="12">
                         <BoxHeader Title="@worker.Name">
                             <MudButton Size="Size.Small" Variant="Variant.Outlined" OnClick="() => AddDailyRule(worker.Id)">Add Daily Allocation Rule</MudButton>
                             <MudButton Size="Size.Small" Variant="Variant.Outlined" OnClick="() => AddWeeklyRule(worker.Id)">Add Weekly Allocation Rule</MudButton>
                         </BoxHeader> 
 
+                        <MudGrid Spacing="3">
+                            <MudItem xs="6">
+                                <MudGrid Spacing="2">
+                                    @foreach (var dailyAllocation in _project.GetDailyAllocations(Database, worker.Id))
+                                    {
+                                        <MudItem xs="12">
+                                            <MudCard Outlined="true" Elevation="0" Class="p-3">
+                                                <DailyAllocationRuleView Rule="dailyAllocation"/>
+                                            </MudCard>
+                                        </MudItem>
+                                    }
+                                    @foreach (var weeklyAllocation in _project.GetWeeklyAllocations(Database, worker.Id))
+                                    {
+                                        <MudItem xs="12">
+                                            <MudCard Outlined="true" Elevation="0" Class="p-3">
+                                                <WeeklyAllocationRuleView Rule="weeklyAllocation"/>
+                                            </MudCard>
+                                        </MudItem>
+                                    }
+                                </MudGrid>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudGrid Spacing="2">
+                                    @foreach (var month in Enumerable.Range(0, 4).Select(m => DateTime.UtcNow.AddMonths(m)))
+                                    {
+                                        <MudItem xs="6">
+                                            <MonthView Year="month.Year" Month="month.Month" Context="day">
+                                                @{
+                                                    var color = "transparent";
+
+                                                    var maximalAllocatable = _project.GetMaximalAllocatable(Database, day, worker.Id);
+
+                                                    if (maximalAllocatable > TimeSpan.Zero)
+                                                        color = "var(--mud-palette-success)";
+                                                    
+                                                    <div style="width: calc(1 / 7* 100%); text-align: center; padding: 2px">
+                                                        <div style="border: 1px solid @color; border-radius: var(--mud-default-borderradius); line-height: 1.5rem; font-size: 0.8rem;">
+                                                            @day.Day
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </MonthView>
+                                        </MudItem>
+                                    }
+                                </MudGrid>
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <MudGrid>
+                            
+                        </MudGrid>
+                        
                         <MudStack Row="false" Spacing="1">
-                            @foreach (var dailyAllocation in _project.GetDailyAllocations(Database, worker.Id))
-                            {
-                                <MudCard Outlined="true" Elevation="0" Class="p-3">
-                                    <DailyAllocationRuleView Rule="dailyAllocation"/>
-                                </MudCard>
-                            }
-                            @foreach (var weeklyAllocation in _project.GetWeeklyAllocations(Database, worker.Id))
-                            {
-                                <MudCard Outlined="true" Elevation="0" Class="p-3">
-                                    <WeeklyAllocationRuleView Rule="weeklyAllocation"/>
-                                </MudCard>
-                            }
+
                         </MudStack>
                     </MudItem>
                 }

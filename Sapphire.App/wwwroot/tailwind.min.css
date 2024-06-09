@@ -754,6 +754,10 @@ video {
   flex-direction: column;
 }
 
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
 .items-center {
   align-items: center;
 }
@@ -786,6 +790,10 @@ video {
 
 .rounded-none {
   border-radius: 0px;
+}
+
+.border {
+  border-width: 1px;
 }
 
 .border-none {

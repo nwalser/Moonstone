@@ -1,10 +1,35 @@
-﻿
+﻿@using System.Globalization
+@{
+    var from = new DateOnly(Year, Month, 1);
+    var to = from.AddMonths(1).AddDays(-1);
+    var days = Enumerable.Range(0, to.DayNumber - from.DayNumber)
+        .Select(d => from.AddDays(d))
+        .ToList();
+    
+    <MudPaper Outlined="true" Class="pa-3" Style="height: 100%">
+        <MudText Typo="Typo.h4">@CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(Month)</MudText>
+        <div style="display: flex; flex-direction: row; flex-wrap: wrap;">
+            @{
+                var bufferDays = from.DayNumber - from.StartOfWeek().DayNumber;
 
+                @foreach (var bufferDay in Enumerable.Range(0, bufferDays))
+                {
+                    <div style="width: calc(1 / 7* 100%);"></div>
+                }
 
-
-
+                @foreach (var day in days)
+                {
+                    @ChildContent?.Invoke(day)
+                }
+            }
+        </div>
+    </MudPaper>
+}
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [Parameter] public required int Year { get; set; }
     [Parameter] public required int Month { get; set; }
+    
+    [Parameter] public RenderFragment<DateOnly>? ChildContent { get; set; }
 }

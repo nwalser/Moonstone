@@ -13,7 +13,7 @@ public class WorkerAggregate : Document
     public TimeSpan ConstantBaseLoad { get; set; } = TimeSpan.Zero;
 
     
-    public TimeSpan RegularHours(ProjectDatabase db, DateOnly date)
+    public TimeSpan GetRegularHours(ProjectDatabase db, DateOnly date)
     {
         // OfficeDay
         {
@@ -52,7 +52,7 @@ public class WorkerAggregate : Document
         return TimeSpan.Zero;
     }    
 
-    public TimeSpan WorkedHours(ProjectDatabase db, DateOnly date)
+    public TimeSpan GetWorkedHours(ProjectDatabase db, DateOnly date)
     {
         var allocations = db.Enumerate<AllocationAggregate>()
             .Where(a => a.Date == date)
@@ -62,7 +62,7 @@ public class WorkerAggregate : Document
         return TimeSpanExtensions.Sum(allocations.Select(t => t.AllocatedTime));
     }    
     
-    public TimeSpan PlannedHours(ProjectDatabase db, DateOnly date)
+    public TimeSpan GetPlannedHours(ProjectDatabase db, DateOnly date)
     {
         var plannedAllocations = db.PlannedAllocations
             .Where(a => a.Date == date)
@@ -72,14 +72,14 @@ public class WorkerAggregate : Document
         return TimeSpanExtensions.Sum(plannedAllocations.Select(t => t.PlannedTime));
     }
 
-    public TimeSpan BaseLoad(ProjectDatabase db, DateOnly date)
+    public TimeSpan GetBaseLoad(ProjectDatabase db, DateOnly date)
     {
         return ConstantBaseLoad;
     }
     
     
-    public TimeSpan AvailableHours(ProjectDatabase db, DateOnly date)
+    public TimeSpan GetAvailableHours(ProjectDatabase db, DateOnly date)
     {
-        return RegularHours(db, date) - WorkedHours(db, date) - PlannedHours(db, date) - BaseLoad(db, date);
+        return GetRegularHours(db, date) - GetWorkedHours(db, date) - GetPlannedHours(db, date) - GetBaseLoad(db, date);
     }
 }

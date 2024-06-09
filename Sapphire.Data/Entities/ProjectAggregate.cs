@@ -74,13 +74,13 @@ public class ProjectAggregate : Document
             return TimeSpan.Zero;
         
         var weeklyAllocations = GetWeeklyAllocations(db, workerId)
-            .Where(w => w.ActiveFrom <= day)
-            .Where(w => w.ActiveTo >= day)
+            .Where(w => w.ActiveFrom is null || w.ActiveFrom <= day)
+            .Where(w => w.ActiveTo is null || w.ActiveTo >= day)
             .Select(w => w.MaximalAllocations.SingleOrDefault(t => t.Key == day.DayOfWeek).Value);
         
         var dailyAllocations = GetDailyAllocations(db, workerId)
-            .Where(w => w.ActiveFrom <= day)
-            .Where(w => w.ActiveTo >= day)
+            .Where(w => w.ActiveFrom is null || w.ActiveFrom <= day)
+            .Where(w => w.ActiveTo is null || w.ActiveTo >= day)
             .Select(w => w.MaximalAllocation);
 
         List<TimeSpan> allocationSpans = [..weeklyAllocations, ..dailyAllocations];
