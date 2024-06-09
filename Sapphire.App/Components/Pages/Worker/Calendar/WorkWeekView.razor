@@ -1,0 +1,56 @@
+﻿<MudStack Row="true" Spacing="4" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudStack Row="false" Spacing="2" Class="flex-grow">
+        <MudStack Row="true" Spacing="2">
+            @foreach (var dayOfWeek in (DayOfWeek[])Enum.GetValues(typeof(DayOfWeek)))
+            {
+                <div style="width: calc(1/7 * 100%)">
+                    <MudNumericField T="double?" Value="WorkWeek.DailyWorkingHours.SingleOrDefault(m => m.Key == dayOfWeek).Value.TotalHours"
+                                     ValueChanged="v => MaximalAllocationChanged(dayOfWeek, v)" Format="N2" Label="@dayOfWeek.ToString()"
+                                     AdornmentText="h" Adornment="Adornment.End" Immediate="false" HideSpinButtons="true" />
+                </div>
+            }
+        </MudStack>
+        <MudStack Row="true">
+            <MudDatePicker Editable="true" Date="WorkWeek.ActiveFrom?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="Active From" Clearable="true" Class="mud-shrink w-1/2" ShowWeekNumbers="true"/>
+            <MudDatePicker Editable="true" Date="WorkWeek.ActiveTo?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveToChanged" Label="Active Until" Clearable="true" Class="mud-shrink w-1/2" ShowWeekNumbers="true"/>
+        </MudStack>
+    </MudStack>
+
+    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="Delete">Delete</MudButton>
+</MudStack>
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [Parameter] public required WorkWeek WorkWeek { get; set; }
+
+    private void ActiveFromChanged(DateTime? date)
+    {
+        WorkWeek.ActiveFrom = date?.ToDateOnly();
+        Database.Update(WorkWeek);
+    }
+
+    private void ActiveToChanged(DateTime? date)
+    {
+        WorkWeek.ActiveTo = date?.ToDateOnly();
+        Database.Update(WorkWeek);
+    }
+
+    private void MaximalAllocationChanged(DayOfWeek day, double? hours)
+    {
+        if (hours is null)
+        {
+            WorkWeek.DailyWorkingHours.Remove(day);
+        }
+        else
+        {
+            WorkWeek.DailyWorkingHours[day] = TimeSpan.FromHours(hours.Value);
+        }
+        
+        Database.Update(WorkWeek);
+    }
+
+    private void Delete()
+    {
+        WorkWeek.Remove(Database);
+    }
+}

@@ -1,14 +1,14 @@
-﻿<BoxHeader Title="Weekly Workdays" />
+﻿<BoxHeader Title="Workweek" />
 
 <MudGrid Spacing="1">
-    @foreach (var dailyAllocationRule in Database.Enumerate<WeeklyWorkDay>()
+    @foreach (var workWeek in Database.Enumerate<WorkWeek>()
                   .Where(w => w.WorkerId == Worker.Id)
-                  .Where(w => w.ActiveFrom.Year <= Year)
-                  .Where(w => w.ActiveTo.Year >= Year))
+                  .Where(w => w.ActiveFrom is null || w.ActiveFrom.Value.Year <= Year)
+                  .Where(w => w.ActiveTo is null || w.ActiveTo.Value.Year >= Year))
     {
         <MudItem sm="12">
-            <MudPaper Outlined="true" Class="pa-3" @key="@dailyAllocationRule.GetHashCode()">
-                <WeeklyWorkdayView WeeklyWorkDay="dailyAllocationRule" />
+            <MudPaper Outlined="true" Class="pa-3" @key="@workWeek.GetHashCode()">
+                <WorkWeekView WorkWeek="workWeek" />
             </MudPaper>
         </MudItem>
     }
@@ -26,13 +26,9 @@
 
     private void AddRule()
     {
-        var weeklyWorkDay = new WeeklyWorkDay
+        var weeklyWorkDay = new WorkWeek
         {
             WorkerId = Worker.Id,
-            ActiveFrom = new DateOnly(2000, 1, 1),
-            ActiveTo = new DateOnly(2100, 1, 1),
-            WorkingHours = TimeSpan.Zero,
-            DayOfWeek = DayOfWeek.Monday
         };
 
         Database.Update(weeklyWorkDay);

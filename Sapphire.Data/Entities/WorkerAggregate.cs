@@ -45,15 +45,14 @@ public class WorkerAggregate : Document
         
         // WeeklyWorkDay
         {
-            var weeklyWorkDays = db.Enumerate<WeeklyWorkDay>()
+            var weeklyWorkDays = db.Enumerate<WorkWeek>()
                 .Where(w => w.WorkerId == Id)
-                .Where(w => w.DayOfWeek == date.DayOfWeek)
-                .Where(w => w.ActiveFrom <= date)
-                .Where(w => w.ActiveTo >= date)
+                .Where(w => w.ActiveFrom is null || w.ActiveFrom <= date)
+                .Where(w => w.ActiveTo is null || w.ActiveTo >= date)
                 .ToList();
-            
-            if(weeklyWorkDays.Any())
-                return TimeSpanExtensions.Sum(weeklyWorkDays.Select(t => t.WorkingHours));
+
+            if (weeklyWorkDays.Any())
+                return TimeSpanExtensions.Sum(weeklyWorkDays.Select(t => t.GetWorkingHours(date.DayOfWeek)));
         }
 
         return TimeSpan.Zero;

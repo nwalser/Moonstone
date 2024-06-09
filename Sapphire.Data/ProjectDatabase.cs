@@ -26,7 +26,7 @@ public class ProjectDatabase : Database, IDisposable
         
         { 4, typeof(LeaveDayAggregate) },
         { 5, typeof(OfficeDayAggregate) },
-        { 6, typeof(WeeklyWorkDay) },
+        { 6, typeof(WorkWeek) },
         
         { 7, typeof(DailyAllocationRule) },
         { 8, typeof(WeeklyAllocationRule) },

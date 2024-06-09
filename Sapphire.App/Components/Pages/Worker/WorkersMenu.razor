@@ -39,13 +39,9 @@
             ConstantBaseLoad = TimeSpan.FromHours(0.5)
         };
 
-        var weeklyWorkDay = new WeeklyWorkDay()
+        var weeklyWorkDay = new WorkWeek()
         {
-            ActiveFrom = DateOnly.MinValue,
-            ActiveTo = DateOnly.MaxValue,
             WorkerId = worker.Id,
-            WorkingHours = TimeSpan.FromHours(8.5),
-            DayOfWeek = DayOfWeek.Monday
         };
 
         Database.Update(worker);
