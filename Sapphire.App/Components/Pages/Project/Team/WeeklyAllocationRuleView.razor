@@ -1,24 +1,21 @@
 ﻿<MudStack Row="true" Spacing="2" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-    <MudGrid Spacing="2">
-        <MudItem sm="3">
-            <MudSelect Dense="true" T="DayOfWeek" MultiSelection="false" Value="Rule.DayOfWeek" ValueChanged="DayOfWeekChanged">
-                @foreach (var dayOfWeek in (DayOfWeek[])Enum.GetValues(typeof(DayOfWeek)))
-                {
-                    <MudSelectItem T="DayOfWeek" Value="@dayOfWeek">@dayOfWeek</MudSelectItem>
-                }
-            </MudSelect>
-        </MudItem>
-        <MudItem sm="3">
-            <MudDatePicker Editable="true" Date="Rule.ActiveFrom?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="Active From" Clearable="true" Class="mud-shrink" ShowWeekNumbers="true" />
-        </MudItem>
-        <MudItem sm="3">
-            <MudDatePicker Editable="true" Date="Rule.ActiveTo?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveToChanged" Label="Active Until" Clearable="true" Class="mud-shrink" ShowWeekNumbers="true" />
-        </MudItem>
-        <MudItem sm="3">
-            <MudNumericField T="double" Value="Rule.MaximalAllocation.TotalHours" ValueChanged="MaximalAllocationChanged" Format="N2" Label="Maximal Allocation" AdornmentText="h" Adornment="Adornment.End"/>
-        </MudItem>
-    </MudGrid>
-    
+    <MudStack Row="false" Spacing="2">
+        <MudStack Row="true" Spacing="2">
+            @foreach (var dayOfWeek in (DayOfWeek[])Enum.GetValues(typeof(DayOfWeek)))
+            {
+                <div style="width: calc(1/7 * 100%)">
+                    <MudNumericField T="double?" Value="Rule.MaximalAllocations.SingleOrDefault(m => m.Key == dayOfWeek).Value.TotalHours"
+                                     ValueChanged="v => MaximalAllocationChanged(dayOfWeek, v)" Format="N2" Label="@dayOfWeek.ToString()"
+                                     AdornmentText="h" Adornment="Adornment.End" Immediate="false" Clearable="true" HideSpinButtons="true" />
+                </div>
+            }
+        </MudStack>
+        <MudStack Row="true">
+            <MudDatePicker Editable="true" Date="Rule.ActiveFrom?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="Active From" Clearable="true" Class="mud-shrink w-1/2" ShowWeekNumbers="true"/>
+            <MudDatePicker Editable="true" Date="Rule.ActiveTo?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveToChanged" Label="Active Until" Clearable="true" Class="mud-shrink w-1/2" ShowWeekNumbers="true"/>
+        </MudStack>
+    </MudStack>
+
     <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="Delete">Delete</MudButton>
 </MudStack>
 
@@ -39,18 +36,20 @@
         Database.Update(Rule);
     }
 
-    private void MaximalAllocationChanged(double hours)
+    private void MaximalAllocationChanged(DayOfWeek day, double? hours)
     {
-        Rule.MaximalAllocation = TimeSpan.FromHours(hours);
+        if (hours is null)
+        {
+            Rule.MaximalAllocations.Remove(day);
+        }
+        else
+        {
+            Rule.MaximalAllocations[day] = TimeSpan.FromHours(hours.Value);
+        }
+        
         Database.Update(Rule);
     }
 
-    private void DayOfWeekChanged(DayOfWeek obj)
-    {
-        Rule.DayOfWeek = obj;
-        Database.Update(Rule);
-    }
-    
     private void Delete()
     {
         Rule.Remove(Database);

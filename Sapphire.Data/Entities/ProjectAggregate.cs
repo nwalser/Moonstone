@@ -76,8 +76,7 @@ public class ProjectAggregate : Document
         var weeklyAllocations = GetWeeklyAllocations(db, workerId)
             .Where(w => w.ActiveFrom <= day)
             .Where(w => w.ActiveTo >= day)
-            .Where(w => w.DayOfWeek == day.DayOfWeek)
-            .Select(w => w.MaximalAllocation);
+            .Select(w => w.MaximalAllocations.SingleOrDefault(t => t.Key == day.DayOfWeek).Value);
         
         var dailyAllocations = GetDailyAllocations(db, workerId)
             .Where(w => w.ActiveFrom <= day)

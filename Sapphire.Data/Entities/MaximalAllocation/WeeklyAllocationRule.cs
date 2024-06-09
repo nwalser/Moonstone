@@ -7,8 +7,7 @@ public class WeeklyAllocationRule : Document
     public required Guid WorkerId { get; set; }
     public required Guid ProjectId { get; set; }
 
-    public required DayOfWeek DayOfWeek { get; set; }
-    public required TimeSpan MaximalAllocation { get; set; }
+    public Dictionary<DayOfWeek, TimeSpan> MaximalAllocations { get; set; } = new();
 
     public DateOnly? ActiveFrom { get; set; }
     public DateOnly? ActiveTo { get; set; }

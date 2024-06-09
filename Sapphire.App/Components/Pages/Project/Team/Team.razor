@@ -16,28 +16,25 @@
                 @foreach (var worker in _workersInProject)
                 {
                     <MudItem sm="12">
-                        <MudCard Outlined="true" Elevation="0">
-                            <MudText>@worker.Name</MudText>
-                            
-                            @{
-                                var dailyAllocations = _project.GetDailyAllocations(Database, worker.Id);
-                                var weeklyAllocations = _project.GetWeeklyAllocations(Database, worker.Id);
+                        <BoxHeader Title="@worker.Name">
+                            <MudButton Size="Size.Small" Variant="Variant.Outlined" OnClick="() => AddDailyRule(worker.Id)">Add Daily</MudButton>
+                            <MudButton Size="Size.Small" Variant="Variant.Outlined" OnClick="() => AddWeeklyRule(worker.Id)">Add Weekly</MudButton>
+                        </BoxHeader> 
 
-                                foreach (var dailyAllocation in dailyAllocations)
-                                {
+                        <MudStack Row="false" Spacing="1">
+                            @foreach (var dailyAllocation in _project.GetDailyAllocations(Database, worker.Id))
+                            {
+                                <MudCard Outlined="true" Elevation="0" Class="p-3">
                                     <DailyAllocationRuleView Rule="dailyAllocation"/>
-                                }
-
-                                <MudButton OnClick="() => AddDailyRule(worker.Id)">Add Daily</MudButton>
-
-                                foreach (var weeklyAllocation in weeklyAllocations)
-                                {
-                                    <WeeklyAllocationRuleView Rule="weeklyAllocation"/>
-                                }
-
-                                <MudButton OnClick="() => AddWeeklyRule(worker.Id)">Add Weekly</MudButton>
+                                </MudCard>
                             }
-                        </MudCard>
+                            @foreach (var weeklyAllocation in _project.GetWeeklyAllocations(Database, worker.Id))
+                            {
+                                <MudCard Outlined="true" Elevation="0" Class="p-3">
+                                    <WeeklyAllocationRuleView Rule="weeklyAllocation"/>
+                                </MudCard>
+                            }
+                        </MudStack>
                     </MudItem>
                 }
             </MudGrid>
@@ -76,8 +73,6 @@
         {
             ProjectId = ProjectId,
             WorkerId = workerId,
-            MaximalAllocation = TimeSpan.FromHours(8.5),
-            DayOfWeek = DayOfWeek.Monday,
         };
 
         Database.Update(dailyRule);
