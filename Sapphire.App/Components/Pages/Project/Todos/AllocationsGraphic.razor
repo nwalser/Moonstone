@@ -1,0 +1,59 @@
+﻿@using Sapphire.Data.ValueObjects
+@{
+    var dayCount = Max.DayNumber - Min.DayNumber;
+    var dayWidth = (double)1 / dayCount * 1.1;
+
+    var dayRange = Enumerable
+        .Range(0, Max.DayNumber - Min.DayNumber)
+        .Select(d => Min.AddDays(d))
+        .ToList();
+
+    var firstDaysOfMonths = dayRange.Select(d => (d.Year, d.Month))
+        .Distinct()
+        .Select(t => new DateOnly(t.Year, t.Month, 1))
+        .ToList();
+
+    <svg preserveAspectRatio="none" width="100%" height="100%" viewBox="0 0 1 1">
+        @foreach (var firstDayOfMonth in firstDaysOfMonths)
+        {
+            <rect x="@GetStartPercent(firstDayOfMonth)" y="0" width="@dayWidth" height="1" fill="var(--mud-palette-lines-default)"></rect>
+        }
+
+        @foreach (var allocation in Allocations)
+        {
+            <rect x="@GetStartPercent(allocation.Date)" y="0" width="@dayWidth" height="1" fill="var(--mud-palette-primary)"></rect>
+        }
+        
+        @foreach (var plannedAllocation in PlannedAllocations)
+        {
+            <rect x="@GetStartPercent(plannedAllocation.Date)" y="0" width="@dayWidth" height="1" fill="var(--mud-palette-primary-darken)"></rect>
+        }
+
+        @if (Today is not null)
+        {
+            <rect x="@GetStartPercent(Today.Value)" y="0" width="@dayWidth" height="1" fill="var(--mud-palette-success)"></rect>
+        }
+        
+        @if (Deadline is not null)
+        {
+            <rect x="@GetStartPercent(Deadline.Value)" y="0" width="@dayWidth" height="1" fill="var(--mud-palette-error)"></rect>
+        }
+    </svg>
+}
+
+@code {
+    [Parameter] public required DateOnly? Today { get; set; }
+    [Parameter] public required DateOnly Min { get; set; }
+    [Parameter] public required DateOnly Max { get; set; }
+    
+    [Parameter] public required List<AllocationAggregate> Allocations { get; set; }
+    [Parameter] public required List<PlannedAllocation> PlannedAllocations { get; set; }
+    
+    [Parameter] public DateOnly? Deadline { get; set; }
+
+    private double GetStartPercent(DateOnly day)
+    {
+        var dayCount = Max.DayNumber - Min.DayNumber;
+        return (double)(day.DayNumber - Min.DayNumber) / dayCount;
+    }
+}

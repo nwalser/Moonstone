@@ -13,7 +13,7 @@
                 </MudStack>
 
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="flex-grow h-full" @onclick="ToggleEditing" Justify="Justify.Center">
-                    <MudText Typo="Typo.body2" Class="w-80" Style="@($"padding-left: {Depth * 12}px")">
+                    <MudText Typo="Typo.body2" Class="w-80 flex-shrink-0" Style="@($"padding-left: {Depth * 12}px")">
                         @switch (Todo.HasChildren(Database))
                         {
                             case true when Expanded:
@@ -30,55 +30,53 @@
                         @Todo.Name
                     </MudText>
 
-                    <div class="w-40 h-full px-2">
+                    <div class="w-40 h-full px-2 flex-shrink-0">
                         @if (Todo.InitialGroupEstimatedEffort is not null)
                         {
                             <HourProgress Progress="Todo.GetGroupWorkedEffort(Database)" Total="Todo.InitialGroupEstimatedEffort.Value"/>
                         }
                     </div>
-                    <div class="w-40 h-full px-2">
+                    <div class="w-40 h-full px-2 flex-shrink-0">
                         @if (Todo.HasChildren(Database))
                         {
                             <HourProgress Progress="Todo.GetGroupWorkedEffort(Database)" Total="Todo.GetGroupEstimatedEffort(Database)"/>
                         }
                     </div>
-                    <div class="w-40 h-full px-2">
+                    <div class="w-40 h-full px-2 flex-shrink-0">
                         @if (Todo.GetEstimatedEffort(Database) > TimeSpan.Zero)
                         {
                             <HourProgress Progress="Todo.GetWorkedEffort(Database)" Total="Todo.GetEstimatedEffort(Database)"/>
                         }
                     </div>
-                    
-                    @*<MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkerIdsText(Todo.PossibleWorkerIds)</MudText>
-                    <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@TagsMultiSelectText(Todo.Tags)</MudText>
-                    <MudCheckBox Value="Todo.Splittable" ReadOnly="true" Class="w-12"/>*@
 
-                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-96 h-2" Row="true">
+                    <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="w-50 flex-shrink-0" Row="true">
+                        <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkerIdsText(Todo.PossibleWorkerIds)</MudText>
+                    </MudStack>
+                    <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="w-50 flex-shrink-0" Row="true">
+                        <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@TagsMultiSelectText(Todo.Tags)</MudText>
+                    </MudStack>
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-10 flex-shrink-0" Row="true">
+                        <MudCheckBox Value="Todo.Splittable" ReadOnly="true" Class="w-12" Size="Size.Small"/>
+                    </MudStack>
+
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="h-2 w-full" Row="true">
                         @{
-                            var allocations = Database.PlannedAllocations.Where(t => t.TodoId == Todo.Id).ToList();
+                            var allocations = Database.Enumerate<AllocationAggregate>().Where(t => t.TodoId == Todo.Id).ToList();
+                            var plannedAllocations = Database.PlannedAllocations.Where(t => t.TodoId == Todo.Id).ToList();
+                            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
                             
-                            if (allocations.Any())
+                            if (plannedAllocations.Any())
                             {
-                                <VisualPosition From="allocations.Select(a => a.Date).Min()"
-                                                To="allocations.Select(a => a.Date).Max()" 
-                                                Min="DateOnly.FromDateTime(DateTime.UtcNow)" 
-                                                Now="DateOnly.FromDateTime(DateTime.UtcNow)"
-                                                Max="DateOnly.FromDateTime(DateTime.UtcNow).AddDays(120)"/>
+                                <AllocationsGraphic
+                                    Today="currentDate"
+                                    Min="currentDate.AddDays(-14)"
+                                    Max="currentDate.AddDays(3 * 40)"
+                                    Allocations="allocations"
+                                    PlannedAllocations="plannedAllocations"
+                                    Deadline="Project.Deadline"/>
                             }
                         }
                     </MudStack>
-                    
-                    <MudSpacer />
-
-                    @if (Todo.State == TodoState.Completed)
-                    {
-                        <MudChip Size="Size.Small" Color="Color.Success" Variant="Variant.Outlined">Completed</MudChip>
-                    }
-
-                    @if (Todo.State == TodoState.Draft)
-                    {
-                        <MudChip Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">Draft</MudChip>
-                    }
                 </MudStack>
 
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
@@ -162,7 +160,7 @@
         var names = values
             .Select(guid => Database.Enumerate<WorkerAggregate>().FirstOrDefault(w => w.Id == guid))
             .Where(w => w is not null)
-            .Select(w => w?.Name)
+            .Select(w => w?.GetDisplayName())
             .ToArray();
 
         return string.Join(", ", names);

@@ -2,7 +2,6 @@
 using Sapphire.Data.Entities.WorkingHours;
 using Sapphire.Data.Extensions;
 
-
 namespace Sapphire.Data.Entities;
 
 public class WorkerAggregate : Document
@@ -12,6 +11,14 @@ public class WorkerAggregate : Document
     public string Color { get; set; } = string.Empty;
     public TimeSpan ConstantBaseLoad { get; set; } = TimeSpan.Zero;
 
+
+    public string GetDisplayName()
+    {
+        if (!string.IsNullOrWhiteSpace(Abbreviation))
+            return Abbreviation;
+
+        return Name;
+    }
     
     public TimeSpan GetRegularHours(ProjectDatabase db, DateOnly date)
     {
