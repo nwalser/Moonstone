@@ -73,17 +73,13 @@ public class ProjectAggregate : Document
         if (Start > day)
             return TimeSpan.Zero;
         
-        var weeklyAllocations = db.Enumerate<WeeklyAllocationRule>()
-            .Where(w => w.ProjectId == Id)
-            .Where(w => w.WorkerId == workerId)
+        var weeklyAllocations = GetWeeklyAllocations(db, workerId)
             .Where(w => w.ActiveFrom <= day)
             .Where(w => w.ActiveTo >= day)
             .Where(w => w.DayOfWeek == day.DayOfWeek)
             .Select(w => w.MaximalAllocation);
         
-        var dailyAllocations = db.Enumerate<DailyAllocationRule>()
-            .Where(w => w.ProjectId == Id)
-            .Where(w => w.WorkerId == workerId)
+        var dailyAllocations = GetDailyAllocations(db, workerId)
             .Where(w => w.ActiveFrom <= day)
             .Where(w => w.ActiveTo >= day)
             .Select(w => w.MaximalAllocation);
@@ -102,5 +98,25 @@ public class ProjectAggregate : Document
         var maximalAllocatable = GetMaximalAllocatable(db, day, workerId);
         
         return maximalAllocatable - alreadyAllocated;
+    }
+
+    public IEnumerable<WeeklyAllocationRule> GetWeeklyAllocations(ProjectDatabase db, Guid workerId)
+    {
+        return db.Enumerate<WeeklyAllocationRule>()
+            .Where(w => w.ProjectId == Id)
+            .Where(w => w.WorkerId == workerId);
+    }
+    
+    public IEnumerable<DailyAllocationRule> GetDailyAllocations(ProjectDatabase db, Guid workerId)
+    {
+        return db.Enumerate<DailyAllocationRule>()
+            .Where(w => w.ProjectId == Id)
+            .Where(w => w.WorkerId == workerId);
+    }
+    
+    public IEnumerable<WorkerInProject> GetWorkersInProject(ProjectDatabase db)
+    {
+        return db.Enumerate<WorkerInProject>()
+            .Where(w => w.ProjectId == Id);
     }
 }

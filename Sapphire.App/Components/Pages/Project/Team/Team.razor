@@ -10,12 +10,31 @@
     </ThirdMenu>
     
     <ChildContent>
-        @if (_project is not null && _workers is not null)
+        @if (_project is not null)
         {
             <MudGrid>
-                <MudItem sm="12">
-                    
-                </MudItem>
+                @foreach (var workerInProject in _workersInProject)
+                {
+                    <MudItem sm="12">
+                        @{
+                            var dailyAllocations = workerInProject.GetDailyAllocations(Database);
+                            
+                            @foreach (var dailyAllocation in dailyAllocations)
+                            {
+                                <p>@dailyAllocation.MaximalAllocation</p>
+                            }
+                        }
+                        
+                        @{
+                            var weeklyAllocations = workerInProject.GetWeeklyAllocations(Database);
+
+                            @foreach (var weeklyAllocation in weeklyAllocations)
+                            {
+                                <p>@weeklyAllocation.MaximalAllocation</p>
+                            }
+                        }
+                    </MudItem>
+                }
             </MudGrid>
         }
     </ChildContent>
@@ -26,11 +45,11 @@
     [Parameter] public required Guid ProjectId { get; set; }
 
     private ProjectAggregate? _project;
-    private List<WorkerAggregate>? _workers;
+    private List<WorkerInProject> _workersInProject = [];
 
     protected override void OnLoadData()
     {
-        _project = Database.Enumerate<ProjectAggregate>().SingleOrDefault(p => p.Id == ProjectId);
-        _workers = Database.Enumerate<WorkerAggregate>().ToList();
+        _project = Database.Enumerate<ProjectAggregate>().Single(p => p.Id == ProjectId);
+        _workersInProject = _project.GetWorkersInProject(Database).ToList();
     }
 }
