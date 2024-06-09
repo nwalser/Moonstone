@@ -54,7 +54,12 @@
                                                     var maximalAllocatable = _project.GetMaximalAllocatable(Database, day, worker.Id);
 
                                                     if (maximalAllocatable > TimeSpan.Zero)
+                                                        color = "var(--mud-palette-lines-default)";
+
+                                                    var regularHours = worker.GetRegularHours(Database, day);
+                                                    if (maximalAllocatable > TimeSpan.Zero && regularHours > TimeSpan.Zero)
                                                         color = "var(--mud-palette-success)";
+                                                    
                                                     
                                                     <div style="width: calc(1 / 7* 100%); text-align: center; padding: 2px">
                                                         <div style="border: 1px solid @color; border-radius: var(--mud-default-borderradius); line-height: 1.5rem; font-size: 0.8rem;">
