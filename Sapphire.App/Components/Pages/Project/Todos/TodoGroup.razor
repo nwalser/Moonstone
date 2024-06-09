@@ -1,13 +1,13 @@
 ﻿@if (_todo is not null)
 {
-    <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" @key="_todo.Id" Todos="Todos" Project="Project" @bind-Expanded="_expanded" />
+    <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" @key="_todo.Id" Todos="Todos" Project="Project" @bind-Expanded="_expanded" Filter="@Filter" />
 }
 
 @if (_expanded)
 {
     <FluentUnstyledSortableList Items="_childTodos" OnUpdate="OnUpdate" Handle="true">
         <ItemTemplate>
-            <TodoGroup TodoId="context.Id" Todos="Todos" Depth="Depth+1" Project="Project" @key="context.Id" />
+            <TodoGroup TodoId="context.Id" Todos="Todos" Depth="Depth+1" Project="Project" @key="context.Id" Filter="@Filter" />
         </ItemTemplate>
     </FluentUnstyledSortableList>
 }
@@ -18,6 +18,7 @@
     [Parameter] public required Guid? TodoId { get; set; }
     [Parameter] public required ProjectAggregate Project { get; set; }
     [Parameter] public required uint Depth { get; set; }
+    [Parameter] public string Filter { get; set; } = string.Empty;
 
     private TodoAggregate?  _todo;
     private List<TodoAggregate> _childTodos = [];

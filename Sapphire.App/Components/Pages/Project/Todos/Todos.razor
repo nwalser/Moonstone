@@ -1,5 +1,4 @@
-﻿@using Align = MudBlazor.Align
-@inherits DatabaseRefresh
+﻿@inherits DatabaseRefresh
 @page "/project/{ProjectId:guid}/todos"
 
 <DefaultWindowLayout PageTitle="@($"{_project?.Name} - Todos")" ChildContentMaxWidth="MaxWidth.False">
@@ -11,9 +10,9 @@
     </ThirdMenu>
     
     <RibbonCenterContent>
-        <MudTextField T="string" Value="string.Empty" Class="w-96 mud-input-narrow" Margin="0" DebounceInterval="300"
+        <MudTextField T="string" @bind-Value="_filter" Class="w-96 mud-input-narrow" Margin="0" DebounceInterval="300"
                       Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.FilterList"
-                      AdornmentColor="Color.Default" Clearable="true"/>
+                      AdornmentColor="Color.Default" Clearable="true" />
     </RibbonCenterContent>
     <RibbonRightContent>
         <MudButton OnClick="() => AddRootTodo()" Variant="Variant.Outlined" Size="Size.Small">New Todo</MudButton>
@@ -35,7 +34,7 @@
                 </MudItem>
                 
                 <FluentDragContainer TItem="TodoAggregate" OnDropEnd="OnDropEnd" Class="w-full">
-                    <TodoGroup Depth="0" Todos="_todos" Project="_project" TodoId="null"/>
+                    <TodoGroup Depth="0" Todos="_todos" Project="_project" TodoId="null" Filter="@_filter"/>
                 </FluentDragContainer>
             </MudGrid>
         }
@@ -48,14 +47,14 @@
     private ProjectAggregate? _project;
     private List<TodoAggregate> _todos = [];
 
+    private string _filter = string.Empty;
+    
     protected override void OnLoadData()
     {
         _project = Database.Enumerate<ProjectAggregate>()
             .SingleOrDefault(p => p.Id == ProjectId);
-        
-        _todos = Database.Enumerate<TodoAggregate>()
-            .Where(t => t.ProjectId == ProjectId)
-            .ToList();
+
+        _todos = _project?.GetTodos(Database).ToList() ?? [];
     }
 
     private void AddRootTodo()
@@ -91,5 +90,4 @@
         e.Source.Item.ParentId = e.Target.Item.Id;
         Database.Update(e.Source.Item);
     }
-
 }

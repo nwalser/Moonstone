@@ -660,6 +660,10 @@ video {
   height: 2.5rem;
 }
 
+.h-2 {
+  height: 0.5rem;
+}
+
 .h-4 {
   height: 1rem;
 }
@@ -670,10 +674,6 @@ video {
 
 .h-full {
   height: 100%;
-}
-
-.h-2 {
-  height: 0.5rem;
 }
 
 .min-h-10 {
@@ -698,10 +698,6 @@ video {
 
 .w-40 {
   width: 10rem;
-}
-
-.w-60 {
-  width: 15rem;
 }
 
 .w-72 {
@@ -835,6 +831,10 @@ video {
 
 .blur {
   --tw-blur: blur(8px);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
+.filter {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 

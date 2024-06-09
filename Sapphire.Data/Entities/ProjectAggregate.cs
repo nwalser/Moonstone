@@ -1,5 +1,4 @@
-﻿using System.Data.Common;
-using Moonstone.Database;
+﻿using Moonstone.Database;
 using Sapphire.Data.Entities.MaximalAllocation;
 using Sapphire.Data.Extensions;
 
@@ -15,8 +14,8 @@ public class ProjectAggregate : Document
     public DateOnly? Deadline { get; set; }
 
     public List<string> PossibleTags { get; set; } = [];
-
-
+    
+    
     public IEnumerable<TodoAggregate> GetRootTodos(ProjectDatabase db)
     {
         return db.Enumerate<TodoAggregate>()
@@ -29,6 +28,7 @@ public class ProjectAggregate : Document
         return db.Enumerate<TodoAggregate>()
             .Where(p => p.ProjectId == Id);
     }
+    
 
     public int GetNumberOfTodos(ProjectDatabase db)
     {
@@ -129,4 +129,5 @@ public class ProjectAggregate : Document
         return db.Enumerate<WorkerAggregate>()
             .Where(w => !IsInProject(db, w.Id));
     }
+    
 }

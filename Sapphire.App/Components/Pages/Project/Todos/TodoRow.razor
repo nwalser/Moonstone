@@ -1,5 +1,5 @@
 ﻿<MudItem xs="12">
-    <MudCard Elevation="0" Outlined="true" Class="my-1">
+    <MudCard Elevation="0" Outlined="true" Class="my-1" Style="@(!Todo.FilterMatches(Filter) ? "filter: brightness(35%) !important" : string.Empty)">
         <MudStack Row="false" Spacing="0">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8" Style="@(Editing ? "background-color: var(--mud-palette-lines-default) !important" : string.Empty)">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
@@ -84,7 +84,7 @@
                         }
                     </div>
                     <div class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]" @onclick="async () => await Delete()">
-                        <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Warning"/>
+                        <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small"/>
                     </div>
                     <div class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]" @onclick="AddSubTodo">
                         <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small"/>
@@ -109,6 +109,7 @@
     [Parameter] public required uint Depth { get; set; }
     [Parameter] public required List<TodoAggregate> Todos { get; set; }
     [Parameter] public required List<TodoAggregate> ChildTodos { get; set; }
+    [Parameter] public string Filter { get; set; } = string.Empty;
 
 
     [Parameter] public bool Expanded { get; set; } = true;

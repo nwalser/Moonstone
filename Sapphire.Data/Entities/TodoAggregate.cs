@@ -25,6 +25,25 @@ public class TodoAggregate : Document
     public bool Splittable { get; set; } = false;
 
 
+    public bool FilterMatches(string filter)
+    {
+        if (string.IsNullOrWhiteSpace(filter))
+            return true;
+        
+        return Name.Contains(filter, StringComparison.InvariantCultureIgnoreCase) || 
+               Tags.Any(tag => tag.Contains(filter, StringComparison.InvariantCultureIgnoreCase));
+    }
+    
+    public IEnumerable<TodoAggregate> GetAncestorTodos(ProjectDatabase db)
+    {
+        var ancestor = GetParentTodo(db);
+        
+        if (ancestor is null)
+            return [];
+
+        return [ancestor, ..ancestor.GetAncestorTodos(db)];
+    }
+    
     public bool HasChildren(ProjectDatabase db)
     {
         return GetChildTodos(db).Any();
