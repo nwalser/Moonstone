@@ -65,21 +65,24 @@
                             var plannedAllocations = Database.PlannedAllocations.Where(t => t.TodoId == Todo.Id).ToList();
                             var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
                             
-                            if (plannedAllocations.Any())
-                            {
-                                <AllocationsGraphic
-                                    Today="currentDate"
-                                    Min="currentDate.AddDays(-14)"
-                                    Max="currentDate.AddDays(3 * 40)"
-                                    Allocations="allocations"
-                                    PlannedAllocations="plannedAllocations"
-                                    Deadline="Project.Deadline"/>
-                            }
+                            <AllocationsGraphic
+                                Today="currentDate"
+                                Min="currentDate.AddDays(-14)"
+                                Max="currentDate.AddDays(3 * 40)"
+                                Allocations="allocations"
+                                PlannedAllocations="plannedAllocations"
+                                Deadline="Project.Deadline"/>
                         }
                     </MudStack>
                 </MudStack>
 
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
+                    <div class="h-full w-8 flex items-center justify-center">
+                        @if (Todo.GetRemainingUnplannedEffort(Database) > TimeSpan.Zero)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" Color="Color.Error"/>
+                        }
+                    </div>
                     <div class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]" @onclick="async () => await Delete()">
                         <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Warning"/>
                     </div>
