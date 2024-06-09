@@ -1,0 +1,13 @@
+﻿<MudStack Row="false" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="0" Class="h-full">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="0" Class="flex-grow w-full">
+        <MudText Typo="Typo.body2" Class="w-1/2 px-2 text-right">@($"{Progress.TotalHours:N0}h")</MudText>
+        <MudText Typo="Typo.body2">/</MudText>
+        <MudText Typo="Typo.body2" Class="w-1/2 px-2 text-right">@($"{Total.TotalHours:N0}h")</MudText>
+    </MudStack>
+    <MudProgressLinear Value="Progress.TotalHours" Min="0" Max="@Total.TotalHours" Size="Size.Small" Class="w-full"/>
+</MudStack>
+
+@code {
+    [Parameter] public required TimeSpan Progress { get; set; }
+    [Parameter] public required TimeSpan Total { get; set; }
+}

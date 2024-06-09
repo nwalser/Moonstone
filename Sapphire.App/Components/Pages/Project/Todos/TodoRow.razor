@@ -1,7 +1,7 @@
 ﻿<MudItem xs="12">
-    <MudCard Elevation="0" Outlined="true" Class="my-1" Style="@(Editing ? "border-color: var(--mud-palette-text-primary)" : "")">
+    <MudCard Elevation="0" Outlined="true" Class="my-1">
         <MudStack Row="false" Spacing="0">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8" Style="@(Editing ? "background-color: var(--mud-palette-lines-default) !important" : string.Empty)">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
                     <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
                         <MudIcon Icon="@Icons.Material.Filled.DragIndicator" Size="Size.Small"/>
@@ -12,7 +12,7 @@
                     </div>
                 </MudStack>
 
-                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="flex-grow h-full" @onclick="ToggleEditing" Justify="Justify.Center">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="flex-grow h-full" @onclick="ToggleEditing" Justify="Justify.Center">
                     <MudText Typo="Typo.body2" Class="w-80" Style="@($"padding-left: {Depth * 12}px")">
                         @switch (Todo.HasChildren(Database))
                         {
@@ -30,21 +30,30 @@
                         @Todo.Name
                     </MudText>
 
-                    <MudText Typo="Typo.body2" Class="w-60 text-right truncate">
+                    <div class="w-40 h-full px-2">
+                        @if (Todo.InitialGroupEstimatedEffort is not null)
+                        {
+                            <HourProgress Progress="Todo.GetGroupWorkedEffort(Database)" Total="Todo.InitialGroupEstimatedEffort.Value"/>
+                        }
+                    </div>
+                    <div class="w-40 h-full px-2">
                         @if (Todo.HasChildren(Database))
                         {
-                            @($"{Todo.GetGroupWorkedEffort(Database).TotalHours:N1}h / {Todo.GetGroupEstimatedEffort(Database).TotalHours:N1}h")
+                            <HourProgress Progress="Todo.GetGroupWorkedEffort(Database)" Total="Todo.GetGroupEstimatedEffort(Database)"/>
                         }
-                    </MudText>
-                    <MudText Typo="Typo.body2" Class="w-60 text-right truncate">
-                        @($"{Todo.GetWorkedEffort(Database).TotalHours:N1}h / {Todo.GetEstimatedEffort(Database).TotalHours:N1}h")
-                    </MudText>
+                    </div>
+                    <div class="w-40 h-full px-2">
+                        @if (Todo.GetEstimatedEffort(Database) > TimeSpan.Zero)
+                        {
+                            <HourProgress Progress="Todo.GetWorkedEffort(Database)" Total="Todo.GetEstimatedEffort(Database)"/>
+                        }
+                    </div>
                     
                     @*<MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkerIdsText(Todo.PossibleWorkerIds)</MudText>
                     <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@TagsMultiSelectText(Todo.Tags)</MudText>
                     <MudCheckBox Value="Todo.Splittable" ReadOnly="true" Class="w-12"/>*@
 
-                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-96 h-4" Row="true">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-96 h-2" Row="true">
                         @{
                             var allocations = Database.PlannedAllocations.Where(t => t.TodoId == Todo.Id).ToList();
                             
