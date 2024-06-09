@@ -1,12 +1,12 @@
-﻿<MudStack Row="true" Spacing="2" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-    <MudStack Row="false" Spacing="2">
+﻿<MudStack Row="true" Spacing="4" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudStack Row="false" Spacing="2" Class="flex-grow">
         <MudStack Row="true" Spacing="2">
             @foreach (var dayOfWeek in (DayOfWeek[])Enum.GetValues(typeof(DayOfWeek)))
             {
                 <div style="width: calc(1/7 * 100%)">
                     <MudNumericField T="double?" Value="Rule.MaximalAllocations.SingleOrDefault(m => m.Key == dayOfWeek).Value.TotalHours"
                                      ValueChanged="v => MaximalAllocationChanged(dayOfWeek, v)" Format="N2" Label="@dayOfWeek.ToString()"
-                                     AdornmentText="h" Adornment="Adornment.End" Immediate="false" Clearable="true" HideSpinButtons="true" />
+                                     AdornmentText="h" Adornment="Adornment.End" Immediate="false" HideSpinButtons="true" />
                 </div>
             }
         </MudStack>

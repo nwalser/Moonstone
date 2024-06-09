@@ -1,14 +1,12 @@
-﻿<MudStack Row="true" Spacing="2" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-    <MudStack AlignItems="AlignItems.Center" Spacing="2" Row="true" Class="flex-grow">
-        <div class="w-1/3">
-            <MudDatePicker Editable="true" Date="Rule.ActiveFrom?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="Active From" Clearable="true" ShowWeekNumbers="true"/>
-        </div>
-        <div class="w-1/3">
-            <MudDatePicker Editable="true" Date="Rule.ActiveTo?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveToChanged" Label="Active Until" Clearable="true" ShowWeekNumbers="true"/>
-        </div>
-        <div class="w-1/3">
+﻿<MudStack Row="true" Spacing="4" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudStack Row="false" Spacing="2" Class="flex-grow">
+        <MudStack Row="true" Spacing="2">
             <MudNumericField T="double" Value="Rule.MaximalAllocation.TotalHours" ValueChanged="MaximalAllocationChanged" Format="N2" Label="Maximal Allocation" AdornmentText="h" Adornment="Adornment.End"/>
-        </div>
+        </MudStack>
+        <MudStack Row="true">
+            <MudDatePicker Editable="true" Date="Rule.ActiveFrom?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="Active From" Clearable="true" ShowWeekNumbers="true"/>
+            <MudDatePicker Editable="true" Date="Rule.ActiveTo?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveToChanged" Label="Active Until" Clearable="true" ShowWeekNumbers="true"/>
+        </MudStack>
     </MudStack>
 
     <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="Delete">Delete</MudButton>
