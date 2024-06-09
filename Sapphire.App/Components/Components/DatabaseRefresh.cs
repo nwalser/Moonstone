@@ -7,13 +7,20 @@ public class DatabaseRefresh : ComponentBase, IDisposable
 {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
 
-    private IDisposable? _subscription;
+    private IDisposable? _lastUpdateSubscription;
+    private IDisposable? _lastSimulationSubscription;
     
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _subscription = Database.LastUpdate.Subscribe(_ =>
+            _lastUpdateSubscription = Database.LastUpdate.Subscribe(_ =>
+            {
+                OnLoadData();
+                InvokeAsync(StateHasChanged);
+            });
+            
+            _lastSimulationSubscription = Database.LastSimulation.Subscribe(_ =>
             {
                 OnLoadData();
                 InvokeAsync(StateHasChanged);
@@ -34,6 +41,7 @@ public class DatabaseRefresh : ComponentBase, IDisposable
 
     public void Dispose()
     {
-        _subscription?.Dispose();
+        _lastUpdateSubscription?.Dispose();
+        _lastSimulationSubscription?.Dispose();
     }
 }
