@@ -10,6 +10,11 @@ public class WeeklyAllocationRule : Document
     public required DayOfWeek DayOfWeek { get; set; }
     public required TimeSpan MaximalAllocation { get; set; }
 
-    public DateOnly ActiveFrom { get; set; }
-    public DateOnly ActiveTo { get; set; }
+    public DateOnly? ActiveFrom { get; set; }
+    public DateOnly? ActiveTo { get; set; }
+    
+    public void Remove(ProjectDatabase db)
+    {
+        db.Remove(this); // todo: implement proper deletion
+    }
 }

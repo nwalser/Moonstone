@@ -30,8 +30,6 @@ public class ProjectDatabase : Database, IDisposable
         
         { 7, typeof(DailyAllocationRule) },
         { 8, typeof(WeeklyAllocationRule) },
-        
-        { 8, typeof(WorkerInProject) },
     };
 
     public override void Create(string path, string session)

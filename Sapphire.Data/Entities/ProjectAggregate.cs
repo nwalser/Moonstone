@@ -113,10 +113,15 @@ public class ProjectAggregate : Document
             .Where(w => w.ProjectId == Id)
             .Where(w => w.WorkerId == workerId);
     }
-    
-    public IEnumerable<WorkerInProject> GetWorkersInProject(ProjectDatabase db)
+
+    public bool IsInProject(ProjectDatabase db, Guid workerId)
     {
-        return db.Enumerate<WorkerInProject>()
-            .Where(w => w.ProjectId == Id);
+        return GetWeeklyAllocations(db, workerId).Any() || GetDailyAllocations(db, workerId).Any();
+    }
+
+    public IEnumerable<WorkerAggregate> GetWorkersInProject(ProjectDatabase db)
+    {
+        return db.Enumerate<WorkerAggregate>()
+            .Where(w => IsInProject(db, w.Id));
     }
 }

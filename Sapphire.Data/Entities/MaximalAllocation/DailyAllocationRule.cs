@@ -9,6 +9,11 @@ public class DailyAllocationRule : Document
     
     public required TimeSpan MaximalAllocation { get; set; }
     
-    public DateOnly ActiveFrom { get; set; }
-    public DateOnly ActiveTo { get; set; }
+    public DateOnly? ActiveFrom { get; set; }
+    public DateOnly? ActiveTo { get; set; }
+
+    public void Remove(ProjectDatabase db)
+    {
+        db.Remove(this); // todo: implement proper deletion
+    }
 }

@@ -166,8 +166,9 @@ public abstract class Database : IDatabase, IDisposable
 
     private void ApplyUpdate(Update update)
     {
-        var type = TypeMap[update.TypeId];
-
+        if (!TypeMap.TryGetValue(update.TypeId, out var type))
+            return;
+        
         if (_deleted.Contains(update.RowId))
             return;
 

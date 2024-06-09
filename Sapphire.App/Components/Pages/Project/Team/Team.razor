@@ -13,26 +13,31 @@
         @if (_project is not null)
         {
             <MudGrid>
-                @foreach (var workerInProject in _workersInProject)
+                @foreach (var worker in _workersInProject)
                 {
                     <MudItem sm="12">
-                        @{
-                            var dailyAllocations = workerInProject.GetDailyAllocations(Database);
+                        <MudCard Outlined="true" Elevation="0">
+                            <MudText>@worker.Name</MudText>
                             
-                            @foreach (var dailyAllocation in dailyAllocations)
-                            {
-                                <p>@dailyAllocation.MaximalAllocation</p>
-                            }
-                        }
-                        
-                        @{
-                            var weeklyAllocations = workerInProject.GetWeeklyAllocations(Database);
+                            @{
+                                var dailyAllocations = _project.GetDailyAllocations(Database, worker.Id);
+                                var weeklyAllocations = _project.GetWeeklyAllocations(Database, worker.Id);
 
-                            @foreach (var weeklyAllocation in weeklyAllocations)
-                            {
-                                <p>@weeklyAllocation.MaximalAllocation</p>
+                                foreach (var dailyAllocation in dailyAllocations)
+                                {
+                                    <DailyAllocationRuleView Rule="dailyAllocation"/>
+                                }
+
+                                <MudButton OnClick="() => AddDailyRule(worker.Id)">Add Daily</MudButton>
+
+                                foreach (var weeklyAllocation in weeklyAllocations)
+                                {
+                                    <WeeklyAllocationRuleView Rule="weeklyAllocation"/>
+                                }
+
+                                <MudButton OnClick="() => AddWeeklyRule(worker.Id)">Add Weekly</MudButton>
                             }
-                        }
+                        </MudCard>
                     </MudItem>
                 }
             </MudGrid>
@@ -45,11 +50,36 @@
     [Parameter] public required Guid ProjectId { get; set; }
 
     private ProjectAggregate? _project;
-    private List<WorkerInProject> _workersInProject = [];
+    private List<WorkerAggregate> _workersInProject = [];
 
     protected override void OnLoadData()
     {
         _project = Database.Enumerate<ProjectAggregate>().Single(p => p.Id == ProjectId);
         _workersInProject = _project.GetWorkersInProject(Database).ToList();
+    }
+
+    private void AddDailyRule(Guid workerId)
+    {
+        var dailyRule = new DailyAllocationRule()
+        {
+            ProjectId = ProjectId,
+            WorkerId = workerId,
+            MaximalAllocation = TimeSpan.FromHours(8.5),
+        };
+
+        Database.Update(dailyRule);
+    }
+
+    private void AddWeeklyRule(Guid workerId)
+    {
+        var dailyRule = new WeeklyAllocationRule()
+        {
+            ProjectId = ProjectId,
+            WorkerId = workerId,
+            MaximalAllocation = TimeSpan.FromHours(8.5),
+            DayOfWeek = DayOfWeek.Monday,
+        };
+
+        Database.Update(dailyRule);
     }
 }

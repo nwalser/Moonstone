@@ -1,0 +1,58 @@
+﻿<MudStack Row="true" Spacing="2" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudGrid Spacing="2">
+        <MudItem sm="3">
+            <MudSelect Dense="true" T="DayOfWeek" MultiSelection="false" Value="Rule.DayOfWeek" ValueChanged="DayOfWeekChanged">
+                @foreach (var dayOfWeek in (DayOfWeek[])Enum.GetValues(typeof(DayOfWeek)))
+                {
+                    <MudSelectItem T="DayOfWeek" Value="@dayOfWeek">@dayOfWeek</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem sm="3">
+            <MudDatePicker Editable="true" Date="Rule.ActiveFrom?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="Active From" Clearable="true" Class="mud-shrink" ShowWeekNumbers="true" />
+        </MudItem>
+        <MudItem sm="3">
+            <MudDatePicker Editable="true" Date="Rule.ActiveTo?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveToChanged" Label="Active Until" Clearable="true" Class="mud-shrink" ShowWeekNumbers="true" />
+        </MudItem>
+        <MudItem sm="3">
+            <MudNumericField T="double" Value="Rule.MaximalAllocation.TotalHours" ValueChanged="MaximalAllocationChanged" Format="N2" Label="Maximal Allocation" AdornmentText="h" Adornment="Adornment.End"/>
+        </MudItem>
+    </MudGrid>
+    
+    <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="Delete">Delete</MudButton>
+</MudStack>
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    
+    [Parameter] public required WeeklyAllocationRule Rule { get; set; }
+
+    private void ActiveFromChanged(DateTime? date)
+    {
+        Rule.ActiveFrom = date?.ToDateOnly();
+        Database.Update(Rule);
+    }
+
+    private void ActiveToChanged(DateTime? date)
+    {
+        Rule.ActiveTo = date?.ToDateOnly();
+        Database.Update(Rule);
+    }
+
+    private void MaximalAllocationChanged(double hours)
+    {
+        Rule.MaximalAllocation = TimeSpan.FromHours(hours);
+        Database.Update(Rule);
+    }
+
+    private void DayOfWeekChanged(DayOfWeek obj)
+    {
+        Rule.DayOfWeek = obj;
+        Database.Update(Rule);
+    }
+    
+    private void Delete()
+    {
+        Rule.Remove(Database);
+    }
+}

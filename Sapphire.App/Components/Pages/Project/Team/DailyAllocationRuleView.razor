@@ -1,18 +1,10 @@
 ﻿<MudStack Row="true" Spacing="2" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
     <MudGrid Spacing="2">
         <MudItem sm="3">
-            <MudSelect Dense="true" Class="overwrite" T="Guid" MultiSelection="false" Value="Rule.WorkerId" ValueChanged="WorkerIdChanged">
-                @foreach (var worker in Workers)
-                {
-                    <MudSelectItem T="Guid" Value="@worker.Id">@worker.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MudDatePicker Editable="true" Date="Rule.ActiveFrom?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="Active From" Clearable="true" ShowWeekNumbers="true" />
         </MudItem>
         <MudItem sm="3">
-            <MudDatePicker Date="Rule.ActiveFrom.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveFromChanged" Label="Active From"/>
-        </MudItem>
-        <MudItem sm="3">
-            <MudDatePicker Date="Rule.ActiveTo.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveToChanged" Label="Active Until"/>
+            <MudDatePicker Editable="true" Date="Rule.ActiveTo?.ToDateTime(TimeOnly.MinValue)" DateChanged="ActiveToChanged" Label="Active Until" Clearable="true" ShowWeekNumbers="true" />
         </MudItem>
         <MudItem sm="3">
             <MudNumericField T="double" Value="Rule.MaximalAllocation.TotalHours" ValueChanged="MaximalAllocationChanged" Format="N2" Label="Maximal Allocation" AdornmentText="h" Adornment="Adornment.End"/>
@@ -26,30 +18,16 @@
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
     
     [Parameter] public required DailyAllocationRule Rule { get; set; }
-    [Parameter] public required List<WorkerAggregate> Workers { get; set; }
-
-
-    private void WorkerIdChanged(Guid obj)
-    {
-        Rule.WorkerId = obj;
-        Database.Update(Rule);
-    }
 
     private void ActiveFromChanged(DateTime? date)
     {
-        if (date is null)
-            return;
-
-        Rule.ActiveFrom = date.Value.ToDateOnly();
+        Rule.ActiveFrom = date?.ToDateOnly();
         Database.Update(Rule);
     }
 
     private void ActiveToChanged(DateTime? date)
     {
-        if (date is null)
-            return;
-
-        Rule.ActiveTo = date.Value.ToDateOnly();
+        Rule.ActiveTo = date?.ToDateOnly();
         Database.Update(Rule);
     }
 
@@ -61,6 +39,6 @@
 
     private void Delete()
     {
-        Database.Remove(Rule); // todo implement proper deletions
+        Rule.Remove(Database);
     }
 }
