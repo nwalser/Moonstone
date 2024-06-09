@@ -64,7 +64,7 @@
             Name = "New Todo",
             ProjectId = ProjectId,
             ParentId = null,
-            Order = int.MaxValue
+            Order = _todos.Count,
         };
 
         Database.Update(todo);

@@ -12,7 +12,7 @@ public class TodoAggregate : Document
     public required Guid ProjectId { get; init; }
     
     public Guid? ParentId { get; set; } = Guid.Empty;
-    public uint Order { get; set; } = 0;
+    public int Order { get; set; } = 0;
     
     public TodoState State { get; set; } = TodoState.Active;
 

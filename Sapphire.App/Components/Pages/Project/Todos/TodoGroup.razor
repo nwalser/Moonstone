@@ -57,7 +57,7 @@
         _childTodos.Insert(args.NewIndex, itemToMove);
 
         // update database
-        uint index = 0;
+        var index = 0;
         foreach (var childTodo in _childTodos)
         {
             childTodo.Order = index;

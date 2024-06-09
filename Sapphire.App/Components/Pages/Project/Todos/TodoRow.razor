@@ -125,7 +125,7 @@
             Name = $"Task {Todos.Count}",
             ProjectId = Todo.ProjectId,
             ParentId = Todo.Id,
-            Order = int.MaxValue,
+            Order = Todos.Count,
         };
 
         Database.Update(todo);
