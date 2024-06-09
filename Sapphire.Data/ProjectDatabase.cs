@@ -55,6 +55,13 @@ public class ProjectDatabase : Database, IDisposable
         });
     }
 
+    protected override void OnAfterOpening()
+    {
+        _ = RunSimulation(DateTime.UtcNow);
+        
+        base.OnAfterOpening();
+    }
+
     public async Task RunSimulation(DateTime change)
     {
         await Task.Run(() =>
