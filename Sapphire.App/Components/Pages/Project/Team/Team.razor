@@ -3,23 +3,38 @@
 
 <DefaultWindowLayout PageTitle="@($"{_project?.Name} - Team")">
     <SecondMenu>
-        <ProjectsMenu />
+        <ProjectsMenu/>
     </SecondMenu>
     <ThirdMenu>
-        <ProjectMenu ProjectId="ProjectId" />
+        <ProjectMenu ProjectId="ProjectId"/>
     </ThirdMenu>
-    
+
     <ChildContent>
         @if (_project is not null)
         {
             <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudPaper Outlined="true" Elevation="0" Class="p-3">
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudSelect MultiSelection="false" T="Guid?" AnchorOrigin="Origin.BottomCenter" Dense="true"
+                                       ShrinkLabel="true" @bind-Value="_workerToBeAdded" Label="Add Team Member" Immediate="false">
+                                @foreach (var worker in _project.GetWorkersNotInProject(Database))
+                                {
+                                    <MudSelectItem T="Guid?" Value="@worker.Id">@worker.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudIconButton Icon="@Icons.Material.Outlined.Add" Variant="Variant.Outlined" Size="Size.Small" OnClick="AddWorker"/>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+                
                 @foreach (var worker in _workersInProject)
                 {
                     <MudItem xs="12">
                         <BoxHeader Title="@worker.Name">
                             <MudButton Size="Size.Small" Variant="Variant.Outlined" OnClick="() => AddDailyRule(worker.Id)">Add Daily Allocation Rule</MudButton>
                             <MudButton Size="Size.Small" Variant="Variant.Outlined" OnClick="() => AddWeeklyRule(worker.Id)">Add Weekly Allocation Rule</MudButton>
-                        </BoxHeader> 
+                        </BoxHeader>
 
                         <MudGrid Spacing="3">
                             <MudItem xs="6">
@@ -27,24 +42,24 @@
                                     @foreach (var dailyAllocation in _project.GetDailyAllocations(Database, worker.Id))
                                     {
                                         <MudItem xs="12">
-                                            <MudCard Outlined="true" Elevation="0" Class="p-3">
-                                                <DailyAllocationRuleView Rule="dailyAllocation"/>
-                                            </MudCard>
+                                            <MudPaper Outlined="true" Elevation="0" Class="p-3">
+                                                <DailyAllocationRuleView Rule="dailyAllocation" @key="dailyAllocation.Id"/>
+                                            </MudPaper>
                                         </MudItem>
                                     }
                                     @foreach (var weeklyAllocation in _project.GetWeeklyAllocations(Database, worker.Id))
                                     {
                                         <MudItem xs="12">
-                                            <MudCard Outlined="true" Elevation="0" Class="p-3">
-                                                <WeeklyAllocationRuleView Rule="weeklyAllocation"/>
-                                            </MudCard>
+                                            <MudPaper Outlined="true" Elevation="0" Class="p-3">
+                                                <WeeklyAllocationRuleView Rule="weeklyAllocation" @key="weeklyAllocation.Id"/>
+                                            </MudPaper>
                                         </MudItem>
                                     }
                                 </MudGrid>
                             </MudItem>
                             <MudItem xs="6">
                                 <MudGrid Spacing="2">
-                                    @foreach (var month in Enumerable.Range(0, 4).Select(m => DateTime.UtcNow.AddMonths(m)))
+                                    @foreach (var month in Enumerable.Range(0, 2).Select(m => DateTime.UtcNow.AddMonths(m)))
                                     {
                                         <MudItem xs="6">
                                             <MonthView Year="month.Year" Month="month.Month" Context="day">
@@ -59,8 +74,8 @@
                                                     var regularHours = worker.GetRegularHours(Database, day);
                                                     if (maximalAllocatable > TimeSpan.Zero && regularHours > TimeSpan.Zero)
                                                         color = "var(--mud-palette-success)";
-                                                    
-                                                    
+
+
                                                     <div style="width: calc(1 / 7* 100%); text-align: center; padding: 2px">
                                                         <div style="border: 1px solid @color; border-radius: var(--mud-default-borderradius); line-height: 1.5rem; font-size: 0.8rem;">
                                                             @day.Day
@@ -73,14 +88,6 @@
                                 </MudGrid>
                             </MudItem>
                         </MudGrid>
-                        
-                        <MudGrid>
-                            
-                        </MudGrid>
-                        
-                        <MudStack Row="false" Spacing="1">
-
-                        </MudStack>
                     </MudItem>
                 }
             </MudGrid>
@@ -95,6 +102,8 @@
     private ProjectAggregate? _project;
     private List<WorkerAggregate> _workersInProject = [];
 
+    private Guid? _workerToBeAdded;
+    
     protected override void OnLoadData()
     {
         _project = Database.Enumerate<ProjectAggregate>().Single(p => p.Id == ProjectId);
@@ -122,5 +131,19 @@
         };
 
         Database.Update(dailyRule);
+    }
+
+    private void AddWorker()
+    {
+        if (_workerToBeAdded is null)
+            return;
+
+        var weeklyAllocations = new WeeklyAllocationRule()
+        {
+            ProjectId = ProjectId,
+            WorkerId = _workerToBeAdded.Value,
+        };
+
+        Database.Update(weeklyAllocations);
     }
 }

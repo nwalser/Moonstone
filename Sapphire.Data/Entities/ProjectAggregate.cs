@@ -123,4 +123,10 @@ public class ProjectAggregate : Document
         return db.Enumerate<WorkerAggregate>()
             .Where(w => IsInProject(db, w.Id));
     }
+
+    public IEnumerable<WorkerAggregate> GetWorkersNotInProject(ProjectDatabase db)
+    {
+        return db.Enumerate<WorkerAggregate>()
+            .Where(w => !IsInProject(db, w.Id));
+    }
 }
