@@ -47,9 +47,10 @@ public static class CalendarSimulation
 
                     var remainingEffort = todoForWorker.GetRemainingUnplannedEffort(db);
                     
-                    // todo: project allocation
+                    var project = todoForWorker.GetProject(db);
+                    var remainingAllocatable = project.GetRemainingAllocatable(db, day, worker.Id);
                     
-                    var allocatableTime = TimeSpanExtensions.Min([availableHours, remainingEffort]);
+                    var allocatableTime = TimeSpanExtensions.Min([availableHours, remainingEffort, remainingAllocatable]);
                     if (allocatableTime <= TimeSpan.Zero)
                         continue;
 

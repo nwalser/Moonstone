@@ -22,4 +22,7 @@
     <ProjectReference Include="..\Moonstone.Database\Moonstone.Database.csproj" />
     <ProjectReference Include="..\Sapphire.Data\Sapphire.Data.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Components\Pages\Project\Team\" />
+  </ItemGroup>
 </Project>
