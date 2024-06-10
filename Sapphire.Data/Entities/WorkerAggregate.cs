@@ -20,6 +20,20 @@ public class WorkerAggregate : Document
         return Name;
     }
     
+    public bool FilterMatches(ProjectDatabase db, string filter)
+    {
+        if (string.IsNullOrWhiteSpace(filter))
+            return true;
+
+        if (Name.Contains(filter))
+            return true;
+
+        if (Abbreviation.Contains(filter))
+            return true;
+
+        return false;
+    }
+    
     public TimeSpan GetRegularHours(ProjectDatabase db, DateOnly date)
     {
         // OfficeDay

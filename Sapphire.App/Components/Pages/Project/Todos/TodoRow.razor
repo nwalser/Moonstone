@@ -1,5 +1,5 @@
 ﻿<MudItem xs="12">
-    <MudCard Elevation="0" Outlined="true" Class="my-1" Style="@(!Todo.FilterMatches(Filter) ? "filter: brightness(35%) !important" : string.Empty)">
+    <MudCard Elevation="0" Outlined="true" Class="my-1" Style="@(!Todo.FilterMatches(Database, Filter) ? "filter: brightness(35%) !important" : string.Empty)">
         <MudStack Row="false" Spacing="0">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8" Style="@(Editing ? "background-color: var(--mud-palette-lines-default) !important" : string.Empty)">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">

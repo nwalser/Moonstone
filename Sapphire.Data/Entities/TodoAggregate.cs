@@ -1,4 +1,5 @@
-﻿using Moonstone.Database;
+﻿using System.Runtime.InteropServices.ComTypes;
+using Moonstone.Database;
 using Sapphire.Data.Entities.SchedulingLocks;
 using Sapphire.Data.Extensions;
 using Sapphire.Data.ValueObjects;
@@ -25,13 +26,48 @@ public class TodoAggregate : Document
     public bool Splittable { get; set; } = false;
 
 
-    public bool FilterMatches(string filter)
+    public bool FilterMatches(ProjectDatabase db, string filter)
     {
         if (string.IsNullOrWhiteSpace(filter))
             return true;
+
+        if (Name.Contains(filter, StringComparison.InvariantCultureIgnoreCase))
+            return true;
+
+        if (Tags.Any(tag => tag.Contains(filter, StringComparison.InvariantCultureIgnoreCase)))
+            return true;
+
+        if (GetPossibleAssignedWorkers(db).Any(w => w.FilterMatches(db, filter)))
+            return true;
+
+        if (State.ToString().Contains(filter))
+            return true;
+
+        return false;
+    }
+
+    public IEnumerable<WorkerAggregate> GetPossibleAssignedWorkers(ProjectDatabase db)
+    {
+        return db.Enumerate<WorkerAggregate>()
+            .Where(w => PossibleWorkerIds.Contains(w.Id));
+    }
+
+    public IEnumerable<WorkerAggregate> GetAssignedWorkers(ProjectDatabase db)
+    {
+        var workerAllocationIds = db.Enumerate<AllocationAggregate>()
+            .Where(w => w.TodoId == Id)
+            .Select(w => w.WorkerId);
         
-        return Name.Contains(filter, StringComparison.InvariantCultureIgnoreCase) || 
-               Tags.Any(tag => tag.Contains(filter, StringComparison.InvariantCultureIgnoreCase));
+        var workerPlannedAllocationIds = db.PlannedAllocations
+            .Where(p => p.TodoId == Id)
+            .Select(w => w.WorkerId);
+
+        var workerIds = workerAllocationIds
+            .Concat(workerPlannedAllocationIds)
+            .Distinct();
+
+        return db.Enumerate<WorkerAggregate>()
+            .Where(w => workerIds.Contains(w.Id));
     }
     
     public IEnumerable<TodoAggregate> GetAncestorTodos(ProjectDatabase db)
