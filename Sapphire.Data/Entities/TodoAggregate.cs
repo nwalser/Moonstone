@@ -150,6 +150,9 @@ public class TodoAggregate : Document
 
     public DateOnly? GetEstimatedCompletion(ProjectDatabase db)
     {
+        if (CurrentEstimatedEffort <= TimeSpan.Zero)
+            return DateOnly.MinValue;
+        
         if (GetRemainingUnplannedEffort(db) > TimeSpan.Zero)
             return null;
 
