@@ -138,16 +138,25 @@ public class TodoAggregate : Document
             var dependeeTodo = db.Enumerate<TodoAggregate>()
                 .Single(t => t.Id == delayLock.TodoLockerId);
 
-            if (dependeeTodo.State == TodoState.Completed)
-                continue;
+            var estimatedCompletion = dependeeTodo.GetEstimatedCompletion(db);
 
-            var plannedTodo = dependeeTodo.GetPlannedTodo(db);
+            if (estimatedCompletion is null)
+                yield return delayLock;
 
-            if (plannedTodo is not null && plannedTodo.PlannedCompletion <= date)
-                continue;
-
-            yield return delayLock;
+            if (estimatedCompletion > date.AddDays(delayLock.DelayInDays))
+                yield return delayLock;
         }
+    }
+
+    public DateOnly? GetEstimatedCompletion(ProjectDatabase db)
+    {
+        if (GetRemainingUnplannedEffort(db) > TimeSpan.Zero)
+            return null;
+
+        var plannedAllocations = db.PlannedAllocations.Select(a => a.Date);
+        var allocations = db.Enumerate<AllocationAggregate>().Select(a => a.Date);
+
+        return plannedAllocations.Concat(allocations).MaxBy(a => (DateOnly?)a);
     }
     
     public IEnumerable<ILock> GetActiveLocks(ProjectDatabase db, DateOnly date)
@@ -169,11 +178,6 @@ public class TodoAggregate : Document
             .SingleOrDefault(t => t.Id == ParentId);
     }
     
-    public PlannedTodo? GetPlannedTodo(ProjectDatabase db)
-    {
-        return db.PlannedTodos.SingleOrDefault(t => t.TodoId == Id);
-    }
-
     public ProjectAggregate GetProject(ProjectDatabase db)
     {
         return db.Enumerate<ProjectAggregate>()

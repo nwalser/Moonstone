@@ -8,7 +8,6 @@ public static class CalendarSimulation
 {
     public static void RunSimulation(ProjectDatabase db, DateOnly start, DateOnly stop, Action<double>? progressCallback = default)
     {
-        db.PlannedTodos.Clear();
         db.PlannedAllocations.Clear();
         
         var days = Enumerable
@@ -39,15 +38,15 @@ public static class CalendarSimulation
                 foreach (var todoForWorker in todosForWorker)
                 {
                     var availableHours = worker.GetAvailableHours(db, day);
-
                     if (availableHours <= TimeSpan.Zero)
-                        break;
+                        break; // do not pick up work if worker has no available time
 
-                    // todo: do not pickup work if other is assigned to task and todo is not splittable
-
-                    var remainingEffort = todoForWorker.GetRemainingUnplannedEffort(db);
+                    var assignedWorkers = todoForWorker.GetAssignedWorkers(db);
+                    if (assignedWorkers.Any(w => w.Id != worker.Id) && !todoForWorker.Splittable)
+                        continue; // do not pick up work if there is any other assigned worker and task is not splittable
                     
                     var project = todoForWorker.GetProject(db);
+                    var remainingEffort = todoForWorker.GetRemainingUnplannedEffort(db);
                     var remainingAllocatable = project.GetRemainingAllocatable(db, day, worker.Id);
                     
                     var allocatableTime = TimeSpanExtensions.Min([availableHours, remainingEffort, remainingAllocatable]);
@@ -61,8 +60,6 @@ public static class CalendarSimulation
                         TodoId = todoForWorker.Id,
                         WorkerId = worker.Id
                     });
-                    
-                    // todo: implement update of tasks if completed
                 }
             }
             

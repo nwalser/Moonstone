@@ -14,7 +14,6 @@ public class ProjectDatabase : Database, IDisposable
     public BehaviorSubject<bool> SimulationOngoing { get; private set; } = new(false);
     public BehaviorSubject<double> SimulationProgress { get; private set; } = new(0);
     
-    public List<PlannedTodo> PlannedTodos { get; set; } = [];
     public List<PlannedAllocation> PlannedAllocations { get; set; } = [];
     
     
