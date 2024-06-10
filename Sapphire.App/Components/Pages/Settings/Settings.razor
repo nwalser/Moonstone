@@ -1,0 +1,24 @@
+﻿@page "/settings"
+
+<DefaultWindowLayout PageTitle="@($"Application Settings")">
+    <ChildContent>
+        <MudGrid Spacing="1">
+            <MudItem sm="12">
+                <BoxHeader Title="General Settings" />
+                <MudPaper Outlined="true" Class="pa-3">
+                    <MudTextField T="string" Value="AppDb.Data.FullName" ValueChanged="NameUpdated" Margin="0" Immediate="false" Label="Your Full Name" ShrinkLabel="true"/>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </ChildContent>
+</DefaultWindowLayout>
+
+@code {
+    [Inject] public required AppDb AppDb { get; set; }
+
+    private void NameUpdated(string name)
+    {
+        AppDb.Data.FullName = name;
+        AppDb.Save();
+    }
+}

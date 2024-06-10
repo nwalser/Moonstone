@@ -1,26 +1,18 @@
-﻿using System.Text.Json;
-using DeviceId;
+﻿using DeviceId;
 using Moonstone.Database;
+using Sapphire.Data.AppDb;
 
 namespace Sapphire.App.Services;
 
 public class DatabaseService<TType> where TType : Database, new()
 {
+    private readonly AppDb _appDb;
+    
     public TType? Database { get; private set; }
 
-    private readonly List<string> _recentDatabases = [];
-    public IReadOnlyList<string> RecentDatabases => _recentDatabases;
-    private readonly string _recentDatabaseStoragePath;
-
-    public DatabaseService(string recentDatabaseStoragePath)
+    public DatabaseService(AppDb appDb)
     {
-        _recentDatabaseStoragePath = recentDatabaseStoragePath;
-
-        if (File.Exists(_recentDatabaseStoragePath))
-        {
-            var json = File.ReadAllText(_recentDatabaseStoragePath);
-            _recentDatabases = JsonSerializer.Deserialize<List<string>>(json) ?? [];
-        }
+        _appDb = appDb;
     }
 
     private string DeviceId => new DeviceIdBuilder()
@@ -29,22 +21,6 @@ public class DatabaseService<TType> where TType : Database, new()
         .AddUserName()
         .ToString();
 
-    public void RemoveRecent(string path)
-    {
-        _recentDatabases.Remove(path);
-    }
-    
-    private void PushRecent(string path)
-    {
-        RemoveRecent(path);
-        _recentDatabases.Add(path);
-    }
-
-    private void StoreRecent()
-    {
-        var json = JsonSerializer.Serialize(RecentDatabases);
-        File.WriteAllText(_recentDatabaseStoragePath, json);
-    }
     
     public void Create(string path)
     {
@@ -54,7 +30,7 @@ public class DatabaseService<TType> where TType : Database, new()
         db.Create(path, DeviceId);
         Database = db;
 
-        PushRecent(path);
+        _appDb.PushRecent(path);
     }
 
     public void Open(string path)
@@ -65,7 +41,7 @@ public class DatabaseService<TType> where TType : Database, new()
         db.Open(path, DeviceId);
         Database = db;
 
-        PushRecent(path);
+        _appDb.PushRecent(path);
     }
 
     public void Close()

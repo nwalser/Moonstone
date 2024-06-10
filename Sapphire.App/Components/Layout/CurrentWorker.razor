@@ -1,5 +1,20 @@
-﻿<MudButton Variant="Variant.Outlined" Size="Size.Small" Class="no-drag w-40">Nathaniel Walser</MudButton>
+﻿@implements IDisposable
+<MudButton Variant="Variant.Outlined" Size="Size.Small" Class="no-drag w-40" Href="/settings">@AppDb.Data.FullName</MudButton>
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [Inject] public required AppDb AppDb { get; set; }
+
+    private IDisposable? _subscription;
+    
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        _subscription = AppDb.LastUpdate.Subscribe(d => InvokeAsync(StateHasChanged));
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    public void Dispose()
+    {
+        _subscription?.Dispose();
+    }
 }

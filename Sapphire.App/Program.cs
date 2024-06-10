@@ -4,6 +4,7 @@ using Microsoft.FluentUI.AspNetCore.Components;
 using MudBlazor.Services;
 using Sapphire.App.Services;
 using Sapphire.Data;
+using Sapphire.Data.AppDb;
 using App = Sapphire.App.Components.App;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,12 +22,14 @@ builder.Services.AddFluentUIComponents();
 if (!webRuntime)
 {
     var userData = await Electron.App.GetPathAsync(PathName.UserData);
-    var recentDatabaseStoragePath = Path.Join(userData, "recent_database_storage_path.json");
-    builder.Services.AddSingleton(new DatabaseService<ProjectDatabase>(recentDatabaseStoragePath));
+    var appDbStoragePath = Path.Join(userData, "appdb.json");
+    builder.Services.AddSingleton(new AppDb(appDbStoragePath));
+    
+    builder.Services.AddSingleton<DatabaseService<ProjectDatabase>>();
 }
 else
 {
-    builder.Services.AddSingleton(new DatabaseService<ProjectDatabase>("C:\\Users\\Nathaniel Walser\\Desktop\\recent.json"));
+    builder.Services.AddSingleton<DatabaseService<ProjectDatabase>>();
 }
 
 builder.Services.AddSingleton(new TimeZoneService());

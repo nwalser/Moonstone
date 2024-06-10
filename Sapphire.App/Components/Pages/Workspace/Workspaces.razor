@@ -16,7 +16,7 @@
                     </MudStack>
 
                     <MudGrid Spacing="1">
-                        @foreach (var recent in DatabaseService.RecentDatabases.Reverse().Take(10))
+                        @foreach (var recent in AppDb.Data.RecentDatabases.AsEnumerable().Reverse().Take(10))
                         {
                             <MudItem xs="12">
                                 <MudPaper Outlined="true" Class="p-3">
@@ -27,7 +27,7 @@
                                         </MudStack>
 
                                         <MudStack Row="true" Spacing="1">
-                                            <MudIconButton Size="Size.Small" OnClick="() => DatabaseService.RemoveRecent(path: recent)" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Close"/>
+                                            <MudIconButton Size="Size.Small" OnClick="() => AppDb.RemoveRecent(path: recent)" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Close"/>
                                             <MudButton Size="Size.Small" OnClick="() => OpenWorkspace(path: recent)" Variant="Variant.Outlined" Disabled="@(!Path.Exists(recent))">Open</MudButton>
                                         </MudStack>
                                     </MudStack>
@@ -49,6 +49,7 @@
 
 @code {
     [Inject] public required DatabaseService<ProjectDatabase> DatabaseService { get; set; }
+    [Inject] public required AppDb AppDb { get; set; }
     [Inject] public required WindowManager WindowManager { get; set; }
     [Inject] public required Dialog Dialog { get; set; }
     [Inject] public required NavigationManager NavigationManager { get; set; }
