@@ -35,9 +35,11 @@ else
     {
         if (firstRender)
         {
-            // todo: fix is maximized check
             if (Window is not null)
-                Window.OnResize += async () => await InvokeAsync(StateHasChanged);
+            {
+                Window.OnMaximize += async () => await InvokeAsync(StateHasChanged);
+                Window.OnUnmaximize += async () => await InvokeAsync(StateHasChanged);
+            }
         }
         
         base.OnAfterRender(firstRender);

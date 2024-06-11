@@ -1,13 +1,12 @@
-﻿using System.Runtime.InteropServices.ComTypes;
-using Moonstone.Database;
+﻿using Moonstone.Database;
 using Sapphire.Data.Entities.SchedulingLocks;
 using Sapphire.Data.Extensions;
-using Sapphire.Data.ValueObjects;
 
 namespace Sapphire.Data.Entities;
 
 public class TodoAggregate : Document
 {
+    // todo: maybe switch to IQueryable for optimization
     public required string Name { get; set; }
     
     public required Guid ProjectId { get; init; }
@@ -15,7 +14,7 @@ public class TodoAggregate : Document
     public Guid? ParentId { get; set; } = Guid.Empty;
     public int Order { get; set; } = 0;
     
-    public TodoState State { get; set; } = TodoState.Active;
+    public TodoState State { get; set; } = TodoState.Active; // todo: implement state handling in simulation
 
     public TimeSpan CurrentEstimatedEffort { get; set; } = TimeSpan.Zero;
     public TimeSpan? InitialGroupEstimatedEffort { get; set; }
