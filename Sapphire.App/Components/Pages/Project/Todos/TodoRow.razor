@@ -1,5 +1,5 @@
 ﻿<MudItem xs="12">
-    <MudCard Elevation="0" Outlined="true" Class="my-1" Style="@(!Todo.FilterMatches(Database, Filter) ? "filter: brightness(35%) !important" : string.Empty)">
+    <MudCard Elevation="0" Outlined="true" Class="my-1 overflow-hidden" Style="@(!Todo.FilterMatches(Database, Filter) ? "filter: brightness(35%) !important" : string.Empty)">
         <MudStack Row="false" Spacing="0">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8" Style="@(Editing ? "background-color: var(--mud-palette-lines-default) !important" : string.Empty)">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
@@ -12,7 +12,7 @@
                     </div>
                 </MudStack>
 
-                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="flex-grow h-full" @onclick="ToggleEditing" Justify="Justify.Center">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="flex-grow h-full flex-shrink overflow-hidden" @onclick="ToggleEditing" Justify="Justify.FlexStart">
                     <MudText Typo="Typo.body2" Class="w-80 flex-shrink-0" Style="@($"padding-left: {Depth * 12}px")">
                         @switch (Todo.HasChildren(Database))
                         {
@@ -173,6 +173,6 @@
     
     private string TagsMultiSelectText(List<string> values)
     {
-        return string.Join(", ", values);
+        return string.Join(", ", values.Order());
     }
 }

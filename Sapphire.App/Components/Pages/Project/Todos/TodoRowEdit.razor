@@ -21,7 +21,7 @@
             </MudItem>
             <MudItem xs="12">
                 <MudSelect MultiSelection="true" T="string" AnchorOrigin="Origin.BottomCenter" Dense="true" MultiSelectionTextFunc="TagsMultiSelectText" SelectedValues="Todo.Tags" ShrinkLabel="true" SelectedValuesChanged="UpdateTags" Label="Tags" Immediate="false">
-                    @foreach (var tag in Project.PossibleTags)
+                    @foreach (var tag in Project.PossibleTags.Order())
                     {
                         <MudSelectItem T="string" Value="@tag">@tag</MudSelectItem>
                     }

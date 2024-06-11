@@ -1,9 +1,9 @@
 ﻿<BoxHeader Title="Possible Tags" />
 
 <MudGrid Spacing="1">
-    @foreach (var tag in Project.PossibleTags)
+    @foreach (var tag in Project.PossibleTags.Order())
     {
-        <MudItem sm="12" @key="tag">
+        <MudItem sm="3" @key="tag">
             <MudPaper Outlined="true" Class="pa-3">
                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
                     <MudText>@tag</MudText>
