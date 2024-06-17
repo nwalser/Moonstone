@@ -4,7 +4,7 @@
 }
 
 .mud-button-group-outlined.mud-button-group-override-styles .mud-button-root {
-    border-color: var(--mud-palette-lines-default);
+    border-color: var(--mud-palette-lines-default) !important;
 }
 
 /* MudDatePicker Overrides */
