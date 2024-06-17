@@ -26,7 +26,7 @@
                     style = "background-color: var(--mud-palette-lines-default)";
 
                 <div style="width: calc(1 / 11 * 100%); text-align: center; padding: 2px" @onclick="() => OpenDay(day)">
-                    <div style="border: 1px solid @color; border-radius: var(--mud-default-borderradius); line-height: 1.5rem; font-size: 0.8rem; @style">
+                    <div style="border: 1px solid @color; border-radius: var(--mud-default-borderradius); line-height: 1.5rem; font-size: 0.8rem; @style" class="hover:bg-[var(--mud-palette-lines-default)]">
                         <MudStack Row="false" Spacing="1">
                             <MudText Typo="Typo.body1">@day.Day (@day.DayOfWeek.ToString()[..1].)</MudText>
                             @{

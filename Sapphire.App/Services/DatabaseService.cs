@@ -17,7 +17,6 @@ public class DatabaseService<TType> where TType : Database, new()
 
     private string DeviceId => new DeviceIdBuilder()
         .AddMachineName()
-        .AddMacAddress()
         .AddUserName()
         .ToString();
 

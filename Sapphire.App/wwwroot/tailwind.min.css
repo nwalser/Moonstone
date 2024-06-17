@@ -712,20 +712,12 @@ video {
   width: 20rem;
 }
 
-.w-96 {
-  width: 24rem;
+.w-\[600px\] {
+  width: 600px;
 }
 
 .w-full {
   width: 100%;
-}
-
-.w-\[200px\] {
-  width: 200px;
-}
-
-.w-\[600px\] {
-  width: 600px;
 }
 
 .min-w-10 {
@@ -736,12 +728,12 @@ video {
   min-width: 18rem;
 }
 
-.flex-shrink-0 {
-  flex-shrink: 0;
-}
-
 .flex-shrink {
   flex-shrink: 1;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
 }
 
 .flex-grow {
@@ -772,10 +764,6 @@ video {
 
 .items-center {
   align-items: center;
-}
-
-.justify-start {
-  justify-content: flex-start;
 }
 
 .justify-center {
