@@ -134,18 +134,15 @@
 
     private async Task Delete()
     {
-        var allChildren = Todo.GetDescendantTodos(Database).ToList();
-        List<TodoAggregate> allTodosToDelete = [..allChildren, Todo];
-        
         var delete = await DialogService.ShowMessageBox(
             title: "Confirm Deletion", 
-            message: $"Are you sure you want to delete {allTodosToDelete.Count} tasks?", 
+            message: "Are you sure you want to delete this and all descendant tasks?", 
             yesText: "Delete", 
             cancelText:"Cancel") ?? false;
 
         if (!delete) return;
 
-        Database.Remove(allTodosToDelete);
+        Todo.Delete(Database);
     }
 
     private void ToggleEditing()

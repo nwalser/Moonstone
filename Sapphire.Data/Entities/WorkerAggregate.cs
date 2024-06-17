@@ -36,17 +36,42 @@ public class WorkerAggregate : Document
     
     public void Delete(ProjectDatabase db)
     {
-        // todo implement proper deletion
         db.Remove(this);
+
+        foreach (var officeDay in GetOfficeDays(db))
+            officeDay.Delete(db);
+        
+        foreach (var leaveDay in GetLeaveDays(db))
+            leaveDay.Delete(db);
+        
+        foreach (var workWeek in GetWorkWeeks(db))
+            workWeek.Delete(db);
+    }
+
+    private IEnumerable<OfficeDayAggregate> GetOfficeDays(ProjectDatabase db)
+    {
+        return db.Enumerate<OfficeDayAggregate>()
+            .Where(o => o.WorkerId == Id);
+    }
+    
+    private IEnumerable<LeaveDayAggregate> GetLeaveDays(ProjectDatabase db)
+    {
+        return db.Enumerate<LeaveDayAggregate>()
+            .Where(o => o.WorkerId == Id);
+    }
+    
+    private IEnumerable<WorkWeek> GetWorkWeeks(ProjectDatabase db)
+    {
+        return db.Enumerate<WorkWeek>()
+            .Where(o => o.WorkerId == Id);
     }
     
     public TimeSpan GetRegularHours(ProjectDatabase db, DateOnly date)
     {
         // OfficeDay
         {
-            var officeDays = db.Enumerate<OfficeDayAggregate>()
+            var officeDays = GetOfficeDays(db)
                 .Where(o => o.Date == date)
-                .Where(o => o.WorkerId == Id)
                 .ToList();
 
             if (officeDays.Any())

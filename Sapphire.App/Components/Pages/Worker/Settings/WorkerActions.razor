@@ -47,7 +47,7 @@
         if (!deletionConfirmed)
             return;
 
-        Database.Remove(Worker);
+        Worker.Delete(Database);
         Navigation.NavigateTo("/worker");
     }
 }

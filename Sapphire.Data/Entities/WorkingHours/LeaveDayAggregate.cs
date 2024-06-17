@@ -28,4 +28,9 @@ public class LeaveDayAggregate : Document
             .Select((d, i) => new { date = d, key = d.Date.AddDays(-i) })
             .GroupBy(d => d.key, tuple => tuple.date);
     }
+    
+    public void Delete(ProjectDatabase db)
+    {
+        db.Remove(this);
+    }
 }

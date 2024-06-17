@@ -67,6 +67,9 @@ public class TodoAggregate : Document
         
         foreach (var minDateLocks in GetMinDateLocks(db))
             minDateLocks.Delete(db);
+        
+        foreach (var childTodo in GetChildTodos(db))
+            childTodo.Delete(db);
     }
 
     public IEnumerable<AllocationAggregate> GetAllocations(Database db)
