@@ -39,7 +39,7 @@ public class TodoAggregate : Document
         if (GetPossibleAssignedWorkers(db).Any(w => w.FilterMatches(db, filter)))
             return true;
 
-        if (State.ToString().Contains(filter))
+        if (State.ToString().Contains(filter, StringComparison.InvariantCultureIgnoreCase))
             return true;
 
         return false;

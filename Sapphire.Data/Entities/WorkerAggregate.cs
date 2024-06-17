@@ -25,10 +25,10 @@ public class WorkerAggregate : Document
         if (string.IsNullOrWhiteSpace(filter))
             return true;
 
-        if (Name.Contains(filter))
+        if (Name.Contains(filter, StringComparison.InvariantCultureIgnoreCase))
             return true;
 
-        if (Abbreviation.Contains(filter))
+        if (Abbreviation.Contains(filter, StringComparison.InvariantCultureIgnoreCase))
             return true;
 
         return false;

@@ -30,8 +30,9 @@
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
 
+    [Inject] public required NavigationManager Navigation { get; set; }
     [Inject] public required IDialogService Dialog { get; set; }
-    
+
     [Parameter] public required ProjectAggregate Project { get; set; }
     
     private async void DeleteProject()
@@ -45,5 +46,6 @@
             return;
 
         Project.Delete(Database);
+        Navigation.NavigateTo("/project");
     }
 }
