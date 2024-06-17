@@ -3,7 +3,7 @@
   "splashscreen": {
     "imageFile": ""
   },
-  "name": "Sapphire.App",
+  "name": "Sapphire",
   "author": "",
   "singleInstance": false,
   "environment": "Production",
@@ -14,7 +14,8 @@
     "buildVersion": "1.0.0",
     "compression": "maximum",
     "directories": {
-      "output": "../../../bin/Desktop"
+      "output": "../../../bin/Desktop",
+      "buildResources": "C:\\Users\\Nathaniel Walser\\Documents\\Respositories\\Moonstone\\Sapphire.App\\wwwroot\\buildRessources" 
     },
     "extraResources": [
       {
