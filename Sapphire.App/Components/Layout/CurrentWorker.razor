@@ -1,5 +1,15 @@
 ﻿@implements IDisposable
-<MudButton Variant="Variant.Outlined" Size="Size.Small" Class="no-drag w-40" Href="/settings">@AppDb.Data.FullName</MudButton>
+
+<MudButton Variant="Variant.Outlined" Size="Size.Small" Class="no-drag w-40" Href="/settings">
+    @if (!string.IsNullOrWhiteSpace(AppDb.Data.FullName))
+    {
+        @AppDb.Data.FullName
+    }
+    else
+    {
+        @("Set Your Name")
+    }
+</MudButton>
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }

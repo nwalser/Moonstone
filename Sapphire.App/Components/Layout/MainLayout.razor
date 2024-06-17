@@ -5,36 +5,42 @@
 <MudThemeProvider @ref="_mudThemeProvider" @bind-IsDarkMode="_isDarkMode" Theme="Theme.Default" DefaultScrollbar="true"/>
 
 <CascadingValue TValue="BrowserWindow?" IsFixed="true" Value="WindowManager.BrowserWindows.SingleOrDefault()">
-    @if (DatabaseService.Database is not null)
-    {
-        <CascadingValue TValue="ProjectDatabase" IsFixed="true" Value="DatabaseService.Database">
+
+        @if (DatabaseService.Database is not null)
+        {
+            var worker = DatabaseService.Database.Enumerate<WorkerAggregate>().FirstOrDefault(w => w.Name == AppDb.Data.FullName);
+            
+            <CascadingValue TValue="WorkerAggregate?" IsFixed="true" Value="worker">
+                <CascadingValue TValue="ProjectDatabase" IsFixed="true" Value="DatabaseService.Database">
+                    <ErrorBoundary>
+                        <ChildContent>
+                            @Body
+                        </ChildContent>
+                        <ErrorContent>
+                            <p>There was an error</p>
+                        </ErrorContent>
+                    </ErrorBoundary>
+                </CascadingValue>
+            </CascadingValue>
+        }
+        else
+        {
             <ErrorBoundary>
                 <ChildContent>
-                    @Body
+                    <Workspaces />
                 </ChildContent>
                 <ErrorContent>
                     <p>There was an error</p>
                 </ErrorContent>
             </ErrorBoundary>
-        </CascadingValue>
-    }
-    else
-    {
-        <ErrorBoundary>
-            <ChildContent>
-                <Workspaces />
-            </ChildContent>
-            <ErrorContent>
-                <p>There was an error</p>
-            </ErrorContent>
-        </ErrorBoundary>
-    }
+        }
 </CascadingValue>
 
 @code{
     [Inject] public required DatabaseService<ProjectDatabase> DatabaseService { get; set; }
     [Inject] public required WindowManager WindowManager { get; set; }
-    
+    [Inject] public required AppDb AppDb { get; set; }
+
     private bool _isDarkMode = true;
     private MudThemeProvider _mudThemeProvider = null!;
     

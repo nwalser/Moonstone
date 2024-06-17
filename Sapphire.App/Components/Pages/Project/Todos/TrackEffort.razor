@@ -1,0 +1,122 @@
+﻿<BoxHeader Title="Track Effort" First="true"/>
+
+<MudStack Row="false">
+    @if (CurrentWorker is not null)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var from = today.AddDays(-9);
+        var to = today.AddDays(2);
+        var days = Enumerable.Range(0, to.DayNumber - from.DayNumber)
+            .Select(d => from.AddDays(d))
+            .ToList();
+
+        <MudStack Row="true" Spacing="0">
+            @foreach (var day in days)
+            {
+                var color = "transparent";
+                var style = "";
+
+                if (day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+                    color = "var(--mud-palette-lines-default)";
+
+                if (day.DayNumber == today.DayNumber)
+                    color = "var(--mud-palette-success)";
+
+                if (day.DayNumber == _currentDay.DayNumber)
+                    style = "background-color: var(--mud-palette-lines-default)";
+
+                <div style="width: calc(1 / 11 * 100%); text-align: center; padding: 2px" @onclick="() => OpenDay(day)">
+                    <div style="border: 1px solid @color; border-radius: var(--mud-default-borderradius); line-height: 1.5rem; font-size: 0.8rem; @style">
+                        <MudStack Row="false" Spacing="1">
+                            <MudText Typo="Typo.body1">@day.Day</MudText>
+                            @{
+                                var allocation = Database.Enumerate<AllocationAggregate>()
+                                    .Where(a => a.Date == day)
+                                    .Where(a => a.WorkerId == CurrentWorker.Id)
+                                    .FirstOrDefault(a => a.TodoId == Todo.Id);
+
+                                <MudText Typo="Typo.body2">@((allocation?.AllocatedTime.TotalHours ?? 0).ToString("N1"))h</MudText>
+                            }
+                        </MudStack>
+                    </div>
+                </div>
+            }
+        </MudStack>
+
+        <MudStack Row="false">
+            <MudText Typo="Typo.h4">@_currentDay</MudText>
+
+            <MudStack Row="true" Justify="Justify.SpaceBetween">
+                <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+                    <MudButton OnClick="() => Track(TimeSpan.FromMinutes(15))">+15m</MudButton>
+                    <MudButton OnClick="() => Track(TimeSpan.FromMinutes(30))">+30m</MudButton>
+                    <MudButton OnClick="() => Track(TimeSpan.FromHours(1))">+1h</MudButton>
+                    <MudButton OnClick="() => Track(TimeSpan.FromHours(2))">+2h</MudButton>
+                    <MudButton OnClick="() => Track(TimeSpan.FromHours(4))">+4h</MudButton>
+                    <MudButton OnClick="() => Track(TimeSpan.FromHours(8))">+8h</MudButton>
+                </MudButtonGroup>
+                <MudButton OnClick="Clear" Variant="Variant.Outlined" Size="Size.Small">Clear</MudButton>
+            </MudStack>
+        </MudStack>
+    }
+    else
+    {
+        <MudStack>
+            <MudText>We could not find you in this workspace. Please check if your name matches any of the workers</MudText>
+        </MudStack>
+    }
+</MudStack>
+
+@code {
+    [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [CascadingParameter] public required WorkerAggregate? CurrentWorker { get; set; }
+    [Parameter] public required TodoAggregate Todo { get; set; }
+
+    private DateOnly _currentDay = DateOnly.FromDateTime(DateTime.UtcNow);
+    
+    private void OpenDay(DateOnly day)
+    {
+        _currentDay = day;
+    }
+
+    private void Clear()
+    {
+        if (CurrentWorker is null) 
+            return;
+
+        var allocation = Database
+            .Enumerate<AllocationAggregate>()
+            .Where(a => a.Date == _currentDay)
+            .Where(a => a.TodoId == Todo.Id)
+            .FirstOrDefault(a => a.WorkerId == CurrentWorker.Id);
+
+        if (allocation is null)
+            return;
+        
+        allocation.Clear();
+        Database.Update(allocation);
+    }
+    
+    private void Track(TimeSpan effort)
+    {
+        if (CurrentWorker is null) 
+            return;
+
+        var allocation = Database
+            .Enumerate<AllocationAggregate>()
+            .Where(a => a.Date == _currentDay)
+            .Where(a => a.TodoId == Todo.Id)
+            .FirstOrDefault(a => a.WorkerId == CurrentWorker.Id);
+
+        if (allocation is null)
+            allocation = new AllocationAggregate()
+            {
+                Date = _currentDay,
+                TodoId = Todo.Id,
+                WorkerId = CurrentWorker.Id,
+            };
+
+        allocation.AddEffort(effort);
+        Database.Update(allocation);
+    }
+}

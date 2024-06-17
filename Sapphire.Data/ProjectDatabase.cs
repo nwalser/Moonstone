@@ -29,6 +29,8 @@ public class ProjectDatabase : Database, IDisposable
         
         { 7, typeof(DailyAllocationRule) },
         { 8, typeof(WeeklyAllocationRule) },
+        
+        { 10, typeof(AllocationAggregate) },
     };
 
     public override void Create(string path, string session)
