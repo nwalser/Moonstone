@@ -12,8 +12,8 @@ public class WeeklyAllocationRule : Document
     public DateOnly? ActiveFrom { get; set; }
     public DateOnly? ActiveTo { get; set; }
     
-    public void Remove(ProjectDatabase db)
+    public void Delete(ProjectDatabase db)
     {
-        db.Remove(this); // todo: implement proper deletion
+        db.Remove(this);
     }
 }

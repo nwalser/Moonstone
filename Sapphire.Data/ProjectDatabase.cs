@@ -67,7 +67,6 @@ public class ProjectDatabase : Database, IDisposable
     {
         await Task.Run(() =>
         {
-            // todo: implement skipping of intermediary simulations
             Monitor.Enter(this);
             try
             {

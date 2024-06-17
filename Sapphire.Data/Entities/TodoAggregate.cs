@@ -45,6 +45,36 @@ public class TodoAggregate : Document
         return false;
     }
 
+    public void RemoveTag(string tag)
+    {
+        Tags.Remove(tag);
+    }
+
+    public void AddTag(string tag)
+    {
+        Tags.Add(tag);
+    }
+
+    public void Delete(ProjectDatabase db)
+    {
+        db.Remove(this);
+
+        foreach (var allocation in GetAllocations(db))
+            allocation.Delete(db);
+        
+        foreach (var delayLocks in GetDelayLocks(db))
+            delayLocks.Delete(db);
+        
+        foreach (var minDateLocks in GetMinDateLocks(db))
+            minDateLocks.Delete(db);
+    }
+
+    public IEnumerable<AllocationAggregate> GetAllocations(Database db)
+    {
+        return db.Enumerate<AllocationAggregate>()
+            .Where(a => a.TodoId == Id);
+    }
+    
     public IEnumerable<WorkerAggregate> GetPossibleAssignedWorkers(ProjectDatabase db)
     {
         return db.Enumerate<WorkerAggregate>()
@@ -104,7 +134,7 @@ public class TodoAggregate : Document
     }
 
 
-    private IEnumerable<ILock> GetParentLocks(ProjectDatabase db, DateOnly date)
+    private IEnumerable<ILock> GetActiveParentLocks(ProjectDatabase db, DateOnly date)
     {
         var parentTodo = GetParentTodo(db);
 
@@ -117,22 +147,30 @@ public class TodoAggregate : Document
             yield return parentLock;
     }
 
-    private IEnumerable<ILock> GetMinDateLocks(ProjectDatabase db, DateOnly date)
+    private IEnumerable<MinDateLockAggregate> GetMinDateLocks(ProjectDatabase db)
     {
-        var activeMinDateLocks = db.Enumerate<MinDateLockAggregate>()
-            .Where(l => l.TodoId == Id)
+        return db.Enumerate<MinDateLockAggregate>()
+            .Where(l => l.TodoId == Id);
+    }
+    
+    private IEnumerable<MinDateLockAggregate> GetActiveMinDateLocks(ProjectDatabase db, DateOnly date)
+    {
+        var activeMinDateLocks = GetMinDateLocks(db)
             .Where(m => m.MinDate > date);
 
         foreach (var minDateLock in activeMinDateLocks)
             yield return minDateLock;
     }
-    
-    private IEnumerable<ILock> GetDelayLocks(ProjectDatabase db, DateOnly date)
-    {
-        var delayLocks = db.Enumerate<DelayLockAggregate>()
-            .Where(l => l.TodoId == Id);
 
-        foreach (var delayLock in delayLocks)
+    private IEnumerable<DelayLockAggregate> GetDelayLocks(ProjectDatabase db)
+    {
+        return db.Enumerate<DelayLockAggregate>()
+            .Where(l => l.TodoId == Id);
+    }
+    
+    private IEnumerable<DelayLockAggregate> GetActiveDelayLocks(ProjectDatabase db, DateOnly date)
+    {
+        foreach (var delayLock in GetDelayLocks(db))
         {
             var dependeeTodo = db.Enumerate<TodoAggregate>()
                 .Single(t => t.Id == delayLock.TodoLockerId);
@@ -163,13 +201,13 @@ public class TodoAggregate : Document
     
     public IEnumerable<ILock> GetActiveLocks(ProjectDatabase db, DateOnly date)
     {
-        foreach (var @lock in GetParentLocks(db, date))
+        foreach (var @lock in GetActiveParentLocks(db, date))
             yield return @lock;
         
-        foreach (var @lock in GetMinDateLocks(db, date))
+        foreach (var @lock in GetActiveMinDateLocks(db, date))
             yield return @lock;
 
-        foreach (var @lock in GetDelayLocks(db, date))
+        foreach (var @lock in GetActiveDelayLocks(db, date))
             yield return @lock;
     }
     

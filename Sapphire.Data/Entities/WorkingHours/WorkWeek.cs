@@ -19,8 +19,8 @@ public class WorkWeek : Document
         return TimeSpan.Zero;
     }
 
-    public void Remove(ProjectDatabase db)
+    public void Delete(ProjectDatabase db)
     {
-        db.Remove(this); // todo: implement proper deletion
+        db.Remove(this);
     }
 }

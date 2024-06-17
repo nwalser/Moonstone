@@ -19,4 +19,9 @@ public class AllocationAggregate : Document
     {
         AllocatedTime = TimeSpan.Zero;
     }
+
+    public void Delete(Database db)
+    {
+        db.Remove(this);
+    }
 }

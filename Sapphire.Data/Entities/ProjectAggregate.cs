@@ -14,7 +14,22 @@ public class ProjectAggregate : Document
     public DateOnly? Deadline { get; set; }
 
     public List<string> PossibleTags { get; set; } = [];
-    
+
+
+    public void AddPossibleTag(ProjectDatabase db, string tag)
+    {
+        PossibleTags.Add(tag);
+    }
+
+    public void RemovePossibleTag(ProjectDatabase db, string tag)
+    {
+        PossibleTags.Remove(tag);
+        var todos = GetTodos(db);
+
+        // remove tag from all child elements
+        foreach (var todo in todos)
+            todo.RemoveTag(tag);
+    }
     
     public IEnumerable<TodoAggregate> GetRootTodos(ProjectDatabase db)
     {
@@ -37,10 +52,29 @@ public class ProjectAggregate : Document
     
     public void Delete(ProjectDatabase db)
     {
-        // todo: delete all related entities
         db.Remove(this);
+
+        foreach (var todo in GetTodos(db))
+            todo.Delete(db);
+        
+        foreach (var dailyAllocationRule in GetDailyAllocationRules(db))
+            dailyAllocationRule.Delete(db);
+        
+        foreach (var weeklyAllocationRule in GetWeeklyAllocationRules(db))
+            weeklyAllocationRule.Delete(db);
     }
 
+    private IEnumerable<DailyAllocationRule> GetDailyAllocationRules(ProjectDatabase db)
+    {
+        return db.Enumerate<DailyAllocationRule>()
+            .Where(d => d.ProjectId == Id);
+    }
+
+    private IEnumerable<WeeklyAllocationRule> GetWeeklyAllocationRules(ProjectDatabase db)
+    {
+        return db.Enumerate<WeeklyAllocationRule>()
+            .Where(a => a.ProjectId == Id);
+    }
 
     public TimeSpan GetAllocations(ProjectDatabase db, DateOnly day, Guid workerId)
     {

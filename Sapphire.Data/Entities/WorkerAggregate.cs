@@ -34,6 +34,12 @@ public class WorkerAggregate : Document
         return false;
     }
     
+    public void Delete(ProjectDatabase db)
+    {
+        // todo implement proper deletion
+        db.Remove(this);
+    }
+    
     public TimeSpan GetRegularHours(ProjectDatabase db, DateOnly date)
     {
         // OfficeDay

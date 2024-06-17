@@ -36,13 +36,13 @@
         if (string.IsNullOrWhiteSpace(_tagValue))
             return;
         
-        Project.PossibleTags.Add(_tagValue);
+        Project.AddPossibleTag(Database, _tagValue);
         Database.Update(Project);
     }
     
     private void DeleteTag(string tag)
     {
-        Project.PossibleTags.Remove(tag);
+        Project.RemovePossibleTag(Database, _tagValue);
         Database.Update(Project);
     }
 }
