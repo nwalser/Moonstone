@@ -4,7 +4,17 @@
         <MudText Typo="Typo.body2">/</MudText>
         <MudText Typo="Typo.body2" Class="w-1/2 px-2 text-right">@($"{Total.TotalHours:N0}h")</MudText>
     </MudStack>
-    <MudProgressLinear Value="Progress.TotalHours" Min="0" Max="@Total.TotalHours" Size="Size.Small" Class="w-full"/>
+    @{
+        var color = Color.Default;
+
+        if (Total * 0.9 < Progress)
+            color = Color.Warning;
+        
+        if (Total < Progress)
+            color = Color.Error;
+        
+        <MudProgressLinear Value="Progress.TotalHours" Min="0" Max="@Total.TotalHours" Size="Size.Small" Class="w-full" Color="color"/>
+    }
 </MudStack>
 
 @code {

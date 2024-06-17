@@ -28,7 +28,7 @@
                 <div style="width: calc(1 / 11 * 100%); text-align: center; padding: 2px" @onclick="() => OpenDay(day)">
                     <div style="border: 1px solid @color; border-radius: var(--mud-default-borderradius); line-height: 1.5rem; font-size: 0.8rem; @style">
                         <MudStack Row="false" Spacing="1">
-                            <MudText Typo="Typo.body1">@day.Day</MudText>
+                            <MudText Typo="Typo.body1">@day.Day (@day.DayOfWeek.ToString()[..1].)</MudText>
                             @{
                                 var allocation = Database.Enumerate<AllocationAggregate>()
                                     .Where(a => a.Date == day)
@@ -44,7 +44,7 @@
         </MudStack>
 
         <MudStack Row="false">
-            <MudText Typo="Typo.h4">@_currentDay</MudText>
+            <MudText Typo="Typo.h4">@_currentDay (@_currentDay.DayOfWeek)</MudText>
 
             <MudStack Row="true" Justify="Justify.SpaceBetween">
                 <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">

@@ -1,5 +1,5 @@
 ﻿<MudGrid Spacing="0">
-    <MudItem xs="4" Class="p-5">
+    <MudItem xs="3" Class="p-5">
         <BoxHeader Title="Task" First="true"></BoxHeader>
         <MudGrid Spacing="1">
             <MudItem xs="12">
@@ -44,7 +44,10 @@
             </MudItem>
         </MudGrid>
     </MudItem>
-    <MudItem xs="4" Class="p-5">
+    <MudItem xs="6" Class="p-5">
+        <TrackEffort Todo="Todo" />
+    </MudItem>
+    <MudItem xs="3" Class="p-5">
         <BoxHeader Title="Planned Allocations" First="true">
             @if (Todo.GetRemainingUnplannedEffort(Database) > TimeSpan.Zero)
             {
@@ -66,9 +69,6 @@
                 </MudPaper>
             }
         </MudStack>
-    </MudItem>
-    <MudItem xs="4" Class="p-5">
-        <TrackEffort Todo="Todo" />
     </MudItem>
 </MudGrid>
 
