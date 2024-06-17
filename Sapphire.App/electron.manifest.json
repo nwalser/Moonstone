@@ -9,13 +9,13 @@
   "environment": "Production",
   "build": {
     "appId": "com.Sapphire.App.app",
-    "productName": "Sapphire.App",
+    "productName": "Sapphire",
     "copyright": "Copyright © 2020",
     "buildVersion": "1.0.0",
     "compression": "maximum",
     "directories": {
       "output": "../../../bin/Desktop",
-      "buildResources": "C:\\Users\\Nathaniel Walser\\Documents\\Respositories\\Moonstone\\Sapphire.App\\wwwroot\\buildRessources" 
+      "buildResources": "C:\\Users\\Nathaniel Walser\\Documents\\Respositories\\Moonstone\\Sapphire.App\\wwwroot\\images" 
     },
     "extraResources": [
       {

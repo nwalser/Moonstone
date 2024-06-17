@@ -58,6 +58,7 @@ if (!webRuntime)
 
     var options = new BrowserWindowOptions()
     {
+        Title = "Sapphire",
         MinHeight = 800,
         MinWidth = 1400,
         Frame = false

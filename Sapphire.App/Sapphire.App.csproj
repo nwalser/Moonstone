@@ -17,6 +17,9 @@
     <Content Update="electron.manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\images\icon.afdesign">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Moonstone.Database\Moonstone.Database.csproj" />
@@ -35,5 +38,8 @@
     <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-700.ttf" />
     <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-900-Italic.ttf" />
     <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-900.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\buildRessources\" />
   </ItemGroup>
 </Project>
