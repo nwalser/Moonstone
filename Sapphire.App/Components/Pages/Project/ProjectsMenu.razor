@@ -1,4 +1,6 @@
-﻿<MudStack Row="false" Spacing="1" Class="p-1">
+﻿@inherits DatabaseRefresh
+
+<MudStack Row="false" Spacing="1" Class="p-1">
     @foreach (var project in Database.Enumerate<ProjectAggregate>().OrderByDescending(p => p.Priority))
     {
         <a href="@($"/project/{project.Id}/todos")">
@@ -22,7 +24,6 @@
 
 
 @code {
-    [CascadingParameter] public required ProjectDatabase Database { get; set; }
     [Inject] public required NavigationManager Navigation { get; set; }
 
     protected override void OnAfterRender(bool firstRender)

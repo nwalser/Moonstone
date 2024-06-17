@@ -13,22 +13,7 @@
         @if (_project is not null)
         {
             <MudGrid Spacing="2">
-                <MudItem xs="12">
-                    <MudPaper Outlined="true" Elevation="0" Class="p-3">
-                        <MudStack Row="true" AlignItems="AlignItems.Center">
-                            <MudSelect MultiSelection="false" T="Guid?" AnchorOrigin="Origin.BottomCenter" Dense="true"
-                                       ShrinkLabel="true" @bind-Value="_workerToBeAdded" Label="Add Team Member" Immediate="false">
-                                @foreach (var worker in _project.GetWorkersNotInProject(Database))
-                                {
-                                    <MudSelectItem T="Guid?" Value="@worker.Id">@worker.Name</MudSelectItem>
-                                }
-                            </MudSelect>
-                            <MudIconButton Icon="@Icons.Material.Outlined.Add" Variant="Variant.Outlined" Size="Size.Small" OnClick="AddWorker"/>
-                        </MudStack>
-                    </MudPaper>
-                </MudItem>
-                
-                @foreach (var worker in _workersInProject)
+                @foreach (var worker in _workers)
                 {
                     <MudItem xs="12">
                         <BoxHeader Title="@worker.Name">
@@ -100,14 +85,14 @@
     [Parameter] public required Guid ProjectId { get; set; }
 
     private ProjectAggregate? _project;
-    private List<WorkerAggregate> _workersInProject = [];
+    private List<WorkerAggregate> _workers = [];
 
     private Guid? _workerToBeAdded;
     
     protected override void OnLoadData()
     {
         _project = Database.Enumerate<ProjectAggregate>().Single(p => p.Id == ProjectId);
-        _workersInProject = _project.GetWorkersInProject(Database).ToList();
+        _workers = Database.Enumerate<WorkerAggregate>().ToList();
     }
 
     private void AddDailyRule(Guid workerId)
