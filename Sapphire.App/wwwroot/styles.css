@@ -1,4 +1,25 @@
-﻿/* MudButton Overrides */
+﻿body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: var(--mud-palette-lines-default);
+}
+
+/* MudButton Overrides */
 .mud-button-outlined {
     border-color: var(--mud-palette-lines-default) !important;
 }

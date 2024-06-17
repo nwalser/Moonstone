@@ -22,4 +22,18 @@
     <ProjectReference Include="..\Moonstone.Database\Moonstone.Database.csproj" />
     <ProjectReference Include="..\Sapphire.Data\Sapphire.Data.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-100-Italic.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-100.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-300-Italic.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-300.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-400-Italic.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-400.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-500-Italic.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-500.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-700-Italic.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-700.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-900-Italic.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-900.ttf" />
+  </ItemGroup>
 </Project>
