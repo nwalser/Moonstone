@@ -33,7 +33,7 @@ public abstract class Database : IDatabase, IDisposable
     private readonly BehaviorSubject<DateTime> _lastUpdate = new(DateTime.MinValue);
     public BehaviorSubject<DateTime> LastUpdate => _lastUpdate;
 
-    public virtual void Create(string path, string session)
+    public void Create(string path, string session)
     {
         if (Directory.EnumerateFileSystemEntries(path).Any())
             throw new DirectoryNotEmptyException();
@@ -49,16 +49,17 @@ public abstract class Database : IDatabase, IDisposable
 
         var json = JsonSerializer.Serialize(metadata);
         File.WriteAllText(Path.Join(path, "metadata.json"), json);
-
-        Console.WriteLine("Hello");
         
         Open(path, session);
+        OnAfterCreating();
     }
     
     public void Close()
     {
         if (_watcher is not null)
             _watcher.EnableRaisingEvents = false;
+
+        OnAfterClosing();
     }
 
     public void Open(string path, string session)
@@ -110,8 +111,12 @@ public abstract class Database : IDatabase, IDisposable
         OnAfterOpening();
     }
 
+    
+    protected virtual void OnAfterCreating() { }
+    protected virtual void OnAfterClosing() { }
     protected virtual void OnAfterOpening() { }
 
+    
     private async Task BackgroundTask(CancellationToken ct = default)
     {
         while (!ct.IsCancellationRequested)

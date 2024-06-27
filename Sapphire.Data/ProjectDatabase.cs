@@ -34,10 +34,8 @@ public class ProjectDatabase : Database, IDisposable
         { 10, typeof(AllocationAggregate) },
     };
 
-    public override void Create(string path, string session)
+    protected override void OnAfterCreating()
     {
-        base.Create(path, session);
-        
         // create initial objects
         var project = new ProjectAggregate()
         {
