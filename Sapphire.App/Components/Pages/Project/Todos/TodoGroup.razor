@@ -1,20 +1,21 @@
-﻿@using Sapphire.Data.Entities.Todo
-@if (_todo is not null)
+﻿@if (_todo is not null && _todoWorkerMetadata is not null)
 {
-    <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" @key="_todo.Id" Todos="Todos" Project="Project" @bind-Expanded="_expanded" Filter="@Filter" />
+    <TodoRow @key="_todo.Id" Todo="_todo" Depth="Depth" ChildTodos="_childTodos" Todos="Todos" Project="Project" Filter="@Filter" TodoWorkerMetadata="_todoWorkerMetadata" />
 }
 
-@if (_expanded)
+@if (_todoWorkerMetadata?.Expanded ?? true)
 {
     <FluentUnstyledSortableList Items="_childTodos" OnUpdate="OnUpdate" Handle="true">
         <ItemTemplate>
-            <TodoGroup TodoId="context.Id" Todos="Todos" Depth="Depth+1" Project="Project" @key="context.Id" Filter="@Filter" />
+            <TodoGroup @key="context.Id" TodoId="context.Id" Todos="Todos" Depth="Depth+1" Project="Project" Filter="@Filter" />
         </ItemTemplate>
     </FluentUnstyledSortableList>
 }
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [CascadingParameter] public required WorkerAggregate CurrentWorker { get; set; }
+    
     [Parameter] public required List<TodoAggregate> Todos { get; set; }
     [Parameter] public required Guid? TodoId { get; set; }
     [Parameter] public required ProjectAggregate Project { get; set; }
@@ -22,14 +23,15 @@
     [Parameter] public string Filter { get; set; } = string.Empty;
 
     private TodoAggregate?  _todo;
+    private TodoWorkerMetadata? _todoWorkerMetadata;
     private List<TodoAggregate> _childTodos = [];
-    private bool _expanded = true;
-    
+
     
     protected override Task OnParametersSetAsync()
     {
         _todo = Todos.SingleOrDefault(t => t.Id == TodoId);
         _childTodos = Todos.Where(t => t.ParentId == TodoId).OrderBy(c => c.Order).ToList();
+        _todoWorkerMetadata = _todo?.GetMetadata(Database, CurrentWorker);
 
         return base.OnParametersSetAsync();
     }

@@ -59,6 +59,22 @@ public partial class TodoAggregate : Document
         foreach (var childTodo in GetChildTodos(db))
             childTodo.Delete(db);
     }
+
+    public TodoWorkerMetadata GetMetadata(ProjectDatabase db, WorkerAggregate? worker)
+    {
+        var metadata = db.Enumerate<TodoWorkerMetadata>()
+            .Where(m => m.WorkerId == worker?.Id)
+            .FirstOrDefault(m => m.TodoId == Id);
+
+        metadata ??= new TodoWorkerMetadata()
+        {
+            TodoId = Id,
+            WorkerId = worker?.Id,
+        };
+        
+        return metadata;
+    }
+    
     
     public IEnumerable<AllocationAggregate> GetAllocations(ProjectDatabase db)
     {

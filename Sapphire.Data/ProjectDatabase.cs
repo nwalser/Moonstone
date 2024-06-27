@@ -32,6 +32,7 @@ public class ProjectDatabase : Database, IDisposable
         { 8, typeof(WeeklyAllocationRule) },
         
         { 10, typeof(AllocationAggregate) },
+        { 11, typeof(TodoWorkerMetadata) },
     };
 
     protected override void OnAfterCreating()

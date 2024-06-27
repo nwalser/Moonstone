@@ -1,8 +1,7 @@
-﻿@using Sapphire.Data.Entities.Todo
-<MudItem xs="12">
+﻿<MudItem xs="12">
     <MudCard Elevation="0" Outlined="true" Class="my-1 overflow-hidden" Style="@(!Todo.FilterMatches(Database, Filter) || Todo.State != TodoState.Active ? "filter: brightness(35%) !important" : string.Empty)">
         <MudStack Row="false" Spacing="0">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8 hover:bg-[var(--mud-palette-lines-default)]" Style="@(Editing ? "background-color: var(--mud-palette-lines-default) !important" : string.Empty)">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8 hover:bg-[var(--mud-palette-lines-default)]" Style="@(TodoWorkerMetadata.Editing ? "background-color: var(--mud-palette-lines-default) !important" : string.Empty)">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
                     <FluentDropZone Draggable="true" Droppable="true" Item="Todo" Class="h-full w-8 flex items-center justify-center hover:bg-[var(--mud-palette-lines-default)]">
                         <MudIcon Icon="@Icons.Material.Filled.DragIndicator" Size="Size.Small"/>
@@ -15,19 +14,21 @@
 
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="flex-grow h-full flex-shrink overflow-hidden" @onclick="ToggleEditing" Justify="Justify.FlexStart">
                     <MudText Typo="Typo.body2" Class="w-80 flex-shrink-0 truncate" Style="@($"padding-left: {Depth * 12}px")">
-                        @switch (Todo.HasChildren(Database))
-                        {
-                            case true when Expanded:
-                                <MudIconButton Icon="@Icons.Material.Outlined.KeyboardArrowDown" Size="Size.Small" OnClick="ToggleExpanded" Class="w-4"/>
-                                break;
-                            case true when !Expanded:
-                                <MudIconButton Icon="@Icons.Material.Outlined.KeyboardArrowRight" Size="Size.Small" OnClick="ToggleExpanded" Class="w-4"/>
-                                break;
-                            case false:
-                                <MudIconButton Size="Size.Small" Class="w-4" Disabled="true" />
-                                break;
+                        @{
+                            @switch (Todo.HasChildren(Database))
+                            {
+                                case true when TodoWorkerMetadata.Expanded:
+                                    <MudIconButton Icon="@Icons.Material.Outlined.KeyboardArrowDown" Size="Size.Small" OnClick="ToggleExpanded" Class="w-4"/>
+                                    break;
+                                case true when !TodoWorkerMetadata.Expanded:
+                                    <MudIconButton Icon="@Icons.Material.Outlined.KeyboardArrowRight" Size="Size.Small" OnClick="ToggleExpanded" Class="w-4"/>
+                                    break;
+                                case false:
+                                    <MudIconButton Size="Size.Small" Class="w-4" Disabled="true"/>
+                                    break;
+                            }
                         }
-
+                        
                         @Todo.Name
                     </MudText>
 
@@ -93,7 +94,7 @@
                 </MudStack>
             </MudStack>
 
-            @if (Editing)
+            @if (TodoWorkerMetadata.Editing)
             {
                 <TodoRowEdit Project="Project" Todo="Todo" />
             }
@@ -103,9 +104,12 @@
 
 @code {
     [CascadingParameter] public required ProjectDatabase Database { get; set; }
+    [CascadingParameter] public required WorkerAggregate? CurrentWorker { get; set; }
+    
     [Inject] public required IDialogService DialogService { get; set; }
     
     [Parameter] public required TodoAggregate Todo { get; set; }
+    [Parameter] public required TodoWorkerMetadata TodoWorkerMetadata { get; set; }
     [Parameter] public required ProjectAggregate Project { get; set; }
     [Parameter] public required uint Depth { get; set; }
     [Parameter] public required List<TodoAggregate> Todos { get; set; }
@@ -113,12 +117,6 @@
     [Parameter] public string Filter { get; set; } = string.Empty;
 
 
-    [Parameter] public bool Expanded { get; set; } = true;
-    [Parameter] public EventCallback<bool> ExpandedChanged { get; set; }
-
-    [Parameter] public bool Editing { get; set; } = false;
-    [Parameter] public EventCallback<bool> EditingChanged { get; set; }
-    
     private void AddSubTodo()
     {
         var todo = new TodoAggregate
@@ -148,14 +146,14 @@
 
     private void ToggleEditing()
     {
-        Editing = !Editing;
-        EditingChanged.InvokeAsync(Editing);
+        TodoWorkerMetadata.Editing = !TodoWorkerMetadata.Editing;
+        Database.Update(TodoWorkerMetadata);
     }
 
     private void ToggleExpanded()
     {
-        Expanded = !Expanded;
-        ExpandedChanged.InvokeAsync(Expanded);
+        TodoWorkerMetadata.Expanded = !TodoWorkerMetadata.Expanded;
+        Database.Update(TodoWorkerMetadata);
     }
     
     private string WorkersText(IEnumerable<WorkerAggregate> workers)
