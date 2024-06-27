@@ -1,5 +1,6 @@
 ﻿using Moonstone.Database;
 using Sapphire.Data.Entities.MaximalAllocation;
+using Sapphire.Data.Entities.Todo;
 using Sapphire.Data.Extensions;
 
 namespace Sapphire.Data.Entities;
@@ -120,7 +121,7 @@ public class ProjectAggregate : Document
         List<TimeSpan> allocationSpans = [..weeklyAllocations, ..dailyAllocations];
 
         if (allocationSpans.Count == 0)
-            return TimeSpan.Zero;
+            return TimeSpan.MaxValue;
         
         return TimeSpanExtensions.Min(allocationSpans);
     }

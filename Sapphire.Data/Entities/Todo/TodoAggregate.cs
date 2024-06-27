@@ -2,9 +2,9 @@
 using Sapphire.Data.Entities.SchedulingLocks;
 using Sapphire.Data.Extensions;
 
-namespace Sapphire.Data.Entities;
+namespace Sapphire.Data.Entities.Todo;
 
-public class TodoAggregate : Document
+public partial class TodoAggregate : Document
 {
     // todo: maybe switch to IQueryable for optimization
     public required string Name { get; set; }
@@ -18,9 +18,7 @@ public class TodoAggregate : Document
 
     public TimeSpan CurrentEstimatedEffort { get; set; } = TimeSpan.Zero;
     public TimeSpan? InitialGroupEstimatedEffort { get; set; }
-
-    public Guid[] PossibleWorkerIds { get; set; } = [];
-    public List<string> Tags { get; set; } = [];
+    
     
     public bool Splittable { get; set; } = false;
 
@@ -33,26 +31,16 @@ public class TodoAggregate : Document
         if (Name.Contains(filter, StringComparison.InvariantCultureIgnoreCase))
             return true;
 
-        if (Tags.Any(tag => tag.Contains(filter, StringComparison.InvariantCultureIgnoreCase)))
+        if (GetTags(db).Any(t => t.Contains(filter, StringComparison.InvariantCultureIgnoreCase)))
             return true;
 
-        if (GetPossibleAssignedWorkers(db).Any(w => w.FilterMatches(db, filter)))
+        if (GetPossibleWorkers(db).Any(w => w.FilterMatches(db, filter)))
             return true;
 
         if (State.ToString().Contains(filter, StringComparison.InvariantCultureIgnoreCase))
             return true;
 
         return false;
-    }
-
-    public void RemoveTag(string tag)
-    {
-        Tags.Remove(tag);
-    }
-
-    public void AddTag(string tag)
-    {
-        Tags.Add(tag);
     }
 
     public void Delete(ProjectDatabase db)
@@ -71,19 +59,13 @@ public class TodoAggregate : Document
         foreach (var childTodo in GetChildTodos(db))
             childTodo.Delete(db);
     }
-
-    public IEnumerable<AllocationAggregate> GetAllocations(Database db)
+    
+    public IEnumerable<AllocationAggregate> GetAllocations(ProjectDatabase db)
     {
         return db.Enumerate<AllocationAggregate>()
             .Where(a => a.TodoId == Id);
     }
     
-    public IEnumerable<WorkerAggregate> GetPossibleAssignedWorkers(ProjectDatabase db)
-    {
-        return db.Enumerate<WorkerAggregate>()
-            .Where(w => PossibleWorkerIds.Contains(w.Id));
-    }
-
     public IEnumerable<WorkerAggregate> GetAssignedWorkers(ProjectDatabase db)
     {
         var workerAllocationIds = db.Enumerate<AllocationAggregate>()
@@ -283,11 +265,4 @@ public class TodoAggregate : Document
     {
         return GetChildrenWorkedEffort(db) + GetWorkedEffort(db);
     }
-}
-
-public enum TodoState
-{
-    Draft,
-    Active,
-    Completed
 }

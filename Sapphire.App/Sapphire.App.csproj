@@ -39,7 +39,4 @@
     <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-900-Italic.ttf" />
     <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-900.ttf" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="wwwroot\buildRessources\" />
-  </ItemGroup>
 </Project>

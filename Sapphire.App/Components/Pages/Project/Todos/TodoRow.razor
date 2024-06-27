@@ -1,5 +1,6 @@
-﻿<MudItem xs="12">
-    <MudCard Elevation="0" Outlined="true" Class="my-1 overflow-hidden" Style="@(!Todo.FilterMatches(Database, Filter) ? "filter: brightness(35%) !important" : string.Empty)">
+﻿@using Sapphire.Data.Entities.Todo
+<MudItem xs="12">
+    <MudCard Elevation="0" Outlined="true" Class="my-1 overflow-hidden" Style="@(!Todo.FilterMatches(Database, Filter) || Todo.State != TodoState.Active ? "filter: brightness(35%) !important" : string.Empty)">
         <MudStack Row="false" Spacing="0">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-8 hover:bg-[var(--mud-palette-lines-default)]" Style="@(Editing ? "background-color: var(--mud-palette-lines-default) !important" : string.Empty)">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="h-full">
@@ -13,7 +14,7 @@
                 </MudStack>
 
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="flex-grow h-full flex-shrink overflow-hidden" @onclick="ToggleEditing" Justify="Justify.FlexStart">
-                    <MudText Typo="Typo.body2" Class="w-80 flex-shrink-0" Style="@($"padding-left: {Depth * 12}px")">
+                    <MudText Typo="Typo.body2" Class="w-80 flex-shrink-0 truncate" Style="@($"padding-left: {Depth * 12}px")">
                         @switch (Todo.HasChildren(Database))
                         {
                             case true when Expanded:
@@ -23,7 +24,7 @@
                                 <MudIconButton Icon="@Icons.Material.Outlined.KeyboardArrowRight" Size="Size.Small" OnClick="ToggleExpanded" Class="w-4"/>
                                 break;
                             case false:
-                                <MudIconButton Size="Size.Small" Class="w-4"/>
+                                <MudIconButton Size="Size.Small" Class="w-4" Disabled="true" />
                                 break;
                         }
 
@@ -50,10 +51,10 @@
                     </div>
 
                     <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="w-50 flex-shrink-0" Row="true">
-                        <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkerIdsText(Todo.PossibleWorkerIds)</MudText>
+                        <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@WorkersText(Todo.GetPossibleWorkers(Database))</MudText>
                     </MudStack>
                     <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="w-50 flex-shrink-0" Row="true">
-                        <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@TagsMultiSelectText(Todo.Tags)</MudText>
+                        <MudText Typo="Typo.body2" Class="w-40 text-right truncate">@TagsText(Todo.GetTags(Database))</MudText>
                     </MudStack>
                     <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="w-10 flex-shrink-0" Row="true">
                         <MudCheckBox Value="Todo.Splittable" ReadOnly="true" Class="w-12" Size="Size.Small"/>
@@ -157,18 +158,16 @@
         ExpandedChanged.InvokeAsync(Expanded);
     }
     
-    private string WorkerIdsText(IEnumerable<Guid> values)
+    private string WorkersText(IEnumerable<WorkerAggregate> workers)
     {
-        var names = values
-            .Select(guid => Database.Enumerate<WorkerAggregate>().FirstOrDefault(w => w.Id == guid))
-            .Where(w => w is not null)
-            .Select(w => w?.GetDisplayName())
+        var names = workers
+            .Select(w => w.GetDisplayName())
             .ToArray();
 
         return string.Join(", ", names);
     }
     
-    private string TagsMultiSelectText(List<string> values)
+    private string TagsText(IEnumerable<string> values)
     {
         return string.Join(", ", values.Order());
     }

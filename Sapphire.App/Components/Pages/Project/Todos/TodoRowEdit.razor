@@ -1,4 +1,6 @@
-﻿<MudGrid Spacing="0">
+﻿@using System.Text.Json
+
+<MudGrid Spacing="0">
     <MudItem xs="3" Class="p-5">
         <BoxHeader Title="Task" First="true"></BoxHeader>
         <MudGrid Spacing="1">
@@ -6,26 +8,36 @@
                 <MudTextField T="string" Value="@Todo.Name" ValueChanged="UpdateName" Label="Name" Immediate="false" AutoFocus="true"/>
             </MudItem>
             <MudItem xs="6">
-                <MudNumericField T="double" Format="N1" Value="@Todo.CurrentEstimatedEffort.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateCurrentEstimatedEffort" Label="Current Estimate" Immediate="false"/>
+                <MudNumericField T="double" Format="N1" Value="@Todo.CurrentEstimatedEffort.TotalHours" AdornmentText="h" ShrinkLabel="true" 
+                                 Adornment="Adornment.End" ValueChanged="UpdateCurrentEstimatedEffort" Label="Current Estimate" Immediate="false"/>
             </MudItem>
             <MudItem xs="6">
-                <MudNumericField T="double?" Format="N1" Value="@Todo.InitialGroupEstimatedEffort?.TotalHours" AdornmentText="h" ShrinkLabel="true" Adornment="Adornment.End" ValueChanged="UpdateInitialGroupEstimatedEffort" Label="Initial Group Estimate" Immediate="false"/>
+                <MudNumericField T="double?" Format="N1" Value="@Todo.InitialGroupEstimatedEffort?.TotalHours" AdornmentText="h" ShrinkLabel="true" 
+                                 Adornment="Adornment.End" ValueChanged="UpdateInitialGroupEstimatedEffort" Label="Initial Group Estimate" Immediate="false"/>
             </MudItem>
             <MudItem xs="12">
-                <MudSelect MultiSelection="true" T="Guid" AnchorOrigin="Origin.BottomCenter" Dense="true" MultiSelectionTextFunc="WorkerMultiSelectText" SelectedValues="Todo.PossibleWorkerIds" ShrinkLabel="true" SelectedValuesChanged="UpdatePossibleAssignees" Label="Possible Workers" Immediate="false">
-                    @foreach (var worker in Database.Enumerate<WorkerAggregate>())
-                    {
-                        <MudSelectItem T="Guid" Value="@worker.Id">@worker.Name</MudSelectItem>
-                    }
-                </MudSelect>
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudSelect MultiSelection="true" T="Guid" AnchorOrigin="Origin.BottomCenter" Dense="true" Disabled="Todo.InheritsPossibleWorkerIds" MultiSelectionTextFunc="WorkerMultiSelectText"
+                               SelectedValues="Todo.GetPossibleWorkerIds(Database)" ShrinkLabel="true" SelectedValuesChanged="UpdatePossibleAssignees" Label="Possible Workers" Immediate="false">
+                        @foreach (var worker in Database.Enumerate<WorkerAggregate>())
+                        {
+                            <MudSelectItem T="Guid" Value="@worker.Id">@worker.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudSwitch T="bool" ValueChanged="UpdateInheritWorker" Value="Todo.InheritsPossibleWorkerIds" Size="Size.Small" Class="mr-0"/>
+                </MudStack>
             </MudItem>
             <MudItem xs="12">
-                <MudSelect MultiSelection="true" T="string" AnchorOrigin="Origin.BottomCenter" Dense="true" MultiSelectionTextFunc="TagsMultiSelectText" SelectedValues="Todo.Tags" ShrinkLabel="true" SelectedValuesChanged="UpdateTags" Label="Tags" Immediate="false">
-                    @foreach (var tag in Project.PossibleTags.Order())
-                    {
-                        <MudSelectItem T="string" Value="@tag">@tag</MudSelectItem>
-                    }
-                </MudSelect>
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudSelect MultiSelection="true" T="string" AnchorOrigin="Origin.BottomCenter" Dense="true" Disabled="Todo.InheritsTags" MultiSelectionTextFunc="TagsMultiSelectText"
+                               SelectedValues="Todo.GetTags(Database)" ShrinkLabel="true" SelectedValuesChanged="UpdateTags" Label="Tags" Immediate="false">
+                        @foreach (var tag in Project.PossibleTags.Order())
+                        {
+                            <MudSelectItem T="string" Value="@tag">@tag</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudSwitch T="bool" ValueChanged="UpdateInheritTags" Value="Todo.InheritsTags" Size="Size.Small" Class="mr-0"/>
+                </MudStack>
             </MudItem>
             <MudItem xs="12">
                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
@@ -109,13 +121,13 @@
 
     private void UpdatePossibleAssignees(IEnumerable<Guid> values)
     {
-        Todo.PossibleWorkerIds = values.ToArray();
+        Todo.SetPossibleWorkerIds(values.ToList());
         Database.Update(Todo);
     }
     
     private void UpdateTags(IEnumerable<string> values)
     {
-        Todo.Tags = values.ToList();
+        Todo.SetTags(values.ToList());
         Database.Update(Todo);
     }
 
@@ -144,5 +156,17 @@
             .ToArray();
 
         return string.Join(", ", names);
+    }
+
+    private void UpdateInheritWorker(bool value)
+    {
+        Todo.InheritsPossibleWorkerIds = value;
+        Database.Update(Todo);
+    }
+    
+    private void UpdateInheritTags(bool value)
+    {
+        Todo.InheritsTags = value;
+        Database.Update(Todo);
     }
 }

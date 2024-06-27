@@ -1,4 +1,5 @@
 ﻿using Sapphire.Data.Entities;
+using Sapphire.Data.Entities.Todo;
 using Sapphire.Data.Extensions;
 using Sapphire.Data.ValueObjects;
 
@@ -32,7 +33,7 @@ public static class CalendarSimulation
             foreach (var worker in workers)
             {
                 var todosForWorker = possibleTodos
-                    .Where(p => p.PossibleWorkerIds.Contains(worker.Id))
+                    .Where(p => p.GetPossibleWorkerIds(db).Contains(worker.Id))
                     .ToList();
 
                 foreach (var todoForWorker in todosForWorker)

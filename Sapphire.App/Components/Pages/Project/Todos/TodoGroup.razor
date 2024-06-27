@@ -1,4 +1,5 @@
-﻿@if (_todo is not null)
+﻿@using Sapphire.Data.Entities.Todo
+@if (_todo is not null)
 {
     <TodoRow Todo="_todo" Depth="Depth" ChildTodos="_childTodos" @key="_todo.Id" Todos="Todos" Project="Project" @bind-Expanded="_expanded" Filter="@Filter" />
 }
