@@ -9,8 +9,8 @@
                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Spacing="1">
                     <MudText Typo="Typo.body2">@project.Name</MudText>
                     <MudSpacer />
-                    <MudChip Size="Size.Small">@($"{project.GetNumberOfTodos(Database)} Tasks")</MudChip>
-                    <MudChip Size="Size.Small">@($"{project.Priority}")</MudChip>
+                    <MudChip T="string" Size="Size.Small">@($"{project.GetNumberOfTodos(Database)} Tasks")</MudChip>
+                    <MudChip T="string" Size="Size.Small">@($"{project.Priority}")</MudChip>
                 </MudStack>
             </MudCard>
         </a>

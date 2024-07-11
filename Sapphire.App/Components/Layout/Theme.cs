@@ -8,7 +8,10 @@ public class Theme
     private static readonly MudColor LinesDark = new(39, 39, 42, 255);
     private static readonly MudColor LinesLight = new(39, 39, 42, 60);
     private static readonly MudColor White = new(250, 250, 250, 255);
+    
     private static readonly MudColor Black = new(9, 9, 11, 255);
+    private static readonly MudColor BlackLight = new(14, 14, 17, 255);
+    private static readonly MudColor BlackDark = new(2, 2, 3, 255);
 
     public static MudTheme Default => new()
     {
@@ -16,7 +19,7 @@ public class Theme
         {
             DefaultBorderRadius = "3px",
         },
-        Palette = new PaletteLight()
+        PaletteLight = new PaletteLight()
         {
             Background = White,
             Surface = White,
@@ -32,7 +35,7 @@ public class Theme
         PaletteDark = new PaletteDark
         {
             Background = Black,
-            Surface = Black,
+            Surface = BlackLight,
             AppbarBackground = Black,
             TextPrimary = White,
             Primary = White,
@@ -40,7 +43,10 @@ public class Theme
             ActionDefault = White,
             LinesDefault = LinesDark,
             LinesInputs = LinesDark,
-            TableLines = LinesDark
+            TableLines = LinesDark,
+            
+            Dark = Black,
+            DarkLighten = BlackLight.Value
         },
         Typography = new Typography
         {

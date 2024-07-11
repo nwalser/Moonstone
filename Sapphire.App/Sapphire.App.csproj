@@ -5,13 +5,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Blazor.Heroicons" Version="2.1.2.2" />
-    <PackageReference Include="DeviceId" Version="6.6.0" />
+    <PackageReference Include="Blazor.Heroicons" Version="2.1.5" />
+    <PackageReference Include="DeviceId" Version="6.7.0" />
     <PackageReference Include="ElectronNET.API" Version="23.6.2" />
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.*-* " />
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Emoji" Version="4.6.0" />
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.*-* " />
-    <PackageReference Include="MudBlazor" Version="6.20.0" />
+    <PackageReference Include="MudBlazor" Version="7.1.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="electron.manifest.json">
@@ -38,5 +38,8 @@
     <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-700.ttf" />
     <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-900-Italic.ttf" />
     <_ContentIncludedByDefault Remove="wwwroot\roboto\Roboto-900.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
 </Project>

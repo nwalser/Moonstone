@@ -63,7 +63,7 @@
         <BoxHeader Title="Planned Allocations" First="true">
             @if (Todo.GetRemainingUnplannedEffort(Database) > TimeSpan.Zero)
             {
-                <MudChip Icon="@Icons.Material.Filled.Warning" Color="Color.Error" Size="Size.Small" Variant="Variant.Outlined">Scheduling Incomplete</MudChip>
+                <MudChip T="string" Icon="@Icons.Material.Filled.Warning" Color="Color.Error" Size="Size.Small" Variant="Variant.Outlined">Scheduling Incomplete</MudChip>
             }
         </BoxHeader>
         
